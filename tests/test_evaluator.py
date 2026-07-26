@@ -130,3 +130,64 @@ def test_node_states_cache_includes_every_node():
     dag = ScheduleDAG.raw_chain(N=3)
     result = Evaluator(net).evaluate(dag)
     assert set(result.node_states.keys()) == set(dag.nodes.keys())
+
+
+def test_gamma_zero_leaves_asymmetric_pumping_schedule_unaffected():
+    # baseline_end_node_pumping's sacrificial copies are combined with a
+    # primary branch that has accumulated round-trip Herald delays, so
+    # their current_time differs -- but with gamma=0.0 this must still be
+    # a no-op (matches historical behaviour / test_flexible_beats_raw_and_baseline).
+    net = ideal_network(N=4, e_d=0.0)
+    assert net.gamma == 0.0
+    dag = ScheduleDAG.baseline_end_node_pumping(N=4, n_pur=5)
+    result = Evaluator(net).evaluate(dag)
+    assert result.fidelity == pytest.approx(1.0)
+
+
+def test_gamma_decoheres_sacrificial_copy_waiting_on_heralded_pumping_round():
+    # With nonzero gamma, a sacrificial copy that waits (in memory) for the
+    # primary branch's accumulated round-trip Herald confirmations should
+    # decohere before being purified -- i.e. baseline pumping's fidelity
+    # must now depend on gamma, unlike before this fix (gamma was inert
+    # because no search tier ever built an IdleNode and Join/Purify simply
+    # took max(current_time) with no decoherence for the earlier side).
+    net_no_decoherence = NetworkConfig.uniform(
+        N=4,
+        length=2.0,
+        branching=(16, 14, 1),
+        arm_count=18,
+        p_x_inner=0.01,
+        p_z_inner=0.01,
+        e_d=0.0,
+        gamma=0.0,
+        c=2e5,
+    )
+    net_with_decoherence = NetworkConfig.uniform(
+        N=4,
+        length=2.0,
+        branching=(16, 14, 1),
+        arm_count=18,
+        p_x_inner=0.01,
+        p_z_inner=0.01,
+        e_d=0.0,
+        gamma=1e-3,
+        c=2e5,
+    )
+    dag = ScheduleDAG.baseline_end_node_pumping(N=4, n_pur=5)
+    fidelity_no_decoherence = Evaluator(net_no_decoherence).evaluate(dag).fidelity
+    fidelity_with_decoherence = Evaluator(net_with_decoherence).evaluate(dag).fidelity
+    assert fidelity_with_decoherence != fidelity_no_decoherence
+
+
+def test_sync_to_common_time_is_noop_when_times_already_match():
+    net = ideal_network(N=4, e_d=0.0)
+    ev = Evaluator(net)
+    dag = ScheduleDAG.raw_chain(N=4)
+    result = ev.evaluate(dag)
+    # raw_chain has no asymmetric-time combines; sanity-check the helper
+    # directly returns identical states when current_time already matches.
+    a = result.node_states[dag.root_id]
+    b = result.node_states[dag.root_id]
+    synced_a, synced_b = ev._sync_to_common_time(a, b)
+    assert synced_a is a
+    assert synced_b is b
