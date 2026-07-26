@@ -1,0 +1,6 @@
+preset,formula,feasible,label,resource_cost,fidelity,success_prob,rate
+maximize_rate_with_fidelity_floor,maximize R s.t. F >= 0.9,True,end_optimistic.n3.YY_ZX,60,0.906317288623857,0.6195951122376533,6195.951122376533
+maximize_fidelity_with_rate_floor(paper_rate),maximize F s.t. R >= 4055.92 (paper baseline's own rate),True,link.n4.YY_ZX_YY,80,0.9351273786755311,0.48045766959900227,4804.576695990022
+maximize_fidelity_with_rate_floor(matched_rate),maximize F s.t. R >= 4158.14 (optimizer matched-cost rate),True,link.n4.YY_ZX_YY,80,0.9351273786755311,0.48045766959900227,4804.576695990022
+minimize_cost_with_constraints(f_min_only),minimize C s.t. F >= 0.9,True,end_heralded.n3.YY_ZX,60,0.906317288623857,0.6195951122376533,1239.1902244753066
+minimize_cost_with_constraints(f_min_and_r_min),minimize C s.t. F >= 0.9 and R >= 4055.92,True,end_optimistic.n3.YY_ZX,60,0.906317288623857,0.6195951122376533,6195.951122376533

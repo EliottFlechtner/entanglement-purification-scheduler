@@ -1,0 +1,13 @@
+config_name,variant,label,resource_cost,fidelity,success_prob,rate,latency_ms,meets_floor
+paper_ideal,paper_baseline,flexible_paper,100,0.9295137825781352,0.4055923104807098,4055.923104807098,0.0001,True
+paper_ideal,optimizer_matched_cost,end_optimistic.n5.ZX_ZX_ZX_ZX,100,0.9167933368902863,0.4158139856634852,4158.139856634852,0.0001,True
+paper_ideal,optimizer_budget_relaxed,end_optimistic.n3.YY_ZX,60,0.906317288623857,0.6195951122376533,6195.951122376533,0.0001,True
+paper_ideal,link_level_baseline,link.n3.YY_ZX,60,0.9342974445079805,0.5877417531168587,5877.417531168587,0.0001,True
+nonzero_inner_arm18,paper_baseline,flexible_paper,100,0.6736941255858512,0.01031794256667917,103.1794256667917,0.0001,False
+nonzero_inner_arm18,optimizer_matched_cost,link.n5.XZ_XZ_XZ_XZ,100,0.9003664053065955,0.0025309580837934993,25.30958083793499,0.0001,True
+nonzero_inner_arm18,optimizer_budget_relaxed,link.n4.YY_YY_XZ,80,0.9017672700232886,0.00852995643295053,85.29956432950529,0.0001,True
+nonzero_inner_arm18,link_level_baseline,link.n4.YY_YY_XZ,80,0.9017672700232886,0.00852995643295053,85.29956432950529,0.0001,True
+nonzero_inner_arm6,paper_baseline,flexible_paper,100,0.8715988779674921,0.08715526730271184,871.5526730271183,0.0001,False
+nonzero_inner_arm6,optimizer_matched_cost,link.n5.YY_ZX_YY_XZ,100,0.9278925714926375,0.06815617588205204,681.5617588205204,0.0001,True
+nonzero_inner_arm6,optimizer_budget_relaxed,link.n3.YY_XZ,60,0.9120342883496232,0.20969050975247946,2096.9050975247947,0.0001,True
+nonzero_inner_arm6,link_level_baseline,link.n3.YY_XZ,60,0.9120342883496232,0.20969050975247946,2096.9050975247947,0.0001,True

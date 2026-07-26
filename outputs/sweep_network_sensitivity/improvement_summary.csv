@@ -1,0 +1,4 @@
+config_name,matched_cost_rate_improvement_pct,matched_cost_fidelity_delta,budget_relaxed_rate_improvement_pct,budget_relaxed_cost_ratio,budget_relaxed_fidelity_delta,budget_relaxed_meets_floor
+paper_ideal,2.520184658003166,-0.012720445687848914,52.763032293020174,0.6,-0.023196493954278252,True
+nonzero_inner_arm18,-75.47032203913413,0.22667227972074433,-17.32890178612523,0.8,0.22807314443743743,True
+nonzero_inner_arm6,-21.79913160574821,0.05629369352514535,140.59419039376286,0.6,0.040435410382131054,True
