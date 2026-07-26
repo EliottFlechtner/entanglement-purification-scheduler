@@ -46,11 +46,14 @@ before choosing these axes:
     schedule-level, quantity), uniformly rescaling hop length rescales
     every variant's `rate`/`latency` by the same constant factor and
     changes none of the *relative* comparisons this script reports.
-  * `NetworkConfig.gamma` (memory dephasing during `IdleNode`) has zero
-    effect because no search tier (`brute_force`, `dp`, `heuristic`)
-    ever constructs an `IdleNode` -- only `schedule/serde.py`'s
-    deserializer can produce one. This is a known model-coverage gap,
-    noted here rather than silently sweeping an inert parameter.
+  * `NetworkConfig.gamma` (memory dephasing): all three configs use
+    `gamma=0.0` (the default), so it has zero effect on this sweep's
+    results. Note: gamma is **not** universally inert -- as of July 2026
+    it is wired into `Evaluator._sync_to_common_time()` and does
+    affect fidelity for heralded-pumping schedules whose combine branches
+    arrive at different `current_time` values. But gamma=0.0 here means
+    zero idle decoherence regardless of schedule shape, so this sweep
+    is unaffected.
 
 That leaves the inner-qubit error rates (`p_x_inner`, `p_z_inner`) and
 `arm_count` as the only two `HopConfig` fields that actually change F/C/R
