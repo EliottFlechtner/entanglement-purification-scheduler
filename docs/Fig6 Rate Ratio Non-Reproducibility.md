@@ -6,6 +6,18 @@ and *order of magnitude*. This document records why, so the discrepancy
 isn't mistaken for a defect in `validation/fig6_rate_ratio.py`,
 `schedule/evaluator.py`, or the timing model in a future session.
 
+**Update (27 July 2026):** `NetworkConfig.tau_emit` and `NetworkConfig.gamma`
+-- previously dead/inert fields, see §2's table below as it read before this
+update -- are now wired into `Evaluator` (`_eval_gen` for `tau_emit`,
+`_sync_to_common_time` for `gamma`; both opt-in, default `None`/`0.0`
+preserves all historical numbers exactly). This does **not** close the Fig.
+6 gap -- the paper still never publishes a numeric `τ_emit`, so there is
+still no principled value to plug in, and `gamma`'s effect is fidelity-only
+(see below), not a latency term -- but it does mean the table in §2 is now
+out of date on `GenNode`'s row specifically. See
+[outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md)
+for the quantified sensitivity now that both fields are live.
+
 ## 1. What we do reproduce exactly
 
 [Integrating, §VI] states the flexible/optimistic scheme "outperforms the
@@ -41,20 +53,25 @@ Tracing `Evaluator.evaluate()`'s bottom-up pass
 
 | Node type | Contribution to `current_time` |
 |---|---|
-| `GenNode` | fixed `gen_time` (defaults to `0.0`, identical for every leaf — **not** scaled by `τ_half` or `n_pur`) |
-| `AbsaBsmNode`, `JoinNode` | `max(t_left, t_right)` — **zero added latency** |
-| `PurifyNode` | `max(t_primary, t_ancilla)` — **zero added latency** (no `τ_pur_circ` term) |
-| `IdleNode` | advances to `until` (decoheres `e`, but is unused by any of the three canonical builders) |
-| `HeraldNode` | **the only node that adds physical time**: `propagation_time × L_total/c` |
+| `GenNode` | fixed `gen_time`, **plus** (as of the update above, opt-in via `NetworkConfig.tau_emit`, default `None` = off) `τ_emit × Σ log₂(b_j)` over the hop's `branching` vector — still identical for every leaf of the same hop, and still `0.0` by default |
+| `AbsaBsmNode`, `JoinNode`, `PurifyNode` | `max(t_left, t_right)` after `_sync_to_common_time` **idles (decoheres, via `gamma`) whichever side is earlier up to the later side's time — fidelity-only, current_time itself is still exactly `max(t_left, t_right)`, so this adds no latency** (no `τ_pur_circ` term for `PurifyNode`) |
+| `IdleNode` | advances to `until` (decoheres `e`); the DAG node type itself is still unused by any of the three canonical builders, but the underlying `idle()` *operation* is now also invoked directly by `_sync_to_common_time` above, independent of whether an explicit `IdleNode` exists |
+| `HeraldNode` | **still the only node that adds physical time on its own**: `propagation_time × L_total/c` |
 | `PauliCorrectNode` | inherits child's time |
 
 Consequently, `EvaluationResult.latency` for *any* of the three canonical
 schedules (`raw_chain`, `baseline_end_node_pumping`,
-`flexible_paper_schedule`) is **entirely determined by how many
+`flexible_paper_schedule`) is still **entirely determined by how many
 `HeraldNode`s are on the path to the root, and their `propagation_time`
-multipliers** — not by [Integrating]'s actual eqs. (1)–(6), which also
-include `n_pur·τ_half` (half-RGS generation time, scaled by the number of
-purification copies) and `τ_pur_circ`/`τ_join` (local operation times).
+multipliers, plus (if `tau_emit` is set) a uniform per-Gen-node offset that
+shifts every schedule's latency by the same amount** — not by
+[Integrating]'s actual eqs. (1)–(6), which also include `n_pur·τ_half`
+(half-RGS generation time, scaled by the number of purification copies) and
+`τ_pur_circ`/`τ_join` (local operation times, still zero). `gamma` affects
+**fidelity** at combine points with asymmetric arrival times, not latency
+at all -- see
+[outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md)
+for exactly how much.
 
 For `baseline_end_node_pumping(N, n_pur=5)`: 4 sequential `PurifyNode`s,
 each followed by an intermediate round-trip `HeraldNode`

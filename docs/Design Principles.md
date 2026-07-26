@@ -1,6 +1,6 @@
 # Design Principles (Roadmap Item 10)
 
-Synthesizes named, generalizable findings from `experiments/sweep_network_sensitivity.py`, `experiments/pareto_frontiers.py`, `experiments/alternative_objectives.py` (items 7-9 of this same roadmap batch) plus the pre-existing sweeps (`outputs/sweep_hop_count/`, `outputs/sweep_min_budget_vs_n/`, `outputs/sweep_min_budget_vs_ed/`, `outputs/sweep_ed_n10/`), per [docs/archive/Roadmap Remaining Work.md](archive/Roadmap%20Remaining%20Work.md), item 10: "state the extracted design principles explicitly, as named findings."
+Synthesizes named, generalizable findings from `experiments/sweep_network_sensitivity.py`, `experiments/pareto_frontiers.py`, `experiments/alternative_objectives.py` (items 7-9 of this same roadmap batch), `experiments/sweep_gamma_and_tau_emit.py` (added 27 July 2026, Finding 5) plus the pre-existing sweeps (`outputs/sweep_hop_count/`, `outputs/sweep_min_budget_vs_n/`, `outputs/sweep_min_budget_vs_ed/`, `outputs/sweep_ed_n10/`), per [docs/archive/Roadmap Remaining Work.md](archive/Roadmap%20Remaining%20Work.md), item 10: "state the extracted design principles explicitly, as named findings."
 
 Companion to [docs/Justification of Implementation.md](Justification%20of%20Implementation.md), which this document assumes as prior context.
 
@@ -45,7 +45,7 @@ New results produced in this document (items 7-9, all freshly run against the cu
 - At the paper's own idealized config (`paper_ideal`), the previously-known pattern holds: optimizer matched-cost +2.5% rate, budget-relaxed schedule clears the floor at a fraction of the paper's cost.
 - At `nonzero_inner_arm18` and `nonzero_inner_arm6` (inner-qubit error turned on, one with the paper's own 18-arm redundancy, one with redundancy cut to 6 arms), the paper's own `flexible_paper` schedule **fails to meet F >= 0.9** in both cases (F=0.6737 and F=0.8716 respectively) -- it was tuned for zero inner-qubit error and does not adapt. The optimizer, run against the exact same physics and the exact same resource budget, finds a differently-shaped schedule that **does** clear the floor in both cases.
 - This is a stronger claim than a rate-percentage comparison: it is a **feasibility** advantage, not just a **quality** advantage, once the network's error model changes. A raw rate-improvement percentage is not even a meaningful comparison when the baseline itself is infeasible; the feasibility gap is the finding.
-- Caveat carried over honestly from the methodology: `HopConfig.branching`, hop `length`, and `NetworkConfig.gamma` were *not* varied in this test because tracing them through `operations/backbone.py` and `schedule/evaluator.py` showed they have zero or purely-rescaling effect on `F`/`C`/relative `R` comparisons in the current implementation (see `experiments/sweep_network_sensitivity.py`'s module docstring for the specific trace) -- this finding is about inner-qubit error and BSM-arm redundancy specifically, not "all possible network configs."
+- Caveat carried over honestly from the methodology: `HopConfig.branching` and hop `length` were *not* varied in this test because tracing them through `operations/backbone.py` and `schedule/evaluator.py` showed they have zero or purely-rescaling effect on `F`/`C`/relative `R` comparisons in the current implementation (see `experiments/sweep_network_sensitivity.py`'s module docstring for the specific trace) -- this finding is about inner-qubit error and BSM-arm redundancy specifically, not "all possible network configs." **Correction (27 July 2026):** `NetworkConfig.gamma` was also excluded from that test on the same "zero effect" basis at the time, but this is no longer accurate -- `gamma` was subsequently wired into `Evaluator._sync_to_common_time()` and does have a real, quantified effect on fidelity for schedules with asymmetric-arrival combine points (e.g. heralded pumping). See Finding 5 below; `sweep_network_sensitivity.py`'s own docstring still needs a matching correction, tracked as a follow-up, not yet applied to that script.
 
 ## Finding 4: The search algorithms are objective-agnostic; changing what "optimal" means is a one-line change, not a re-implementation
 
@@ -57,6 +57,16 @@ New results produced in this document (items 7-9, all freshly run against the cu
 - `minimize_cost_with_constraints(f_min=0.9)`: cost=60 -- directly answers "what is the cheapest schedule that still works," a question the rate-maximizing preset cannot answer on its own, without any bisection loop (contrast with `outputs/sweep_min_budget_vs_n/`'s external bisection method, which was necessary only because no experiment had exercised this preset directly before).
 - **A genuine gotcha surfaced by this test, documented in `outputs/alternative_objectives/README.md`:** `minimize_cost_with_constraints` has no secondary preference over rate once its cost objective and fidelity floor are met, so among tied-cost feasible candidates it can return one with a markedly *worse* rate than another schedule at the identical cost (observed: 1239.19 vs. 6195.95, same cost=60) -- a caller who cares about rate as well as cost must add an explicit `r_min`, which `minimize_cost_with_constraints(f_min, r_min=...)` already supports.
 
+## Finding 5: Memory-decoherence sensitivity (`gamma`) is entirely a function of a schedule's *timing shape*, not a universal per-hop penalty -- and the optimizer already avoids the schedules it would hurt
+
+**Statement:** `gamma` (memory dephasing rate) only degrades a schedule if that schedule actually combines two branches that became ready at different `current_time`s (an asymmetric-arrival combine point, e.g. a sacrificial copy waiting through a heralded pumping round's round-trip confirmation). Schedules built entirely from synchronous combines (no intermediate `HeraldNode` between `PurifyNode`s) are exactly gamma-invariant by construction, not just empirically low-sensitivity. Because `beam_search`'s own candidate selection already prefers this synchronous-combine shape at the paper's own config (Finding 1's non-uniform, optimistic-pumping-favoring allocation), the optimizer's headline numbers are naturally insulated from `gamma` even though the fixed heralded-pumping baseline is not.
+
+**Evidence (`outputs/sweep_gamma_and_tau_emit/`, generated today, N=10, e_d=0.01, gamma swept 0 -> 1e5 log-spaced):**
+- `raw_chain` and `flexible_paper_schedule` (both purely optimistic/synchronous) are **bit-for-bit flat** across the entire gamma sweep (F=0.8234 and F=0.9295 respectively, unchanged at every tested value).
+- `baseline_end_node_pumping` (n_pur=5, sequential heralded pumping) degrades from F=0.9168 (gamma=0, matches the historical Fig. 5 number) to **F=0.2500** (fully mixed) by gamma=1e5 -- a real, large, quantified "how bad it gets" collapse for the one canonical schedule shape that has a real asymmetric wait built in.
+- At every gamma value tested, `beam_search`'s `optimizer_matched_cost`/`optimizer_budget_relaxed` results both land on `end_optimistic.*`-family candidates (the same no-intermediate-Herald shape as `flexible_paper`), never on a heralded-pumping candidate -- so the optimizer's own reported numbers are unaffected by `gamma` in this configuration, not because `gamma` doesn't matter in general, but because the search was already avoiding the one schedule shape it penalizes.
+- A related but distinct effect: `tau_emit` (opt-in per-Gen-node generation latency) degrades *rate* uniformly across all three canonical schedules, but hits the *lowest-baseline-latency* schedule hardest in relative terms -- `flexible_optimistic` (1x L/c latency) and `baseline_end_node_pumping` (9x L/c latency) cross over around `tau_emit=1e-2`, above which the heralded schedule's larger fixed latency actually makes it *less* rate-sensitive to the added generation delay.
+
 ## Summary table
 
 | # | Finding (named) | Primary new evidence |
@@ -65,6 +75,7 @@ New results produced in this document (items 7-9, all freshly run against the cu
 | 2 | Minimum budget scales super-linearly (~$N^{1.9}$), not linearly | `sweep_min_budget_vs_n` |
 | 3 | Search-found schedules generalize across network configs; fixed schedules can become infeasible | `sweep_network_sensitivity` (item 7) |
 | 4 | Search algorithms are objective-agnostic; new goals are a one-line `ObjectiveConfig` change | `alternative_objectives` (item 9) |
+| 5 | `gamma` sensitivity is schedule-shape-specific; the optimizer already avoids the shape it would hurt | `sweep_gamma_and_tau_emit` |
 | -- | (caveat) Pumping's shared beam budget silently degraded 4 previously-cached "reproducible" results | discovered while producing this document |
 
 ## Reproducing
@@ -75,4 +86,5 @@ source .venv/bin/activate
 python3 experiments/sweep_network_sensitivity.py
 python3 experiments/pareto_frontiers.py
 python3 experiments/alternative_objectives.py
+python3 experiments/sweep_gamma_and_tau_emit.py
 ```

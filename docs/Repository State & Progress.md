@@ -219,7 +219,7 @@ lists.
   order of magnitude** (~8.8× for flexible/baseline vs. the paper's
   stated 45–65×), because:
   1. In the current DAG-evaluator model, only `HeraldNode`s contribute
-     nonzero latency (`propagation_time × L_total/c`); `Gen`/`Join`/
+     nonzero latency (`propagation_time × L_total/c`); `Join`/
      `AbsaBsm`/`Purify` all contribute zero added time. So the computed
      ratio is *exactly* the structural Herald-count ratio (9:1 for
      `n_pur=5` baseline: 4 sequential round-trip heralds + 1 final vs.
@@ -234,6 +234,20 @@ lists.
   paper, not a bug in this codebase. Do not attempt to force-fit magic
   numbers to hit 45–65× — there is no principled way to recover the
   paper's specific timing constants from published information.
+- **Update (27 July 2026):** `NetworkConfig.tau_emit` (opt-in `GenNode`
+  latency, scaled by the hop's `branching` vector) and `NetworkConfig.gamma`
+  (opt-in memory decoherence during `Evaluator._sync_to_common_time`, fired
+  whenever a combine point joins two branches that became ready at
+  different `current_time`s) were previously unwired/inert fields; both are
+  now live, opt-in (default off, all historical numbers unaffected), and
+  quantified in
+  [outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md).
+  This does not close the Fig. 6 gap above (no numeric `τ_emit` is
+  published to plug in, and `gamma` only ever affects fidelity, never
+  latency) but it does mean point 1's Gen-node parenthetical is narrower
+  than it used to be -- see
+  [docs/Fig6 Rate Ratio Non-Reproducibility.md](Fig6%20Rate%20Ratio%20Non-Reproducibility.md)'s
+  own update note for the corrected per-node-type table.
 
 ## 5. Known gaps (not bugs — explicitly flagged, not silently skipped)
 
