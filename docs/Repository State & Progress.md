@@ -278,6 +278,13 @@ schedules, and a `results.csv`).
 | Optimizer, same cost (100) | 100 | 0.9168 | 0.4158 | **4158.14** (+2.5%) |
 | Optimizer, budget ≤ 100 (chooses 50) | 50 | 0.9047 | 0.6713 | **6713.18** (+65%) |
 
+**Reproducibility note:** the budget≤100 row above requires
+`beam_search(..., enable_pumping=False)`. A later commit added an
+optional "pumping" search move whose new default (`enable_pumping=True`)
+shares its beam width with join-only candidates and can silently evict
+this cost=50 candidate, returning cost=60/rate=6195.95 instead; see
+[`Design Principles.md`](Design%20Principles.md).
+
 The optimizer's schedule structurally allocates purification
 non-uniformly (per-hop, based on where composing many hops erodes
 fidelity fastest) instead of applying one fixed circuit sequence

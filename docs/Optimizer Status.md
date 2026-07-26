@@ -81,7 +81,7 @@ The repository currently collects **243 tests** when run with `PYTHONPATH=src`. 
 
 The strongest optimizer checks are in [`test_dp.py`](../tests/test_dp.py), [`test_heuristic.py`](../tests/test_heuristic.py), [`test_brute_force.py`](../tests/test_brute_force.py), and [`test_cost_functions.py`](../tests/test_cost_functions.py). Test collection was verified while preparing this document. Passing status should be established with the full test command for any release or thesis snapshot.
 
-The current headline experiment at `N=10`, `e_d=0.01`, and `F_min=0.9` reports the paper schedule at cost 100 with rate 4055.92, a matched-cost optimizer result with rate 4158.14, and a budget-relaxed result at cost 50 with rate 6713.18. These are reproducible existence and comparison results for the implemented model. They are not proofs of global optimality.
+The current headline experiment at `N=10`, `e_d=0.01`, and `F_min=0.9` reports the paper schedule at cost 100 with rate 4055.92, a matched-cost optimizer result with rate 4158.14, and a budget-relaxed result at cost 50 with rate 6713.18. These are reproducible existence and comparison results for the implemented model. They are not proofs of global optimality. **Reproducing the exact cost=50/rate=6713.18 budget-relaxed number now requires `beam_search(..., enable_pumping=False)`** — the default `enable_pumping=True` shares its beam width between pump and join-only candidates and returns a different (worse) top result, cost=60/rate=6195.95, at this same config; see [`Design Principles.md`](Design%20Principles.md).
 
 ## Known Limits
 
