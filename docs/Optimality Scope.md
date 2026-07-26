@@ -102,15 +102,22 @@ the correctness note below) — yields a single validated
 | | cost | fidelity | success_prob | rate |
 |---|---|---|---|---|
 | Excluded-move schedule (A purify-XZ B) | 36 | **0.989693** | 0.112945 | 3764.82 |
-| Best `dp_search` finds at cost ≤ 36, `f_min=0.98` | — | 0.971736 | — | infeasible (score = −∞) |
+| Best `dp_search` finds at cost ≤ 36, `f_min=0.98` | — | 0.996656 | — | 3737.34 |
 
-At `f_min = 0.98`, `dp_search(net, obj, e_max=36)` reports **zero
-feasible schedules** (best score is `-inf`) because its best achievable
-fidelity at that budget is 0.971736 (from `brute_force_search`'s
-`link_level` family, `link.n6.YY_ZX_YY_XZ_YY`) — below the floor. But a
-genuinely valid, `ScheduleDAG.validate()`-passing schedule with fidelity
-0.989693 exists at that exact cost. **`dp_search` incorrectly reports
-"no feasible schedule" in a regime where a feasible one exists.**
+`dp_search(net, obj, e_max=36)` (with pumping enabled, the current
+default) finds a feasible schedule at F=0.996656, rate=3737.34 — but
+the excluded move's schedule achieves a **higher rate (3764.82 > 3737.34)**
+at lower fidelity (0.989693). **`dp_search` finds a feasible schedule
+but misses the rate-optimal one.** The gap is now a rate-optimality
+gap, not a feasibility gap.
+
+Note: `LABEL_A` and `LABEL_B` (the non-pumped link-level building
+blocks) are Pareto-dominated and pruned from the search frontier when
+pumping is enabled, because the pumping move finds a genuinely
+better sub-span candidate at the same cost — exactly as the script's
+own docstring describes. The excluded move is still built with
+`enable_pumping=False` to retrieve those building blocks, so
+F=0.989693 remains correct and reproducible.
 
 ### Correctness pitfall caught during construction
 
@@ -148,11 +155,13 @@ closing this gap (see §3's quoted scope-limit note).
   same-span purification, with correctly independent Gen-node subtrees
   per copy) is a separate, larger implementation item and is not
   attempted in this document.
-- Practical takeaway for anyone citing `dp_search` results: fidelity/
-  feasibility figures near a floor should be read as **upper bounds on
-  what the implemented search finds**, not as proof that no better
-  schedule exists — as shown concretely above, "infeasible" can mean
-  "infeasible for the searched families," not "infeasible in general."
+- Practical takeaway for anyone citing `dp_search` results: rate/fidelity
+  figures should be read as **upper bounds on what the implemented search
+  finds**, not as proof that no better schedule exists — as shown
+  concretely above, the rate-optimal schedule can be missed even when
+  dp_search reports a feasible result, because the excluded move reaches
+  a different cost/fidelity/rate combination that the DP recursion never
+  explores.
 
 ## 6. Addendum — the gap is not just theoretical at production scale either
 
