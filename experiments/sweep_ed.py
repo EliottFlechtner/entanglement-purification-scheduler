@@ -92,7 +92,17 @@ class Row:
 def run_one_point(e_d: float) -> list[Row]:
     net = NetworkConfig.integrating_paper_config(e_d=e_d)
     obj = ObjectiveConfig.maximize_rate_with_fidelity_floor(f_min=F_MIN)
-    results = beam_search(net, obj, e_max=E_MAX, beam_width=BEAM_WIDTH)
+    # enable_pumping=False: pins this sweep to the pre-pumping search
+    # behaviour its cached outputs/README were originally generated
+    # under. The default `enable_pumping=True` (added in a later
+    # commit) shares the same fixed `beam_width` between pump and
+    # join-only candidates, which can silently evict a previously-kept,
+    # previously-optimal non-pumped candidate -- see docs/Design
+    # Principles.md. Without this pin, re-running this script no longer
+    # reproduces the numbers documented in outputs/sweep_ed_n10/README.md.
+    results = beam_search(
+        net, obj, e_max=E_MAX, beam_width=BEAM_WIDTH, enable_pumping=False
+    )
 
     paper = next(r for r in results if r.label == "flexible_paper")
     matched = next(

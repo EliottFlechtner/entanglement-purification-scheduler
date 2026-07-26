@@ -148,7 +148,14 @@ def run_one_point(N: int) -> list[Row]:
     net = _build_network(N)
     obj = ObjectiveConfig.maximize_rate_with_fidelity_floor(f_min=F_MIN)
     e_max = 10 * N  # paper's own cost formula: 5 copies/side x 2 sides x N hops
-    results = beam_search(net, obj, e_max=e_max, beam_width=BEAM_WIDTH)
+    # enable_pumping=False: pins this sweep to the pre-pumping search
+    # behaviour its cached outputs/README were originally generated
+    # under -- see docs/Design Principles.md for why the default
+    # `enable_pumping=True` can silently evict a previously-kept,
+    # previously-optimal non-pumped candidate under a fixed beam width.
+    results = beam_search(
+        net, obj, e_max=e_max, beam_width=BEAM_WIDTH, enable_pumping=False
+    )
 
     paper = next(r for r in results if r.label == "flexible_paper")
     matched = next(
@@ -205,9 +212,11 @@ def run_dp_crosscheck() -> list[CrossCheckRow]:
         e_max = 10 * N
         print(f"[crosscheck] exact dp_search at N={N} ...", flush=True)
         t0 = time.time()
-        exact = dp_search(net, obj, e_max=e_max)
+        exact = dp_search(net, obj, e_max=e_max, enable_pumping=False)
         elapsed = time.time() - t0
-        beam = beam_search(net, obj, e_max=e_max, beam_width=BEAM_WIDTH)
+        beam = beam_search(
+            net, obj, e_max=e_max, beam_width=BEAM_WIDTH, enable_pumping=False
+        )
 
         exact_best = exact[0]
         beam_best = beam[0]
