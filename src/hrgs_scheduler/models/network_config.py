@@ -137,18 +137,32 @@ class NetworkConfig:
         Quantum-memory decoherence rate constant γ (per unit time).
     c : float
         Signal propagation velocity (km per time unit).
+    tau_emit : float or None
+        Per-qubit emission / gate cycle time, used to convert each hop's
+        ``branching`` vector into a half-RGS generation latency
+        τ_half = τ_emit × Σ_j log₂(b_j) [Validated Formal Model Def, §2.2;
+        see ``timing.half_rgs_generation_time`` for the standalone
+        cross-check formula]. When ``None`` (the default), GenNode
+        generation is treated as instantaneous relative to its scheduled
+        ``gen_time`` and ``branching`` has no effect on evaluated
+        latency/rate — this is the historical/back-compatible behaviour.
+        Set to a positive value to opt in to branching-derived generation
+        timing in :class:`~hrgs_scheduler.schedule.evaluator.Evaluator`.
     """
 
     hops: tuple[HopConfig, ...]
     e_d: float
     gamma: float
     c: float
+    tau_emit: float | None = None
 
     def __post_init__(self) -> None:
         if len(self.hops) == 0:
             raise ValueError("Network must have at least one hop.")
         # Coerce list input to tuple for hashability.
         object.__setattr__(self, "hops", tuple(self.hops))
+        if self.tau_emit is not None and self.tau_emit < 0.0:
+            raise ValueError(f"tau_emit must be >= 0, got {self.tau_emit!r}")
 
     # ------------------------------------------------------------------
     # Properties
@@ -210,6 +224,7 @@ class NetworkConfig:
         e_d: float = 0.0,
         gamma: float = 0.0,
         c: float = 2e5,
+        tau_emit: float | None = None,
     ) -> NetworkConfig:
         """Build a uniform network where every hop shares the same parameters.
 
@@ -236,6 +251,10 @@ class NetworkConfig:
             Memory dephasing rate.
         c : float
             Propagation speed (km / time unit).  Default: 2×10⁵ km/s ≈ 2/3 c.
+        tau_emit : float or None
+            Per-qubit emission/gate cycle time. When set, opts in to
+            branching-derived generation timing (see ``NetworkConfig``
+            docstring). Default ``None`` preserves historical behaviour.
         """
         hop = HopConfig(
             length=length,
@@ -246,7 +265,13 @@ class NetworkConfig:
             eta=eta,
             attenuation_db_per_km=attenuation_db_per_km,
         )
-        return cls(hops=tuple(hop for _ in range(N)), e_d=e_d, gamma=gamma, c=c)
+        return cls(
+            hops=tuple(hop for _ in range(N)),
+            e_d=e_d,
+            gamma=gamma,
+            c=c,
+            tau_emit=tau_emit,
+        )
 
     # ------------------------------------------------------------------
     # Paper reference config [Integrating, §V.A]
