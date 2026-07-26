@@ -37,7 +37,7 @@ Full data: [`results.csv`](results.csv).
 ```bash
 cd /home/shark/Documents/hrgs-purification-scheduler
 source .venv/bin/activate
-PYTHONPATH=src python3 -u validation/sweep_min_budget_vs_ed.py
+PYTHONPATH=src python3 -u experiments/sweep_min_budget_vs_ed.py
 ```
 
-Total wall-clock time: ~510s.
+Total wall-clock time: ~611s.

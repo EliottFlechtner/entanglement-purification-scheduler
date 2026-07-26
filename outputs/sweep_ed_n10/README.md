@@ -2,9 +2,9 @@
 
 Generalizes `outputs/headline_experiment_n10/` (single point, e_d=0.01) into a full sweep, per [docs/Roadmap Remaining Work.md](../../docs/Roadmap%20Remaining%20Work.md), item 1.
 
-Grid: `e_d in {0.000, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010}` (11 points), matching the granularity used by `validation/fig5_fidelity_vs_noise.py` / `fig6_rate_ratio.py`.
+Grid: `e_d in {0.000, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010}` (11 points), matching the granularity used by `experiments/fig5_fidelity_vs_noise.py` / `fig6_rate_ratio.py`.
 
-Network: `NetworkConfig.integrating_paper_config(e_d=e_d)` (N=10, l=2km, b=(16,14,1), k=18 arms — the paper's exact config, only e_d varies). Objective: `maximize_rate_with_fidelity_floor(f_min=0.9)`. Search: `beam_search(net, obj, e_max=100, beam_width=25)` (`e_max=100` = paper's own resource cost, so a single call yields the paper baseline, matched-cost, and budget-relaxed candidates all at once — `beam_search` always includes `brute_force_search`'s fixed families, so `flexible_paper` and the matched-cost family are present regardless of beam pruning).
+Network: `NetworkConfig.integrating_paper_config(e_d=e_d)` (N=10, l=2km, b=(16,14,1), k=18 arms, the paper's exact config, only e_d varies). Objective: `maximize_rate_with_fidelity_floor(f_min=0.9)`. Search: `beam_search(net, obj, e_max=100, beam_width=25)` (`e_max=100` = paper's own resource cost, so a single call yields the paper baseline, matched-cost, and budget-relaxed candidates all at once; `beam_search` always includes `brute_force_search`'s fixed families, so `flexible_paper` and the matched-cost family are present regardless of beam pruning).
 
 ## Headline numbers (endpoints of the sweep)
 
@@ -55,7 +55,7 @@ Full per-point data: [`results.csv`](results.csv) (long format, one row per `(e_
 ```bash
 cd /home/shark/Documents/hrgs-purification-scheduler
 source .venv/bin/activate
-PYTHONPATH=src python3 validation/sweep_ed.py
+PYTHONPATH=src python3 experiments/sweep_ed.py
 ```
 
-Total wall-clock time for the 11-point sweep: ~147s (11 `beam_search` calls, one per e_d point; `beam_search` reuses `brute_force_search`'s families internally, so no separate brute-force pass is needed).
+Total wall-clock time for the 11-point sweep: ~164s (11 `beam_search` calls, one per e_d point; `beam_search` reuses `brute_force_search`'s families internally, so no separate brute-force pass is needed).

@@ -49,8 +49,8 @@ Full data: [`results.csv`](results.csv), [`improvement_summary.csv`](improvement
 
 | N | dp_search time (s) | Exact rate | Exact meets floor | beam_search rate | Beam meets floor | Gap from exact (%) |
 |---|---|---|---|---|---|---|
-| 2 | 0.03 | 50000.00 | Yes | 50000.00 | Yes | 0.0000 |
-| 4 | 0.90 | 25000.00 | Yes | 25000.00 | Yes | 0.0000 |
+| 2 | 0.04 | 50000.00 | Yes | 50000.00 | Yes | 0.0000 |
+| 4 | 1.17 | 25000.00 | Yes | 25000.00 | Yes | 0.0000 |
 
 `beam_search` (beam_width=25) matches the exact DP optimum at both cross-check points -- consistent with `sweep_beam_width.py`'s finding that this codebase's default beam width already reaches the true optimum well before its practical runtime ceiling.
 
@@ -61,7 +61,7 @@ Full data: [`dp_crosscheck.csv`](dp_crosscheck.csv).
 ```bash
 cd /home/shark/Documents/hrgs-purification-scheduler
 source .venv/bin/activate
-PYTHONPATH=src python3 validation/sweep_hop_count.py
+PYTHONPATH=src python3 experiments/sweep_hop_count.py
 ```
 
-Total wall-clock time for this script: ~207s.
+Total wall-clock time for this script: ~236s.
