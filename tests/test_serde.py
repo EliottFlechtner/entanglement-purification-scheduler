@@ -313,6 +313,7 @@ class TestNetworkRoundTrip:
         assert back.e_d == net.e_d
         assert back.gamma == net.gamma
         assert back.c == net.c
+        assert back.tau_emit == net.tau_emit
         assert back.N == net.N
         for i in range(net.N):
             h, b = net.hop(i), back.hop(i)
@@ -322,6 +323,14 @@ class TestNetworkRoundTrip:
             assert h.p_x_inner == b.p_x_inner
             assert h.p_z_inner == b.p_z_inner
             assert h.eta == pytest.approx(b.eta)
+
+    def test_tau_emit_roundtrips_when_set(self):
+        net = small_net(N=4)
+        net_with_tau = NetworkConfig(
+            hops=net.hops, e_d=net.e_d, gamma=net.gamma, c=net.c, tau_emit=2.0
+        )
+        back = dict_to_network(network_to_dict(net_with_tau))
+        assert back.tau_emit == pytest.approx(2.0)
 
     def test_heterogeneous_network_roundtrip(self):
         net = het_net()

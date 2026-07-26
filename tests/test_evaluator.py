@@ -79,6 +79,45 @@ def test_success_prob_is_product_of_purify_success_probs():
     assert 0.0 < result.success_prob <= 1.0
 
 
+def test_tau_emit_none_leaves_branching_inert():
+    # Default (tau_emit=None) is the historical behaviour: branching has
+    # zero effect on latency, matching test_latency_only_accrues_from_herald_nodes.
+    net = ideal_network(N=4, e_d=0.0)
+    assert net.tau_emit is None
+    dag = ScheduleDAG.raw_chain(N=4)
+    result = Evaluator(net).evaluate(dag)
+    l_over_c = net.total_length() / net.c
+    assert result.latency == pytest.approx(l_over_c)
+
+
+def test_tau_emit_opts_in_to_branching_derived_generation_latency():
+    # branching=(16, 14, 1) -> tau_half = tau_emit * (log2(16) + log2(14) + 0)
+    import math
+
+    branching = (16, 14, 1)
+    tau_emit = 1.5
+    tau_half = tau_emit * sum(math.log2(b) for b in branching if b > 1)
+    net = NetworkConfig.uniform(
+        N=4,
+        length=2.0,
+        branching=branching,
+        arm_count=18,
+        p_x_inner=0.0,
+        p_z_inner=0.0,
+        e_d=0.0,
+        gamma=0.0,
+        c=2e5,
+        tau_emit=tau_emit,
+    )
+    dag = ScheduleDAG.raw_chain(N=4)
+    result = Evaluator(net).evaluate(dag)
+    l_over_c = net.total_length() / net.c
+    assert result.latency == pytest.approx(l_over_c + tau_half)
+    # Fidelity/resource cost are unaffected by generation timing.
+    assert result.fidelity == pytest.approx(1.0)
+    assert result.resource_cost == dag.gen_node_count
+
+
 def test_rate_is_success_prob_over_latency():
     net = ideal_network(N=4, e_d=0.005)
     dag = ScheduleDAG.baseline_end_node_pumping(N=4, n_pur=5)
