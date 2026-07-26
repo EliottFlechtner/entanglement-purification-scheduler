@@ -156,20 +156,27 @@ class Evaluator:
 
             elif isinstance(node, AbsaBsmNode):
                 child_l, child_r = node.children
-                state = self._eval_absa_bsm(
-                    node, node_states[child_l], node_states[child_r]
+                state_l, state_r = self._sync_to_common_time(
+                    node_states[child_l], node_states[child_r]
                 )
+                state = self._eval_absa_bsm(node, state_l, state_r)
 
             elif isinstance(node, JoinNode):
                 child_l, child_r = node.children
-                state = join(node_states[child_l], node_states[child_r])
+                state_l, state_r = self._sync_to_common_time(
+                    node_states[child_l], node_states[child_r]
+                )
+                state = join(state_l, state_r)
 
             elif isinstance(node, PurifyNode):
                 child_p, child_a = node.children
+                state_p, state_a = self._sync_to_common_time(
+                    node_states[child_p], node_states[child_a]
+                )
                 result = purify(
                     node.circuit,
-                    node_states[child_p],
-                    node_states[child_a],
+                    state_p,
+                    state_a,
                 )
                 state = result.output_state
                 success_prob *= result.success_prob
@@ -228,6 +235,35 @@ class Evaluator:
     # ------------------------------------------------------------------
     # Per-node evaluation helpers
     # ------------------------------------------------------------------
+
+    def _sync_to_common_time(
+        self, state_a: State, state_b: State
+    ) -> tuple[State, State]:
+        """Idle whichever of *state_a*/*state_b* is earlier up to the other's time.
+
+        Combining operations (Join/EntSwap, AbsaBsm, Purify) take two
+        resources that may have become ready at different simulation
+        times -- e.g. a freshly generated sacrificial copy waiting for a
+        heralded pumping round's round-trip confirmation
+        [Integrating, §III-B, §VI; timing.py's t_mem^(base) model]. The
+        earlier-ready resource sits in quantum memory for the difference
+        and decoheres per :func:`~hrgs_scheduler.operations.backbone.idle`
+        using ``NetworkConfig.gamma``, rather than being combined for
+        free. When both states already share the same ``current_time``
+        (the common case for symmetric schedules) or ``gamma == 0``, this
+        is a no-op [Validated Formal Model Def, §2.6].
+        """
+        if state_a.current_time == state_b.current_time:
+            return state_a, state_b
+        if state_a.current_time < state_b.current_time:
+            return (
+                idle(state_a, until=state_b.current_time, gamma=self._network.gamma),
+                state_b,
+            )
+        return (
+            state_a,
+            idle(state_b, until=state_a.current_time, gamma=self._network.gamma),
+        )
 
     def _eval_gen(self, node: GenNode) -> State:
         """Evaluate a GenNode using the hop config for node.hop_index.
