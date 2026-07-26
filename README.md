@@ -14,12 +14,16 @@ hrgs-purification-scheduler/
 ├── experiments/          ← research experiment scripts (run against the package)
 ├── outputs/              ← generated results from experiments (CSV, PNG, DOT)
 ├── docs/                 ← research notes, formal model spec, roadmaps
+├── architecture/         ← interactive optimizer architecture viewer
 │
 └── thesis/               ← LaTeX internship report (build with `cd thesis && make`)
 ```
 
 See `docs/Validated Formal Model Def.md` for the full formal spec
 (`Σ = (T, φ)`, backbone + scheduling layers, cost functions).
+
+The interactive optimizer diagrams and their run commands are documented in
+[`architecture/optimizer-viewer/README.md`](architecture/optimizer-viewer/README.md).
 
 ## Weeks 1-2: inner loop — **done**
 
