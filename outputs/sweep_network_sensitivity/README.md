@@ -8,6 +8,8 @@ Roadmap item 7 ([docs/archive/Roadmap Remaining Work.md](../../docs/archive/Road
 
 Traced through `operations/backbone.py` and `schedule/evaluator.py` first: `HopConfig.branching` is never read by any operation (dead field in the current implementation), and uniformly rescaling `HopConfig.length` only rescales every schedule's rate/latency by the same constant factor (all variants pay the same `L_total/c` herald term), so neither changes any *relative* comparison here. `NetworkConfig.gamma` is also inert because no search tier ever builds an `IdleNode`. That leaves the inner-qubit error rates and `arm_count` as the only `HopConfig` fields that actually change F/C/R for schedules built by `beam_search` -- hence:
 
+> **Update**: `NetworkConfig` now has an opt-in `tau_emit` field (default `None`, preserving the behaviour above exactly). When set, `Evaluator` adds a branching-derived half-RGS generation latency τ_half = τ_emit × Σ log₂(bⱼ) to each `GenNode`'s evaluated time, making `branching` affect latency/rate (see `schedule/evaluator.py::_eval_gen`, `tests/test_evaluator.py`). This sweep was generated before that change and does not set `tau_emit`, so its results and the "dead field" analysis above remain accurate and reproducible as documented. `gamma` remains inert regardless, since no search tier constructs an `IdleNode`.
+
 | Config | Description |
 |---|---|
 | `paper_ideal` | Paper's own config: arm_count=18, zero inner-qubit error |
