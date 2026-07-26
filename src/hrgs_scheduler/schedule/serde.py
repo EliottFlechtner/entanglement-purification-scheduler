@@ -254,6 +254,7 @@ def network_to_dict(network: NetworkConfig) -> dict[str, Any]:
         "e_d": network.e_d,
         "gamma": network.gamma,
         "c": network.c,
+        "tau_emit": network.tau_emit,
         "hops": [
             {
                 "length": h.length,
@@ -288,7 +289,13 @@ def dict_to_network(d: dict[str, Any]) -> NetworkConfig:
         )
         for h in d["hops"]
     )
-    return NetworkConfig(hops=hops, e_d=d["e_d"], gamma=d["gamma"], c=d["c"])
+    return NetworkConfig(
+        hops=hops,
+        e_d=d["e_d"],
+        gamma=d["gamma"],
+        c=d["c"],
+        tau_emit=d.get("tau_emit"),
+    )
 
 
 # ---------------------------------------------------------------------------

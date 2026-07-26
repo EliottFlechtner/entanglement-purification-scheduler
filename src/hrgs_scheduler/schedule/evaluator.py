@@ -42,6 +42,7 @@ Named tuple returned by ``Evaluator.evaluate``:
 
 from __future__ import annotations
 
+import math
 from typing import NamedTuple
 
 from hrgs_scheduler.models.network_config import NetworkConfig
@@ -229,11 +230,25 @@ class Evaluator:
     # ------------------------------------------------------------------
 
     def _eval_gen(self, node: GenNode) -> State:
-        """Evaluate a GenNode using the hop config for node.hop_index."""
+        """Evaluate a GenNode using the hop config for node.hop_index.
+
+        If ``network.tau_emit`` is set, the hop's ``branching`` vector
+        contributes a half-RGS generation latency
+        τ_half = τ_emit × Σ_j log₂(b_j) on top of the node's scheduled
+        ``gen_time`` [Validated Formal Model Def, §2.2]. This is an
+        opt-in behaviour (``tau_emit`` defaults to ``None``); when unset,
+        ``branching`` has no effect on the evaluated latency/rate, matching
+        the historical behaviour.
+        """
         hop_config = self._network.hop(node.hop_index)
+        t = node.gen_time
+        if self._network.tau_emit is not None:
+            t += self._network.tau_emit * sum(
+                math.log2(b) for b in hop_config.branching if b > 1
+            )
         return gen(
             hop_config=hop_config,
-            t=node.gen_time,
+            t=t,
             side_effect_parity=node.side_effect_parity,
         )
 
