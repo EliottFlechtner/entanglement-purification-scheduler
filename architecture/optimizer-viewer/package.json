@@ -1,0 +1,20 @@
+{
+  "name": "optimizer-viewer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide": "^0.468.0",
+    "mermaid": "^11.4.1",
+    "svg-pan-zoom": "^3.6.2"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^5.4.11"
+  }
+}
