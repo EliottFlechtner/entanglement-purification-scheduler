@@ -577,6 +577,20 @@ class _SpanPartitionSearch:
             # UNLESS `exact_pumping=True`, which lifts this cap entirely
             # (see `_pump_width`) at the cost of only being usable at very
             # small N.
+            #
+            # NOTE: an attempted fix here (skip this recap under
+            # `beam_search`, relying on `base_pruned` and `pump_candidates`
+            # already being independently capped) was tried and reverted:
+            # it only partially restored the pre-pumping headline numbers
+            # (crowding also happens one recursion level deeper, at
+            # intermediate spans' own `base_pruned` selection, which
+            # competes against pump-enlarged left/right pools from
+            # narrower spans -- fully fixing that needs two parallel
+            # per-span frontiers, out of scope here) AND caused a 5x test
+            # suite slowdown (65s -> 353s) by letting frontier sizes
+            # compound across recursion depth, confirming this cap's
+            # original purpose. See docs/Design Principles.md for the
+            # regression this crowding causes and why it is not fixed here.
             pruned = _beam_select(pruned, frontier_width, self._f_min_hint)
         self._memo[key] = pruned
         return pruned
@@ -638,6 +652,7 @@ def dp_search(
     max_link_copies: int = 3,
     max_enumerated_rounds: int = 3,
     include_brute_force_families: bool = True,
+    enable_pumping: bool = True,
     exact_pumping: bool = False,
 ) -> list[SearchResult]:
     """Search schedules via memoized span-partition DP, sorted best-first.
@@ -681,6 +696,15 @@ def dp_search(
     include_brute_force_families : bool
         When False, only the new span-partition candidates are returned
         (useful for isolating the DP contribution, e.g. in tests).
+    enable_pumping : bool
+        When False, disables the "pump" move entirely (see module
+        docstring), restoring `dp_search`'s pre-pumping exact behaviour
+        for the split/join dimension. Also avoids the beam-crowding
+        interaction where pump candidates compete with pre-existing
+        join-only candidates for the same fixed frontier slots, which can
+        make pumping-enabled results *worse* than pumping-disabled ones
+        at matching settings (see docs/Design Principles.md). Default
+        True, matching this function's existing default behaviour.
     exact_pumping : bool
         When True, pumping's pairing pool and its contribution to each
         span's frontier are left completely uncapped (genuinely
@@ -708,6 +732,7 @@ def dp_search(
         max_link_copies=max_link_copies,
         max_enumerated_rounds=max_enumerated_rounds,
         budget_cap=e_max,
+        enable_pumping=enable_pumping,
         exact_pumping=exact_pumping,
     )
     top_frontier = search.frontier(0, N)

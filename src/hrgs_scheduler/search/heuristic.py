@@ -67,6 +67,7 @@ def beam_search(
     max_link_copies: int = 3,
     max_enumerated_rounds: int = 3,
     include_brute_force_families: bool = True,
+    enable_pumping: bool = True,
 ) -> list[SearchResult]:
     """Search schedules via beam-capped span-partition DP, sorted best-first.
 
@@ -98,6 +99,16 @@ def beam_search(
         When True (default), also includes `brute_force_search`'s three
         fixed families, so `beam_search` results remain comparable to
         (and a superset of, modulo beam pruning) `brute_force_search`.
+    enable_pumping : bool
+        When False, disables the "pump" move entirely (see
+        `search.dp` module docstring), restoring the pre-pumping
+        beam-search behaviour. Also avoids the beam-crowding
+        interaction where pump candidates compete with pre-existing
+        join-only candidates for the same fixed `beam_width` slots,
+        which can make pumping-enabled results *worse* than
+        pumping-disabled ones at matching settings (see docs/Design
+        Principles.md). Default True, matching this function's
+        existing default behaviour.
 
     Returns
     -------
@@ -119,6 +130,7 @@ def beam_search(
         budget_cap=e_max,
         max_frontier_size=beam_width,
         f_min_hint=objective.f_min,
+        enable_pumping=enable_pumping,
     )
     top_frontier = search.frontier(0, N)
 
