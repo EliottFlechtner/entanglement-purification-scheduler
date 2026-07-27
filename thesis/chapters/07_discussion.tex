@@ -1,32 +1,73 @@
 \chapter{Discussion}
 \label{chap:discussion}
 
+\section{Design Principles}
+\label{sec:disc:principles}
+
+\TODO{Synthesise the four most citable generalizable findings from the
+campaign as named rules (not just numerical observations). See
+\texttt{docs/Design Principles.md} for the full source.
+\textbf{Finding~1} (non-uniform allocation wins): composing hops erodes
+fidelity non-uniformly, so concentrating purification rounds where it
+matters most outperforms a uniform allocation at matched cost --- directly
+observed in the headline experiment and confirmed across the $e_d$ sweep.
+\textbf{Finding~2} (advantage scales with noise asymmetry): improvement
+over the uniform baseline is near-zero when all hops are symmetric
+($e_d \approx 0$) and maximal in the high-noise regime; a $\gamma$
+threshold separates the two regimes in the hardware-noise sweep.
+\textbf{Finding~3} (super-linear budget law): the minimum feasible
+resource budget scales as $e_{\max}^{\min} \approx 0.593 \cdot N^{1.909}$,
+not the paper's linear $10N$ --- the paper overspends $2$--$4.8\times$
+at $N=10$. \textbf{Finding~4} (objective substitution is free): swapping
+to fidelity-maximisation or cost-minimisation is a one-line
+\texttt{ObjectiveConfig} change that yields a structurally different top
+schedule, confirming the objective layer is not cosmetic.}
+
 \section{When Simple Schedules Are Near-Optimal}
 \label{sec:disc:nearoptimal}
 
-\TODO{Characterise the regime (symmetric noise, uniform hops, moderate
-budget) in which the paper's hand-chosen YY-first schedule is within
-a small fraction of the DP optimum. Provide an intuitive explanation
-based on the error-vector bias toward ZI/IZ Pauli errors.}
+\TODO{Characterise the ``flat floor'' regime (low $e_d$, small $N$,
+generous budget) where the paper's hand-chosen schedule is within a
+few percent of the DP optimum and the optimization overhead is
+not justified. Point to the $e_d$ sweep's near-zero improvement at
+$e_d \approx 0$ as the empirical anchor. Tie to Finding~2.}
 
 \section{When the Scheduling Choice Matters}
 \label{sec:disc:matters}
 
-\TODO{Identify the regime (asymmetric per-hop noise, tight fidelity
-constraint, large $N$) where the optimised schedule achieves a
-meaningful improvement. Discuss the excluded move (end-to-end
-purification of partially-purified multi-hop segments) and its impact.}
+\TODO{Identify the complementary high-benefit regime (high $e_d$,
+large $N$, tight fidelity constraint): at $N=10$, $e_d=0.01$ the
+budget-relaxed optimizer achieves $+65\%$ rate at half the resource
+cost. Discuss the $N=18$ rescue (\S\ref{sec:exp:excluded}) as the
+strongest demonstration: the paper's own budget fails, the excluded
+move succeeds. Tie to Findings~1, 3.}
+
+\section{Optimality Scope and the Excluded-Move Gap}
+\label{sec:disc:scope}
+
+\TODO{State precisely what the DP/beam search finds natively and what
+it cannot reach (the excluded same-span-purification move). Show the
+gap is demonstrated-real (reproducible counterexample at $N=3$, $N=18$
+rescue) but bounded: at $N=10$ the excluded families account for
+only a small fraction of the Pareto frontier. Cite
+\texttt{docs/Optimality Scope.md}.}
 
 \section{Optimistic versus Heralded Purification}
 \label{sec:disc:optimistic}
 
-\TODO{Analyse the trade-off: optimistic purification saves one
+\TODO{Analyse the trade-off: optimistic (blind) execution saves one
 classical round-trip ($L/c$ vs.\ $2L/c$ memory time) at the cost of
-higher discard probability. Show which regime favours each mode.}
+higher discard probability. Cite the \texttt{end\_optimistic} vs.\
+\texttt{end\_heralded} brute-force comparison at the relevant $N$.}
 
 \section{Limitations and Threats to Validity}
 \label{sec:disc:limitations}
 
-\TODO{State the main modelling assumptions (Pauli channel, i.i.d.\ noise,
-non-adaptive schedules, single-path routing) and discuss what could
-change if they were relaxed.}
+\TODO{Main modelling assumptions: Pauli channel (i.i.d.\ noise),
+non-adaptive (open-loop) schedules, single-path routing, $M_{\max}$
+not enforced. Discuss the first two carefully --- the Pauli
+assumption is shared with the reference paper, so relative comparisons
+are unaffected; the non-adaptive assumption is the most consequential
+for real hardware. Note the pumping-reproducibility regression as an
+example of how adding a new move can silently shift headline numbers
+(documented, fixed, but a signal to watch for future extensions).}

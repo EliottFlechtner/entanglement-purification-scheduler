@@ -26,6 +26,20 @@ covers and its computational cost.}
 and recursive-level (join across disjoint sub-spans). Describe
 Pareto-frontier pruning on $(\mathrm{cost}, F, P_{\mathrm{success}})$.}
 
+\subsection{Same-Span Pumping}
+\label{sec:alg:pumping}
+
+\TODO{Describe the pumping move added to the DP: select two
+pre-pump candidates for the same Span$(a,b)$, clone the second
+candidate's subtree with fresh node IDs (fresh cloning is required ---
+reusing a memoized node ID would silently undercount resource cost),
+and apply YY/ZX/XZ. Both the input pairing pool and the frontier
+contribution are capped at 25 candidates to prevent quadratic blowup.
+Note the \texttt{enable\_pumping} flag (default \texttt{True})
+added for reproducibility: setting it \texttt{False} exactly
+reproduces pre-pumping cached results (e.g.\ the cost=50/rate=6713
+N=10 headline number).}
+
 \section{Heuristic Beam Search}
 \label{sec:alg:beam}
 
@@ -33,13 +47,17 @@ Pareto-frontier pruning on $(\mathrm{cost}, F, P_{\mathrm{success}})$.}
 a configurable beam width. Motivate when it is needed (large $N$,
 large budget) and its runtime complexity.}
 
-\section{Cost Functions}
+\section{Objective Presets}
 \label{sec:alg:cost}
 
-\TODO{Define the two cost functions used to rank candidates:
-$C_{\mathrm{fid}}$ (infidelity subject to throughput constraint) and
-$C_{\mathrm{rate}}$ (effective rate subject to fidelity floor). Show how
-each maps to one of the objectives from~\Cref{sec:model:objectives}.}
+\TODO{Define the three \texttt{ObjectiveConfig} presets used in
+experiments: (1)~\texttt{maximize\_rate\_with\_fidelity\_floor}
+(default; $\max R$ s.t.\ $F \ge F_{\min}$, $C \le e_{\max}$);
+(2)~\texttt{maximize\_fidelity\_with\_rate\_floor} ($\max F$ s.t.\
+$R \ge R_{\min}$); (3)~\texttt{minimize\_cost\_with\_constraints}
+($\min C$ s.t.\ constraints on $F$ and optionally $R$). Stress that
+all three use the identical search algorithms unchanged --- the
+objective layer is fully decoupled from the search layer.}
 
 \section{Software Architecture}
 \label{sec:alg:software}

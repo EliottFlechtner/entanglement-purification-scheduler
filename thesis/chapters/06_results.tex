@@ -7,63 +7,136 @@
 \subsection{Parameter Ranges}
 \label{sec:exp:params}
 
-\TODO{Table of fixed and swept parameters: $N \in \{4, 6, 8, 10, 14, 18\}$,
-budget $M_{\max}$, per-photon error rate, gate error rate, memory $T_2$.}
+\TODO{Table of fixed and swept parameters. Fixed: paper's $N=10$
+headline config, $e_d=0.01$, $F_{\min}=0.9$, $e_{\max}=100$.
+Swept: $N \in \{6,8,10,12,14,16,18\}$; $e_d \in [0, 0.01]$ (11
+points); $e_{\max}$ (bisection); $\gamma$, $\tau_{\mathrm{emit}}$;
+branching vector (non-paper config for sensitivity). Mark which are
+explored per subsection.}
 
 \subsection{Baselines}
 \label{sec:exp:baselines}
 
-\TODO{Define the baselines: (1)~raw chain, (2)~the paper's hand-chosen
-YY-first fixed schedule (\texttt{flexible\_paper}), (3)~uniform
-link-level purification with identical circuit sequence at every hop.}
+\TODO{Three baselines, ordered by sophistication: (1)~raw chain;
+(2)~uniform link-level purification (same circuit sequence at every
+hop --- the practitioner's default); (3)~the paper's hand-chosen
+\texttt{flexible\_paper} schedule (explicitly acknowledged by its
+authors as unoptimised). Baseline (2) is new vs.\ prior single-point
+reports; distinguish it clearly from (3) in figures.}
 
 \subsection{Metrics}
 \label{sec:exp:metrics}
 
-\TODO{Define the reported metrics: final Bell-pair fidelity $F$,
-effective generation rate $R = P_{\mathrm{success}} / T_{\mathrm{gen}}$,
-and resource consumption $M_{\mathrm{used}}$.}
+\TODO{Define: fidelity $F$, rate $R = P_{\mathrm{success}} /
+T_{\mathrm{gen}}$, resource cost $C$ (half-RGS copies consumed).
+Note two comparison modes used throughout: matched-cost
+(optimizer constrained to $C = 100$) and budget-relaxed (optimizer
+free within $C \le e_{\max}$).}
 
-\section{Validation}
+\section{Physics Validation}
 \label{sec:exp:validation}
 
-\TODO{Show that the DAG evaluator reproduces the three closed-form
-timing/fidelity benchmarks from the Integrating paper for the canonical
-schedule types. Include a table or figure comparing analytical and
-simulated values.}
+\TODO{DAG evaluator reproduces Integrating paper Fig.~5 to
+4 significant figures (raw/baseline/flexible at $e_d=0.01$:
+0.8234/0.9168/0.9295 vs.\ $\approx$0.823/0.917/0.929). Include
+a two-column table: analytical vs.\ evaluator for each schedule
+type and several $e_d$ values. State explicitly that agreement
+confirms the physical model, not the search quality.}
 
-\section{Main Results}
-\label{sec:exp:results}
+\section{Headline Comparison at the Paper's Nominal Config}
+\label{sec:exp:headline}
 
-\subsection{Schedule Structure at Optimal Points}
-\label{sec:exp:optimal-structure}
+\TODO{$N=10$, $e_d=0.01$. Two optimizer variants vs.\ the paper's
+\texttt{flexible\_paper} baseline: matched-cost ($C=100$, +2.5\% rate)
+and budget-relaxed ($C=50$, +65\% rate at half the resource cost).
+Include the four DAG visualisations (\texttt{flexible\_paper},
+matched-cost, budget-relaxed, cost-50 candidate). Note the
+\texttt{enable\_pumping=False} pin needed to reproduce the
+cost=50/rate=6713 historical number exactly; current default
+(pumping enabled) returns cost=60/rate=6196 --- both are
+valid, the pin is a reproducibility anchor, not a fix.}
 
-\TODO{Present the dominant structural patterns discovered by the search
-(e.g., YY-first at RGSS level, mixed ZX/XZ at link level). Use dot-graph
-figures of representative optimal DAGs.}
+\section{Noise-Rate Sensitivity ($e_d$ Sweep)}
+\label{sec:exp:edsweep}
 
-\subsection{Throughput and Fidelity Comparison}
-\label{sec:exp:comparison}
+\TODO{Sweep $e_d \in \{0, 0.001, \ldots, 0.010\}$ at $N=10$.
+Three-line rate plot and fidelity plot vs.\ $e_d$; percent-improvement
+curve. Key observation: optimizer advantage grows with noise
+(near-zero advantage at $e_d=0$, up to $\sim$18\% at $e_d=0.01$
+over the link-level baseline). Tie to Finding~2 (non-uniform
+allocation is more effective where per-hop fidelity varies). Source:
+\texttt{outputs/sweep\_ed\_n10/}.}
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.7\linewidth]{figures/results/throughput.png}
-    \caption{\TODO{Effective rate vs.\ fidelity for competing scheduling
-             strategies at $N=10$.}}
-    \label{fig:throughput}
-\end{figure}
+\section{Rate--Fidelity Tradeoff: Full Pareto Frontiers}
+\label{sec:exp:pareto}
 
-\TODO{Discuss the Pareto frontier of (rate, fidelity) and where the
-paper baseline and discovered optima sit on it.}
+\TODO{Full $F$--$C$ and $R$--$C$ Pareto curves at the paper's nominal
+config, extracted from the DP frontier machinery. The paper baseline
+and the two headline optimizer variants sit as specific labelled
+points on these curves. Highlight the ``elbow'' where additional
+resources stop buying meaningful quality gains. Source:
+\texttt{outputs/pareto\_frontiers/}.}
+
+\subsection{Objective Substitution: Fidelity-Maximisation and Cost-Minimisation}
+\label{sec:exp:objectives}
+
+\TODO{Brief (one paragraph + one table) demonstration that swapping
+\texttt{ObjectiveConfig} to \texttt{maximize\_fidelity\_with\_rate\_floor}
+or \texttt{minimize\_cost\_with\_constraints} yields a structurally
+different top schedule without touching any search code. The cost-
+minimisation result (minimum $C$ to clear $F \ge 0.9$: $C=X$; to
+also meet $R \ge R_{\text{paper}}$: $C=Y$) cross-validates the
+bisected minimum-budget result from \S\ref{sec:exp:scalability}.
+Source: \texttt{outputs/alternative\_objectives/}.}
+
+\section{Sensitivity to Gate Error Rate}
+\label{sec:exp:edsweep}
+
+\TODO{Sweep $e_d \in \{0, 0.001, \ldots, 0.010\}$ at $N=10$.
+Three-line rate plot vs.\ $e_d$; percent-improvement summary curve.
+Key finding: optimizer advantage is near-zero at $e_d=0$ (all hops
+symmetric, nothing to exploit) and rises monotonically to $\sim$18\%
+over the uniform link-level baseline at $e_d=0.01$. Maps out the
+``flat floor'' regime. Source: \texttt{outputs/sweep\_ed\_n10/}.}
+
+\section{Scalability and Regime Analysis}
+\label{sec:exp:scalability}
 
 \subsection{Scaling with Hop Count}
 \label{sec:exp:scaling}
 
-\TODO{Show how the optimality gap between the baseline and the
-discovered schedule evolves with $N$. Identify the crossover point.}
+\TODO{$N \in \{6,8,10,12,14,16,18\}$ at $e_d=0.01$, budget $10N$.
+Paper baseline fidelity decreases monotonically with $N$, failing
+the floor at $N \ge 12$; beam search remains feasible to $N=16$.
+At $N=18$ beam search plateaus at $F=0.888$. One-sentence robustness
+note: repeating the matched-cost comparison at a non-paper branching
+vector yields the same qualitative conclusion (see
+\texttt{outputs/sweep\_network\_sensitivity/}). Source:
+\texttt{outputs/sweep\_hop\_count/}.}
 
-\subsection{Minimum Budget vs.\ Number of Hops}
+\subsection{Excluded-Move Check at $N=18$}
+\label{sec:exp:excluded}
+
+\TODO{Does the excluded same-span-purification move rescue feasibility
+where beam search reports none? Result: yes at $N=18$ ---
+a \texttt{ScheduleDAG.validate()}-passing schedule achieves
+$F=0.929$ at $e_{\max}=180=10\times18$. This demonstrates the
+$N=18$ plateau is a search-family wall, not a physical limit.
+Source: \texttt{outputs/excluded\_move\_n14\_n18/}.}
+
+\subsection{Minimum-Budget Scaling Law and Hardware Noise Sensitivity}
 \label{sec:exp:budget}
 
-\TODO{Present the sweep over $(N, M_{\max})$ showing the minimum budget
-needed to reach a target fidelity. Discuss the excluded-move gap.}
+\TODO{Bisect minimum $e_{\max}$ to clear $F_{\min}=0.9$ for
+$N \in \{10,12,14,16\}$. Power-law fit:
+$e_{\max}^{\min} \approx 0.593 \cdot N^{1.909}$ (super-linear;
+grows faster than the paper's linear $10N$; the paper overspends
+$2$--$4.8\times$ at $N=10$ depending on noise). Companion result:
+a sweep of memory decoherence rate $\gamma$ and emission time
+$\tau_{\mathrm{emit}}$ identifies a $\gamma$ threshold below which
+the optimizer advantage shrinks toward zero (timing delays short
+relative to $T_2$) and above which non-uniform scheduling provides
+large gains. Both sweeps confirm that optimizer benefit is strongest
+in the physically realistic, high-loss/high-noise regime. Sources:
+\texttt{outputs/sweep\_min\_budget\_vs\_n/},
+\texttt{outputs/sweep\_gamma\_and\_tau\_emit/}.}

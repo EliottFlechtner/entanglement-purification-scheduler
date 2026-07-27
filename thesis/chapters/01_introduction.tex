@@ -22,15 +22,24 @@ note that schedule optimization remains open. This thesis fills that gap.}
 \section{Research Objectives and Contributions}
 \label{sec:intro:contributions}
 
-\TODO{State the three to four concrete contributions:
+\TODO{State the four concrete contributions:
 \begin{enumerate}
-    \item A formal model of the schedule space for HRGS-based repeaters.
-    \item A DAG-based cost evaluator that reproduces closed-form benchmarks
-          from prior work.
-    \item Exact and heuristic search algorithms that find schedules
-          outperforming the baseline.
-    \item A regime characterisation showing when simple schedules are
-          near-optimal and when they are not.
+    \item A formal DAG-based model of the schedule space for HRGS-based
+          quantum repeaters, with a bottom-up evaluator that reproduces
+          closed-form benchmarks from prior work to 4 significant figures.
+    \item A three-tier search framework (structured brute force, exact
+          span-partition DP, beam search) that finds schedules outperforming
+          the hand-chosen paper baseline: $+2.5\%$ rate at matched cost,
+          $+65\%$ at budget-relaxed, and feasible where the paper's own
+          schedule fails ($N=18$).
+    \item An empirical characterisation of the parameter regimes where
+          optimised scheduling yields large vs.\ negligible gains, covering
+          gate error rate $e_d$, hop count $N$, and hardware noise
+          ($\gamma$, $\tau_{\mathrm{emit}}$).
+    \item Four named, generalizable design principles, most citable being
+          a super-linear minimum-budget scaling law
+          ($e_{\max}^{\min} \approx 0.593\,N^{1.909}$) that contradicts
+          the paper's linear $10N$ heuristic.
 \end{enumerate}}
 
 \section{Thesis Outline}
