@@ -49,21 +49,48 @@ exists at exactly the paper's own budget.
 `beam_search` (∪ brute-force families) clears `f_min=0.9`, rather than
 assuming the paper's `10*N` formula is right.
 
-**Result:**
+**Result (original, pre-pumping-integration):**
 
 | N | Paper's `10N` | Min. feasible `e_max` | Ratio |
-|---|---|---|---|
+|---|---|---|
 | 10 | 100 | 50 | 0.50x |
 | 12 | 120 | 67 | 0.56x |
 | 14 | 140 | 82 | 0.59x |
 | 16 | 160 | 128 | 0.80x |
 | 18 | 180 | **not found** (gave up at 5760, 32x) | — |
 
-Power-law fit: $e_{max}^{min} \approx 0.593 \cdot N^{1.909}$ — super-
+Power-law fit (original): $e_{max}^{min} \approx 0.593 \cdot N^{1.909}$ — super-
 linear, i.e. grows faster than the paper's linear `10N`. N=18 plateaus
 at exactly F=0.8878 across the entire 180-5760 range tested (32x) — a
 search-family wall, not a resource wall (see §1: a real schedule exists
 at N=18 at 1x budget, just outside what `beam_search` can reach).
+
+**⚠ Addendum (post-pumping-integration re-run):** The fit above was produced by
+`sweep_min_budget_vs_n.py` run with `enable_pumping=False`, before pumping was
+properly integrated into `beam_search`. That run excluded N=18 entirely ("not
+found") because the pre-pumping search family was a genuine blind spot at that
+N. `sweep_min_budget_vs_n.py` has since been re-run with the current default
+(`enable_pumping=True`), covering N in {10, 12, 14, 16, 18, 20}. The N=18
+blind spot is resolved: `beam_search` (pumping enabled) now finds a feasible
+schedule at N=18 **within the paper's own budget** (e_max=162 < 180).
+
+**Updated result (pumping-integrated search, N in {10,12,14,16,18,20}):**
+
+| N | Paper's `10N` | Old min. `e_max` | New min. `e_max` | Delta | New ratio |
+|---|---|---|---|---|---|
+| 10 | 100 | 50 | 60 | +10 | 0.60x |
+| 12 | 120 | 67 | 73 | +6 | 0.61x |
+| 14 | 140 | 82 | 84 | +2 | 0.60x |
+| 16 | 160 | 128 | 128 | 0 | 0.80x |
+| 18 | 180 | not found | **162** | — | **0.90x** |
+| 20 | 200 | (new) | 187 | — | 0.94x |
+
+New power-law fit (all 6 valid points): $e_{max}^{min} \approx 0.995 \cdot N^{1.742}$.
+The fitted exponent is still super-linear (1.742 > 1) but lower than the old fit
+(1.909). The old N^1.909 number must not be cited as a validated result going
+forward — it was driven primarily by the N=18 "not found" exclusion, which is
+now resolved. See [outputs/sweep_min_budget_vs_n/README.md](../outputs/sweep_min_budget_vs_n/README.md)
+for the full updated table and fit.
 
 **Files:**
 - [outputs/sweep_min_budget_vs_n/results.csv](../outputs/sweep_min_budget_vs_n/results.csv)
