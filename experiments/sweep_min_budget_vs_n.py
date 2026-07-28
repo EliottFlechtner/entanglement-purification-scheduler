@@ -69,6 +69,7 @@ from __future__ import annotations
 
 import csv
 import math
+import argparse
 import sys
 import time
 from dataclasses import dataclass
@@ -85,7 +86,7 @@ from hrgs_scheduler.search import SearchResult, beam_search
 F_MIN = 0.9
 E_D = 0.01
 BEAM_WIDTH = 25
-N_VALUES = [10, 12, 14, 16, 18, 20]
+N_VALUES = [20, 21, 22, 23]
 
 # Safety cap on the exponential upward search, as a multiple of the
 # paper's own e_max=10*N, to avoid an unbounded doubling loop if
@@ -122,6 +123,24 @@ _GAMMA = 0.0
 _C = 2e5
 
 OUTPUT_DIR = _PROJECT_ROOT / "outputs" / "sweep_min_budget_vs_n"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Sweep minimum feasible e_max vs N, or regenerate plot/README "
+            "from an existing concatenated results.csv."
+        )
+    )
+    parser.add_argument(
+        "--plot-from-results-csv",
+        action="store_true",
+        help=(
+            "Do not run beam_search. Load OUTPUT_DIR/results.csv and rebuild "
+            "min_budget_vs_n.{png,svg} and README from those rows."
+        ),
+    )
+    return parser.parse_args()
 
 
 def _build_network(N: int) -> NetworkConfig:
@@ -346,6 +365,30 @@ def write_results_csv(rows: list[MinBudgetResult], path: Path) -> None:
             )
 
 
+def read_results_csv(path: Path) -> list[MinBudgetResult]:
+    by_n: dict[int, MinBudgetResult] = {}
+    with path.open("r", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            parsed = MinBudgetResult(
+                N=int(row["N"]),
+                paper_e_max=int(row["paper_e_max"]),
+                min_feasible_e_max=int(row["min_feasible_e_max"]),
+                ratio_to_paper=float(row["ratio_to_paper"]),
+                best_label=row["best_label"],
+                best_fidelity=float(row["best_fidelity"]),
+                best_success_prob=float(row["best_success_prob"]),
+                best_rate=float(row["best_rate"]),
+                best_cost=int(row["best_cost"]),
+                n_beam_search_calls=int(row["n_beam_search_calls"]),
+                wall_time_s=float(row["wall_time_s"]),
+            )
+            # Concatenated files may contain repeated N rows from later reruns;
+            # keep the last occurrence for each N.
+            by_n[parsed.N] = parsed
+    return sorted(by_n.values(), key=lambda r: r.N)
+
+
 def _power_law_fit(rows: list[MinBudgetResult]) -> tuple[float, float] | None:
     """Fit `min_feasible_e_max ~ a * N^b` via least squares on
     `log(min_feasible_e_max) = log(a) + b*log(N)`. Returns `(a, b)`, or
@@ -538,6 +581,24 @@ def write_readme(
 
 
 def main() -> None:
+    args = parse_args()
+
+    if args.plot_from_results_csv:
+        csv_path = OUTPUT_DIR / "results.csv"
+        if not csv_path.exists():
+            raise FileNotFoundError(
+                f"Cannot plot from CSV: file does not exist: {csv_path}"
+            )
+        rows = read_results_csv(csv_path)
+        if not rows:
+            raise ValueError(f"Cannot plot from CSV: no rows found in {csv_path}")
+        fit = make_plot(rows)
+        total_elapsed = sum(r.wall_time_s for r in rows)
+        write_readme(rows, fit, total_elapsed)
+        print(f"Rebuilt plot/README from existing CSV: {csv_path}")
+        print(f"Outputs written to {OUTPUT_DIR}")
+        return
+
     t0 = time.time()
     rows: list[MinBudgetResult] = []
     for N in N_VALUES:
