@@ -31,11 +31,12 @@ New results produced in this document (items 7-9, all freshly run against the cu
 
 ## Finding 2: The minimum resource budget required to hit a fixed fidelity floor scales super-linearly in hop count, not linearly
 
-**Statement:** the paper's own resource-cost convention (`e_max = 10*N`, linear in `N`) is not the point at which the fidelity floor genuinely becomes tight -- the minimum budget this repo's searched families actually need scales as roughly $N^{1.9}$, i.e. faster than linear, over the tested range.
+**Statement:** the paper's own resource-cost convention (`e_max = 10*N`, linear in `N`) is not the point at which the fidelity floor genuinely becomes tight -- the minimum budget this repo's searched families actually need scales as roughly $N^{1.7}$, i.e. faster than linear, over the tested range.
 
 **Evidence:**
-- `outputs/sweep_min_budget_vs_n/README.md`: descriptive power-law fit over `N in {10, 12, 14, 16}` (verified points; `N=18` did not converge within the search families used): $e_{max}^{min} \approx 0.593 \cdot N^{1.909}$. The *ratio* of minimum-feasible-budget to the paper's own linear budget rises monotonically with `N` (0.500x at N=10, 0.558x at N=12, 0.586x at N=14, 0.800x at N=16) -- i.e. the paper's fixed linear formula becomes progressively *less* over-provisioned as `N` grows, consistent with a genuinely super-linear minimum requirement rather than a fixed-offset one.
-- This finding is orthogonal to the reproducibility caveat above: it is about the *ratio and trend* across `N`, not the exact `N=10` rate value that regressed. The `N=12,14,16,18` rows are unaffected (their budget-relaxed candidates are not the specific one impacted by the pumping/beam-width interaction), and the qualitative "ratio increases with N" trend holds regardless of the exact `N=10` figure.
+- `outputs/sweep_min_budget_vs_n/README.md`: descriptive power-law fit over `N in {10, 12, 14, 16, 18, 20}` (pumping-integrated re-run; all points converged): $e_{max}^{min} \approx 0.995 \cdot N^{1.742}$. The *ratio* of minimum-feasible-budget to the paper's own linear budget rises monotonically with `N` (0.60x at N=10, 0.61x at N=12, 0.60x at N=14, 0.80x at N=16, 0.90x at N=18, 0.94x at N=20) -- i.e. the paper's fixed linear formula becomes progressively *less* over-provisioned as `N` grows, consistent with a genuinely super-linear minimum requirement rather than a fixed-offset one.
+- **Note:** the original fit ($0.593 \cdot N^{1.909}$, over N in {10,12,14,16} only) was produced before pumping was integrated into `beam_search` and excluded N=18 as "not found." With pumping enabled, N=18 converges at e_max=162 (below the paper's own budget of 180), changing the shape of the curve. The exponent dropped from 1.909 to 1.742; the fit is still super-linear but less so. The old number is preserved in [docs/archive/Roadmap_Derisk_and_Reframe_Results.md](archive/Roadmap_Derisk_and_Reframe_Results.md) §2 for reference.
+- This finding is orthogonal to the reproducibility caveat above: it is about the *ratio and trend* across `N`, not the exact `N=10` rate value that regressed. The qualitative "ratio increases with N" trend holds regardless of the exact per-point figure.
 
 ## Finding 3: The optimizer's advantage is a general search-vs-fixed-schedule phenomenon, not an artifact of the paper's specific noise idealization
 
@@ -72,7 +73,7 @@ New results produced in this document (items 7-9, all freshly run against the cu
 | # | Finding (named) | Primary new evidence |
 |---|---|---|
 | 1 | Non-uniform allocation beats uniform allocation at equal cost | `pareto_frontiers` (item 8), `headline_experiment_n10` |
-| 2 | Minimum budget scales super-linearly (~$N^{1.9}$), not linearly | `sweep_min_budget_vs_n` |
+| 2 | Minimum budget scales super-linearly (~$N^{1.7}$), not linearly | `sweep_min_budget_vs_n` |
 | 3 | Search-found schedules generalize across network configs; fixed schedules can become infeasible | `sweep_network_sensitivity` (item 7) |
 | 4 | Search algorithms are objective-agnostic; new goals are a one-line `ObjectiveConfig` change | `alternative_objectives` (item 9) |
 | 5 | `gamma` sensitivity is schedule-shape-specific; the optimizer already avoids the shape it would hurt | `sweep_gamma_and_tau_emit` |
