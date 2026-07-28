@@ -8,23 +8,25 @@ Per [docs/Roadmap_Derisk_and_Reframe.md](../../docs/Roadmap_Derisk_and_Reframe.m
 
 | N | Paper's $e_{max}=10N$ | Min. feasible $e_{max}$ (this sweep) | Ratio | Best F at min. budget | Best label |
 |---|---|---|---|---|---|
-| 10 | 100 | 50 | 0.500x | 0.9047 | beam.span.((hop0.n2.YY+(hop1+hop2))+(hop3.n3.ZX_YY+(hop4.n3.ZX_YY+(hop5.n3.ZX_YY+(hop6.n3.ZX_YY+(hop7.n3.ZX_YY+(hop8.n3.ZX_YY+hop9.n3.ZX_YY))))))) |
-| 12 | 120 | 67 | 0.558x | 0.9047 | beam.span.((hop0+hop1.n2.ZX)+((hop2.n3.YY_ZX+hop3.n3.YY_ZX)+(hop4.n3.YY_ZX+(hop5.n3.YY_ZX+(hop6.n3.YY_ZX+(hop7.n3.YY_ZX+(hop8.n3.YY_ZX+(hop9.n3.YY_ZX+(hop10.n3.YY_ZX+hop11.n3.YY_ZX))))))))) |
-| 14 | 140 | 82 | 0.586x | 0.9050 | beam.span.(hop0.n2.ZX+(hop1.n3.YY_ZX+(hop2.n3.YY_ZX+((hop3.n3.YY_ZX+(hop4.n3.YY_ZX+hop5.n3.YY_ZX))+(hop6.n3.YY_ZX+(hop7.n3.YY_ZX+(hop8.n3.YY_ZX+(hop9.n3.YY_ZX+(hop10.n3.YY_ZX+(hop11.n3.YY_ZX+(hop12.n3.YY_ZX+hop13.n3.YY_ZX))))))))))) |
+| 10 | 100 | 60 | 0.600x | 0.9063 | end_optimistic.n3.YY_ZX |
+| 12 | 120 | 73 | 0.608x | 0.9222 | link.n3.YY_ZX |
+| 14 | 140 | 84 | 0.600x | 0.9104 | link.n3.YY_ZX |
 | 16 | 160 | 128 | 0.800x | 0.9003 | link.n4.YY_ZX_YY |
-| 18 | 180 | **not found** (gave up at 32x paper's budget) | N/A | 0.8878 | beam.span.(hop0.n3.YY_ZX+(hop1.n3.YY_ZX+((hop2.n3.YY_ZX+hop3.n3.YY_ZX)+((hop4.n3.YY_ZX+hop5.n3.YY_ZX)+(hop6.n3.YY_ZX+((hop7.n3.YY_ZX+(hop8.n3.YY_ZX+hop9.n3.YY_ZX))+(hop10.n3.YY_ZX+(hop11.n3.YY_ZX+(hop12.n3.YY_ZX+(hop13.n3.YY_ZX+(hop14.n3.YY_ZX+(hop15.n3.YY_ZX+(hop16.n3.YY_ZX+hop17.n3.YY_ZX))))))))))))) |
+| 18 | 180 | 162 | 0.900x | 0.9030 | beam.span.(pump[YY](hop0.n3.YY_ZX,hop0.n3.YY_ZX)+(pump[YY](hop1.n3.YY_ZX,hop1.n3.YY_ZX)+(pump[YY](hop2.n3.YY_ZX,hop2.n3.YY_ZX)+(pump[YY](hop3.n3.YY_ZX,hop3.n3.YY_ZX)+(pump[YY](hop4.n3.YY_ZX,hop4.n3.YY_ZX)+(pump[YY](hop5.n3.YY_ZX,hop5.n3.YY_ZX)+(pump[YY](hop6.n3.YY_ZX,hop6.n3.YY_ZX)+(pump[YY](hop7.n3.YY_ZX,hop7.n3.YY_ZX)+(pump[YY](hop8.n3.YY_ZX,hop8.n3.YY_ZX)+(pump[YY](hop9.n3.YY_ZX,hop9.n3.YY_ZX)+(pump[YY](hop10.n3.YY_ZX,hop10.n3.YY_ZX)+(pump[YY](hop11.n3.YY_ZX,hop11.n3.YY_ZX)+(hop12.n3.ZX_YY+(hop13.n2.YY+((hop14+hop15)+(hop16+hop17)))))))))))))))) |
+| 20 | 200 | 187 | 0.935x | 0.9026 | beam.span.(pump[YY](hop0.n3.YY_ZX,hop0.n3.YY_ZX)+(pump[YY](hop1.n3.YY_ZX,hop1.n3.YY_ZX)+(pump[YY](hop2.n3.YY_ZX,hop2.n3.YY_ZX)+(pump[YY](hop3.n3.YY_ZX,hop3.n3.YY_ZX)+(pump[YY](hop4.n3.YY_ZX,hop4.n3.YY_ZX)+(pump[YY](hop5.n3.YY_ZX,hop5.n3.YY_ZX)+(pump[YY](hop6.n3.YY_ZX,hop6.n3.YY_ZX)+(pump[YY](hop7.n3.YY_ZX,hop7.n3.YY_ZX)+(pump[YY](hop8.n3.YY_ZX,hop8.n3.YY_ZX)+(pump[YY](hop9.n3.YY_ZX,hop9.n3.YY_ZX)+(pump[YY](hop10.n3.YY_ZX,hop10.n3.YY_ZX)+(pump[YY](hop11.n3.YY_ZX,hop11.n3.YY_ZX)+(pump[YY](hop12.n3.YY_ZX,hop12.n3.YY_ZX)+(pump[YY](hop13.n3.YY_ZX,hop13.n3.YY_ZX)+(hop14.n3.ZX_YY+(hop15.n2.YY+((hop16+hop17)+(hop18+hop19)))))))))))))))))) |
 
-**Descriptive power-law fit** (least squares on log-log data, valid points only): $e_{max}^{min} \approx 0.593 \cdot N^{1.909}$. The fitted exponent exceeds 1, i.e. the minimum required budget within this sweep's searched families grows faster than the paper's own linear `10*N` formula.
+**Descriptive power-law fit** (least squares on log-log data, valid points only): $e_{max}^{min} \approx 0.995 \cdot N^{1.742}$. The fitted exponent exceeds 1, i.e. the minimum required budget within this sweep's searched families grows faster than the paper's own linear `10*N` formula.
 
-This fit is descriptive, not a rigorous asymptotic claim -- it is over a small number of points (5) and is sensitive to the specific N values tested.
+This fit is descriptive, not a rigorous asymptotic claim -- it is over a small number of points (6) and is sensitive to the specific N values tested.
 
 ## Details
 
-- **N=10**: paper's `e_max`=100, min. feasible `e_max`=50, best schedule found there: `beam.span.((hop0.n2.YY+(hop1+hop2))+(hop3.n3.ZX_YY+(hop4.n3.ZX_YY+(hop5.n3.ZX_YY+(hop6.n3.ZX_YY+(hop7.n3.ZX_YY+(hop8.n3.ZX_YY+hop9.n3.ZX_YY)))))))`, F=0.9047, success_prob=0.6713, rate=6713.1751, cost=50. (7 `beam_search` calls, 68.2s.)
-- **N=12**: paper's `e_max`=120, min. feasible `e_max`=67, best schedule found there: `beam.span.((hop0+hop1.n2.ZX)+((hop2.n3.YY_ZX+hop3.n3.YY_ZX)+(hop4.n3.YY_ZX+(hop5.n3.YY_ZX+(hop6.n3.YY_ZX+(hop7.n3.YY_ZX+(hop8.n3.YY_ZX+(hop9.n3.YY_ZX+(hop10.n3.YY_ZX+hop11.n3.YY_ZX)))))))))`, F=0.9047, success_prob=0.5724, rate=4769.8277, cost=66. (7 `beam_search` calls, 202.7s.)
-- **N=14**: paper's `e_max`=140, min. feasible `e_max`=82, best schedule found there: `beam.span.(hop0.n2.ZX+(hop1.n3.YY_ZX+(hop2.n3.YY_ZX+((hop3.n3.YY_ZX+(hop4.n3.YY_ZX+hop5.n3.YY_ZX))+(hop6.n3.YY_ZX+(hop7.n3.YY_ZX+(hop8.n3.YY_ZX+(hop9.n3.YY_ZX+(hop10.n3.YY_ZX+(hop11.n3.YY_ZX+(hop12.n3.YY_ZX+hop13.n3.YY_ZX)))))))))))`, F=0.9050, success_prob=0.4880, rate=3485.8754, cost=82. (7 `beam_search` calls, 392.6s.)
-- **N=16**: paper's `e_max`=160, min. feasible `e_max`=128, best schedule found there: `link.n4.YY_ZX_YY`, F=0.9003, success_prob=0.3095, rate=1934.3196, cost=128. (8 `beam_search` calls, 681.7s.)
-- **N=18**: paper's `e_max`=180, min. feasible `e_max`=not found, best schedule found there: `beam.span.(hop0.n3.YY_ZX+(hop1.n3.YY_ZX+((hop2.n3.YY_ZX+hop3.n3.YY_ZX)+((hop4.n3.YY_ZX+hop5.n3.YY_ZX)+(hop6.n3.YY_ZX+((hop7.n3.YY_ZX+(hop8.n3.YY_ZX+hop9.n3.YY_ZX))+(hop10.n3.YY_ZX+(hop11.n3.YY_ZX+(hop12.n3.YY_ZX+(hop13.n3.YY_ZX+(hop14.n3.YY_ZX+(hop15.n3.YY_ZX+(hop16.n3.YY_ZX+hop17.n3.YY_ZX)))))))))))))`, F=0.8878, success_prob=0.3842, rate=2134.3384, cost=108. (5 `beam_search` calls, 783.3s.)
+- **N=10**: paper's `e_max`=100, min. feasible `e_max`=60, best schedule found there: `end_optimistic.n3.YY_ZX`, F=0.9063, success_prob=0.6196, rate=6195.9511, cost=60. (7 `beam_search` calls, 79.2s.)
+- **N=12**: paper's `e_max`=120, min. feasible `e_max`=73, best schedule found there: `link.n3.YY_ZX`, F=0.9222, success_prob=0.5285, rate=4403.9523, cost=72. (7 `beam_search` calls, 159.7s.)
+- **N=14**: paper's `e_max`=140, min. feasible `e_max`=84, best schedule found there: `link.n3.YY_ZX`, F=0.9104, success_prob=0.4752, rate=3394.1664, cost=84. (7 `beam_search` calls, 290.1s.)
+- **N=16**: paper's `e_max`=160, min. feasible `e_max`=128, best schedule found there: `link.n4.YY_ZX_YY`, F=0.9003, success_prob=0.3095, rate=1934.3196, cost=128. (8 `beam_search` calls, 571.4s.)
+- **N=18**: paper's `e_max`=180, min. feasible `e_max`=162, best schedule found there: `beam.span.(pump[YY](hop0.n3.YY_ZX,hop0.n3.YY_ZX)+(pump[YY](hop1.n3.YY_ZX,hop1.n3.YY_ZX)+(pump[YY](hop2.n3.YY_ZX,hop2.n3.YY_ZX)+(pump[YY](hop3.n3.YY_ZX,hop3.n3.YY_ZX)+(pump[YY](hop4.n3.YY_ZX,hop4.n3.YY_ZX)+(pump[YY](hop5.n3.YY_ZX,hop5.n3.YY_ZX)+(pump[YY](hop6.n3.YY_ZX,hop6.n3.YY_ZX)+(pump[YY](hop7.n3.YY_ZX,hop7.n3.YY_ZX)+(pump[YY](hop8.n3.YY_ZX,hop8.n3.YY_ZX)+(pump[YY](hop9.n3.YY_ZX,hop9.n3.YY_ZX)+(pump[YY](hop10.n3.YY_ZX,hop10.n3.YY_ZX)+(pump[YY](hop11.n3.YY_ZX,hop11.n3.YY_ZX)+(hop12.n3.ZX_YY+(hop13.n2.YY+((hop14+hop15)+(hop16+hop17))))))))))))))))`, F=0.9030, success_prob=0.2186, rate=1214.4122, cost=162. (8 `beam_search` calls, 915.7s.)
+- **N=20**: paper's `e_max`=200, min. feasible `e_max`=187, best schedule found there: `beam.span.(pump[YY](hop0.n3.YY_ZX,hop0.n3.YY_ZX)+(pump[YY](hop1.n3.YY_ZX,hop1.n3.YY_ZX)+(pump[YY](hop2.n3.YY_ZX,hop2.n3.YY_ZX)+(pump[YY](hop3.n3.YY_ZX,hop3.n3.YY_ZX)+(pump[YY](hop4.n3.YY_ZX,hop4.n3.YY_ZX)+(pump[YY](hop5.n3.YY_ZX,hop5.n3.YY_ZX)+(pump[YY](hop6.n3.YY_ZX,hop6.n3.YY_ZX)+(pump[YY](hop7.n3.YY_ZX,hop7.n3.YY_ZX)+(pump[YY](hop8.n3.YY_ZX,hop8.n3.YY_ZX)+(pump[YY](hop9.n3.YY_ZX,hop9.n3.YY_ZX)+(pump[YY](hop10.n3.YY_ZX,hop10.n3.YY_ZX)+(pump[YY](hop11.n3.YY_ZX,hop11.n3.YY_ZX)+(pump[YY](hop12.n3.YY_ZX,hop12.n3.YY_ZX)+(pump[YY](hop13.n3.YY_ZX,hop13.n3.YY_ZX)+(hop14.n3.ZX_YY+(hop15.n2.YY+((hop16+hop17)+(hop18+hop19))))))))))))))))))`, F=0.9026, success_prob=0.1719, rate=859.6317, cost=186. (8 `beam_search` calls, 1230.7s.)
 
 ## Method caveats
 
@@ -39,4 +41,4 @@ source .venv/bin/activate
 PYTHONPATH=src python3 -u experiments/sweep_min_budget_vs_n.py
 ```
 
-Total wall-clock time: ~2129s.
+Total wall-clock time: ~3247s.
