@@ -85,7 +85,7 @@ from hrgs_scheduler.search import SearchResult, beam_search
 F_MIN = 0.9
 E_D = 0.01
 BEAM_WIDTH = 25
-N_VALUES = [10, 12, 14, 16, 18]
+N_VALUES = [10, 12, 14, 16, 18, 20]
 
 # Safety cap on the exponential upward search, as a multiple of the
 # paper's own e_max=10*N, to avoid an unbounded doubling loop if
@@ -175,16 +175,11 @@ def _check(
     "feasible at e_max=1" result. Re-filtering by cost here is the fix.
     """
     if e_max not in cache:
-        # enable_pumping=False: pins this bisection to the pre-pumping
-        # search behaviour its cached outputs/README were originally
-        # generated under -- see docs/Design Principles.md for why the
-        # default `enable_pumping=True` can silently evict a
-        # previously-kept, previously-optimal non-pumped candidate under
-        # a fixed beam width, making this script's numbers otherwise
-        # non-reproducible.
-        results = beam_search(
-            net, obj, e_max=e_max, beam_width=BEAM_WIDTH, enable_pumping=False
-        )
+        # Pumping enabled (default): this re-run uses the current
+        # default beam_search settings (enable_pumping=True) to
+        # produce results that include the pumped schedule families
+        # now properly integrated into the search.
+        results = beam_search(net, obj, e_max=e_max, beam_width=BEAM_WIDTH)
         in_budget = [r for r in results if r.eval_result.resource_cost <= e_max]
         if in_budget:
             best = in_budget[0]
