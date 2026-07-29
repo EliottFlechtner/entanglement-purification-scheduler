@@ -92,17 +92,38 @@ forward — it was driven primarily by the N=18 "not found" exclusion, which is
 now resolved. See [outputs/sweep_min_budget_vs_n/README.md](../outputs/sweep_min_budget_vs_n/README.md)
 for the full updated table and fit.
 
-**⚠ Second addendum (N=20–28 extension):** The sweep has since been extended to
-`N in {20,21,22,23,24,26,28}`. The full 12-point (N=10–28) revised power-law fit
-is $e_{max}^{min} \approx 1.369 \cdot N^{1.620}$ — exponent still super-linear
-but now refined over a wider range. More importantly, **N=28 is the first
-crossover point**: `min_feasible_e_max=283 > paper_e_max=280` (ratio 1.011x),
-meaning `beam_search`'s pumping-enabled families require *more* than the paper's
-`10*N` budget for the first time. N=26 is still just below 1.0x (ratio 0.992x).
-The 10N formula derives from the paper's own hardware model (5 half-RGS copies
-per side × 2 sides × N hops). The crossover makes concrete that this formula
-becomes strictly insufficient for the searched families at approximately N≈27–28
-at `e_d=0.01`. All the scoping caveats from §1 still apply.
+**⚠ Second addendum (N=20-28 extension, reframed):** The sweep has since
+been extended to `N in {20,21,22,23,24,26,28}`. Plotting the raw points
+(before any curve fit) shows two distinct regimes rather than one
+smooth power law: from N=16 through N=24, the minimum feasible `e_max`
+tracks close to and roughly parallel with the paper's own `10*N` line;
+starting around N=26-28, the two visibly diverge, with the searched
+minimum overtaking the paper's formula for the first time at N=28
+(min. feasible=283 > 10*28=280, ratio 1.011x).
+
+**The correct claim is therefore: the paper's linear `10*N` formula
+holds well within the range the paper itself tests (up to its own
+N=10-18 experiments), and only breaks down once extended well beyond
+that range, at N≈26-28.** This is a different and more defensible claim
+than "the formula is wrong" — it says the paper's own tested regime is
+fine, and locates specifically where an extrapolation of it stops
+holding.
+
+A single global power-law fit across all 12 points ($e_{max}^{min}
+\approx 1.369 \cdot N^{1.620}$) is kept as a *descriptive summary
+statistic only*, not as the headline finding — it is disproportionately
+influenced by the last 2-3 points where the divergence actually occurs,
+and does not cleanly describe either the near-linear regime (N<=24) or
+the diverging regime (N>=26) on its own.
+
+**Caveat on the crossover point itself:** N=26-28 is exactly the size
+range where `beam_search`'s beam-width cap is most likely to matter
+(the same class of effect that produced the original, since-resolved
+N=18 "not found" result before pumping was integrated). The crossover
+location (N≈27-28) should be treated as provisional, not a precise
+constant, since a wider beam width might push it further out. This has
+not been checked and is flagged as a natural follow-up if the exact
+crossover point becomes load-bearing for any specific claim.
 
 **Files:**
 - [outputs/sweep_min_budget_vs_n/results.csv](../outputs/sweep_min_budget_vs_n/results.csv)
@@ -193,6 +214,11 @@ candidate).
    spending 2x-4.8x) across an entire noise sweep at the paper's own
    N=10 — this doesn't need any of §1/§2's search-family caveats, since
    N=10 is far from where those caveats bite.
+   §2's crossover finding, now correctly scoped to "holds within the
+   paper's tested range, diverges beyond N≈26-28," is a secondary,
+   supporting finding — cite it as evidence the paper's formula was
+   tuned for its own working range, not as a standalone "the paper is
+   wrong" claim.
 3. **§4's link-level numbers are a secondary, more conservative
    improvement claim** to report alongside (not instead of) the
    existing improvement-over-`flexible_paper` numbers — use both when
