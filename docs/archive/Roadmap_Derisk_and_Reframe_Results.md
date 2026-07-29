@@ -92,6 +92,18 @@ forward — it was driven primarily by the N=18 "not found" exclusion, which is
 now resolved. See [outputs/sweep_min_budget_vs_n/README.md](../outputs/sweep_min_budget_vs_n/README.md)
 for the full updated table and fit.
 
+**⚠ Second addendum (N=20–28 extension):** The sweep has since been extended to
+`N in {20,21,22,23,24,26,28}`. The full 12-point (N=10–28) revised power-law fit
+is $e_{max}^{min} \approx 1.369 \cdot N^{1.620}$ — exponent still super-linear
+but now refined over a wider range. More importantly, **N=28 is the first
+crossover point**: `min_feasible_e_max=283 > paper_e_max=280` (ratio 1.011x),
+meaning `beam_search`'s pumping-enabled families require *more* than the paper's
+`10*N` budget for the first time. N=26 is still just below 1.0x (ratio 0.992x).
+The 10N formula derives from the paper's own hardware model (5 half-RGS copies
+per side × 2 sides × N hops). The crossover makes concrete that this formula
+becomes strictly insufficient for the searched families at approximately N≈27–28
+at `e_d=0.01`. All the scoping caveats from §1 still apply.
+
 **Files:**
 - [outputs/sweep_min_budget_vs_n/results.csv](../outputs/sweep_min_budget_vs_n/results.csv)
 - [outputs/sweep_min_budget_vs_n/README.md](../outputs/sweep_min_budget_vs_n/README.md) — full writeup, power-law fit, N=18 scoping note.
