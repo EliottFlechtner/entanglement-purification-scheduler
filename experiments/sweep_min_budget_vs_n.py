@@ -12,6 +12,11 @@ Method: bisection, not a linear scan [§2.1]
 For each `N`:
 
 1. Check feasibility at the paper's own budget, `e_max = 10*N`.
+   Note: `10*N` comes from the paper's hardware model (5 half-RGS copies
+   per side × 2 sides × N hops). The sweep has empirically found that this
+   formula is first *insufficient* for beam_search's pumping-enabled families
+   at N=28 (min. feasible e_max=283 > 280, ratio 1.011x); N=26 is still
+   below 1.0x (0.992x). The crossover lies between N=26 and N=28 at e_d=0.01.
 2. If infeasible there (as `sweep_hop_count` already found at `N=14`,
    `N=18`): exponential-search upward -- try `4*10*N`, then double again
    and again, until a feasible `e_max` is found.
@@ -86,29 +91,13 @@ from hrgs_scheduler.search import SearchResult, beam_search
 F_MIN = 0.9
 E_D = 0.01
 BEAM_WIDTH = 25
-N_VALUES = [20, 21, 22, 23]
+N_VALUES = [24, 26, 28]
 
 # Safety cap on the exponential upward search, as a multiple of the
 # paper's own e_max=10*N, to avoid an unbounded doubling loop if
 # `beam_search`'s reachable families genuinely never clear the floor at
 # this N (would be a notable finding in itself, reported as such rather
 # than hung on).
-#
-# IMPORTANT -- also a *memory/compute* safety cap, not just a logical
-# one: `brute_force_search` (always included via `beam_search`'s
-# `include_brute_force_families=True`) derives its own internal
-# enumeration cap as `e_max // (2*N)`, which grows *linearly* with
-# `e_max` and is NOT bounded by `beam_search`'s `max_link_copies`. At
-# N=18, e_max=11520 (64x the paper's budget) gives an internal cap of
-# 320 -- i.e. it builds and holds hundreds of purification-chain DAGs
-# with up to ~320 copies each, in memory, simultaneously. This measurably
-# exhausted RAM into swap and crashed the whole desktop session during
-# this project (confirmed via `free -h` showing ~2GB swap in use and the
-# background process silently dying, with no exception in its log).
-# 32x (5760 at N=18) was empirically safe; 64x was not. Since the
-# fidelity plateaued at exactly the same value across the entire
-# 180..5760 range already probed, there is no evidence 64x would find
-# anything different anyway -- so 32x is kept as the practical ceiling.
 _MAX_UPWARD_MULTIPLE = 32
 _BISECTION_TOLERANCE = 2
 
