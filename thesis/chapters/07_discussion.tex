@@ -4,53 +4,55 @@
 \section{Design Principles}
 \label{sec:disc:principles}
 
-\TODO{Synthesise the four most citable generalizable findings from the
+\TODO{Synthesise the five most citable generalizable findings from the
 campaign as named rules (not just numerical observations). See
 \texttt{docs/Design Principles.md} for the full source.
 \textbf{Finding~1} (non-uniform allocation wins): composing hops erodes
 fidelity non-uniformly, so concentrating purification rounds where it
 matters most outperforms a uniform allocation at matched cost --- directly
-observed in the headline experiment and confirmed across the $e_d$ sweep.
-\textbf{Finding~2} (advantage scales with noise asymmetry): improvement
-over the uniform baseline is near-zero when all hops are symmetric
-($e_d \approx 0$) and maximal in the high-noise regime; a $\gamma$
-threshold separates the two regimes in the hardware-noise sweep.
-\textbf{Finding~3} (super-linear budget law): the minimum feasible
-resource budget scales as $e_{\max}^{\min} \approx 0.593 \cdot N^{1.909}$,
-not the paper's linear $10N$ --- the paper overspends $2$--$4.8\times$
-at $N=10$. \textbf{Finding~4} (objective substitution is free): swapping
-to fidelity-maximisation or cost-minimisation is a one-line
-\texttt{ObjectiveConfig} change that yields a structurally different top
-schedule, confirming the objective layer is not cosmetic.}
+observed in the headline comparison and Pareto analysis.
+\textbf{Finding~2} (searched-family budget grows super-linearly): the
+descriptive $N=10$--28 fit is $e_{\max}^{\min} \approx 1.369\cdot
+N^{1.620}$, with a provisional, beam-width-sensitive crossover above
+$10N$ near $N=28$. \textbf{Finding~3} (search restores feasibility under
+changed physics): the paper schedule fails the fidelity floor under the
+tested inner-qubit-error configurations while searched schedules remain
+feasible. \textbf{Finding~4} (objective substitution is free): swapping
+to fidelity maximisation or cost minimisation is a one-line
+\texttt{ObjectiveConfig} change. \textbf{Finding~5} (timing shape controls
+$\gamma$ sensitivity): only schedules with asymmetric-arrival combines
+decohere under $\gamma$; the selected optimistic schedules are invariant
+at the nominal configuration.}
 
 \section{When Simple Schedules Are Near-Optimal}
 \label{sec:disc:nearoptimal}
 
-\TODO{Characterise the ``flat floor'' regime (low $e_d$, small $N$,
-generous budget) where the paper's hand-chosen schedule is within a
-few percent of the DP optimum and the optimization overhead is
-not justified. Point to the $e_d$ sweep's near-zero improvement at
-$e_d \approx 0$ as the empirical anchor. Tie to Finding~2.}
+\TODO{Characterise the ``flat floor'' regime (low outer error, small $N$,
+and sufficient budget) where the tested schedules differ little and the
+engineering benefit of optimisation is modest. Anchor the claim to the
+$e_d$ sweep, but do not claim global optimality from a beam-limited
+frontier.}
 
 \section{When the Scheduling Choice Matters}
 \label{sec:disc:matters}
 
-\TODO{Identify the complementary high-benefit regime (high $e_d$,
-large $N$, tight fidelity constraint): at $N=10$, $e_d=0.01$ the
-budget-relaxed optimizer achieves $+65\%$ rate at half the resource
-cost. Discuss the $N=18$ rescue (\S\ref{sec:exp:excluded}) as the
-strongest demonstration: the paper's own budget fails, the excluded
-move succeeds. Tie to Findings~1, 3.}
+\TODO{Identify the complementary high-benefit regime: tight fidelity
+constraints and physics that invalidates a fixed hand-tuned allocation.
+At the nominal configuration, distinguish the current default cost-60,
+rate-6195.95 result from the pinned historical cost-50, rate-6713.18
+reproduction. Use the inner-qubit-error sensitivity experiment as the
+strongest feasibility comparison, and present the $N=18$ excluded-move
+result only as an existence check outside the primary heuristic search.}
 
 \section{Optimality Scope and the Excluded-Move Gap}
 \label{sec:disc:scope}
 
-\TODO{State precisely what the DP/beam search finds natively and what
-it cannot reach (the excluded same-span-purification move). Show the
-gap is demonstrated-real (reproducible counterexample at $N=3$, $N=18$
-rescue) but bounded: at $N=10$ the excluded families account for
-only a small fraction of the Pareto frontier. Cite
-\texttt{docs/Optimality Scope.md}.}
+\TODO{State precisely that native DP/beam search includes one same-span
+pumping move, but bounds it by default. Explain that a hand-constructed
+comparison can still outperform the default pumping search, while
+\texttt{exact\_pumping=True} may be impractical even at small useful
+instances. Treat all pumping-enabled results as validated heuristic
+constructions, not global optima. Cite \texttt{docs/Optimality Scope.md}.}
 
 \section{Optimistic versus Heralded Purification}
 \label{sec:disc:optimistic}

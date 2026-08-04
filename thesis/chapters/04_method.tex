@@ -1,4 +1,4 @@
-\chapter{Formal Model and Problem Statement}
+\chapter{Formal Model, Research Problem, and Assumptions}
 \label{chap:model}
 
 \section{Network Configuration}
@@ -32,10 +32,11 @@ states may be purified together only if they share the same $\kappa$.}
 
 \TODO{Define a schedule $\Sigma = (T, \phi)$ as a directed acyclic graph
 whose nodes are typed operations
-(\texttt{Generate}, \texttt{Join}, \texttt{Purify}, \texttt{Herald},
-\texttt{PauliCorrect}, \texttt{Idle}, \texttt{Discard})
-and whose edges encode data dependencies. Explain the semantics of
-each node type.}
+(\texttt{Gen}, \texttt{AbsaBsm}, \texttt{Join}, \texttt{Purify},
+\texttt{Herald}, \texttt{PauliCorrect}, and \texttt{Idle}) and whose
+edges encode data dependencies. Explain the semantics and parameters of
+each node type. There is no \texttt{Discard} node in the implemented
+schedule model.}
 
 \subsection{Canonical Timing Scenarios}
 \label{sec:model:timing}
@@ -47,16 +48,22 @@ show they are special cases of the general DAG evaluator.}
 \section{Objective Functions and Resource Budget}
 \label{sec:model:objectives}
 
-\TODO{Define the resource budget $M_{\max}$ (maximum number of
-half-RGSs consumed per trial). State the two candidate objectives:
+\TODO{Define the implemented resource budget $e_{\max}$ as the maximum
+number of \texttt{GenNode} leaves (half-RGS resources) consumed per trial.
+Distinguish it from $M_{\max}$, the maximum concurrent open branches,
+which is represented in the resource model but is not enforced by the
+search or DAG validator. State the two candidate objectives:
 (1)~fidelity subject to a throughput floor, and
 (2)~throughput subject to a fidelity floor $F \ge 0.9$.}
 
 \section{Optimality Scope and Known Limitations}
 \label{sec:model:scope}
 
-\TODO{State precisely what the DP recursion finds natively
-(per-hop link-level purification with variable copies and circuits,
-stitched by span-partition joins) and the one excluded move
-(purifying two independently produced copies of the same multi-hop span).
-Reference the brute-force families that cover the gap.}
+\TODO{State precisely what the recursion finds natively: per-hop
+link-level purification with variable copies and circuits, arbitrary
+span-partition joins, and one two-copy same-span pumping move. Explain
+that pumping candidates and stored frontiers are capped by default, so
+default DP and beam results are heuristic. \texttt{exact\_pumping=True}
+removes these caps but is only practical for very small instances.
+Reference the merged fixed families and the remaining non-guarantee:
+the search need not find every optimal legal schedule.}

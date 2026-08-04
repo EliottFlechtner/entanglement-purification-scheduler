@@ -12,9 +12,10 @@ Explain validation against the three canonical closed-form benchmarks.}
 \section{Brute-Force Search}
 \label{sec:alg:bruteforce}
 
-\TODO{Define the four fixed families
-(\texttt{raw}, \texttt{end\_heralded}, \texttt{end\_optimistic},
-\texttt{link\_level}, \texttt{flexible\_paper})
+\TODO{Define the three configurable fixed families
+(end-node heralded, end-node optimistic, and uniform link-level
+purification), plus the unconditional \texttt{raw} baseline and, for
+even $N$ within budget, the \texttt{flexible\_paper} baseline.
 and the enumeration strategy. State the exact scope of what brute force
 covers and its computational cost.}
 
@@ -43,9 +44,12 @@ N=10 headline number).}
 \section{Heuristic Beam Search}
 \label{sec:alg:beam}
 
-\TODO{Describe the outer-loop beam search that extends the DP with
-a configurable beam width. Motivate when it is needed (large $N$,
-large budget) and its runtime complexity.}
+\TODO{Describe beam search as the same \texttt{\_SpanPartitionSearch}
+machinery with every retained span frontier capped at a configurable
+\texttt{beam\_width} (25 by default). Explain the split between
+fidelity-preserving and efficiency-oriented slots, motivate its use at
+large $N$ or budget, and state that it is deterministic but has no global
+optimality guarantee.}
 
 \section{Objective Presets}
 \label{sec:alg:cost}
