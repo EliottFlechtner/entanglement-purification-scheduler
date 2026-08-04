@@ -41,8 +41,6 @@ button:focus-visible, [tabindex="0"]:focus-visible { outline: 2px solid var(--or
   flex-direction: column;
   color: #f4f5f1;
   background-color: var(--sidebar);
-  background-image: radial-gradient(rgb(255 255 255 / 5%) 0.7px, transparent 0.7px);
-  background-size: 8px 8px;
   border-right: 1px solid #31413e;
 }
 
@@ -63,15 +61,10 @@ button:focus-visible, [tabindex="0"]:focus-visible { outline: 2px solid var(--or
 .view-button.active { color: white; background: #29403c; border-color: #46615b; }
 .view-button.active > span:first-child { color: #f4ad65; }
 .view-button.active small { color: #9fb7b1; }
-.sidebar-footer { margin-top: auto; padding: 20px; border-top: 1px solid #34433f; }
-.status-line { display: flex; align-items: center; gap: 8px; color: #b7c8c4; font-size: 11px; }
-.status-line span { width: 7px; height: 7px; background: #67c6a4; border-radius: 50%; box-shadow: 0 0 0 4px rgb(103 198 164 / 10%); }
-.sidebar-footer p { margin: 10px 0 0; color: #748a84; font-size: 11px; line-height: 1.5; }
 
 .workspace { min-width: 0; min-height: 100vh; }
 .topbar { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 12px 28px; background: rgb(247 246 241 / 92%); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
-.breadcrumb { display: flex; gap: 9px; color: #78817e; font: 500 11px/1 "IBM Plex Mono", "Courier New", monospace; }
-.breadcrumb b { color: #b1b4af; }
+.breadcrumb { color: #5f6966; font: 600 12px/1 "IBM Plex Mono", "Courier New", monospace; }
 .top-actions, .dialog-actions { display: flex; align-items: center; gap: 8px; }
 .menu-button { display: none; }
 
@@ -88,16 +81,7 @@ button:focus-visible, [tabindex="0"]:focus-visible { outline: 2px solid var(--or
 .kind-badge { display: inline-flex; padding: 5px 8px; color: #8d4a15; background: var(--orange-soft); border: 1px solid #ecc597; border-radius: 3px; font: 700 10px/1 "IBM Plex Mono", "Courier New", monospace; letter-spacing: 0.08em; text-transform: uppercase; }
 h1 { margin: 12px 0 8px; font-family: Charter, Georgia, serif; font-size: clamp(30px, 3vw, 44px); line-height: 1.03; font-weight: 600; letter-spacing: 0; }
 .diagram-heading p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
-.metrics { display: flex; border: 1px solid var(--line); background: var(--white); }
-.metric { min-width: 104px; padding: 12px 14px; border-right: 1px solid var(--line); }
-.metric:last-child { border-right: 0; }
-.metric span { display: block; margin-bottom: 7px; color: #7b8481; font: 600 9px/1 "IBM Plex Mono", "Courier New", monospace; letter-spacing: 0.08em; text-transform: uppercase; }
-.metric strong { font: 650 15px/1 Charter, Georgia, serif; }
-.metric.teal strong { color: var(--teal); }
-.metric.orange strong { color: var(--orange); }
-
-.canvas-frame { position: relative; height: calc(100vh - 220px); min-height: 560px; overflow: hidden; background-color: #fbfbf8; background-image: linear-gradient(#e7e8e2 1px, transparent 1px), linear-gradient(90deg, #e7e8e2 1px, transparent 1px); background-size: 22px 22px; border: 1px solid #cdd1ca; box-shadow: var(--shadow); }
-.canvas-frame:fullscreen { height: 100vh; background-color: #fbfbf8; }
+.canvas-frame { position: relative; height: calc(100vh - 220px); min-height: 560px; overflow: hidden; background: #fbfbf8; border: 1px solid #cdd1ca; box-shadow: var(--shadow); }
 .diagram-stage { width: 100%; height: calc(100% - 42px); padding: 42px 40px 28px; overflow: hidden; }
 .diagram-stage svg { max-width: none !important; cursor: grab; }
 .diagram-stage svg:active { cursor: grabbing; }
@@ -155,8 +139,6 @@ h1 { margin: 12px 0 8px; font-family: Charter, Georgia, serif; font-size: clamp(
   .topbar { padding: 10px 14px; }
   .breadcrumb { display: none; }
   .content { padding: 22px 14px 18px; }
-  .metrics { width: 100%; overflow-x: auto; }
-  .metric { min-width: 33.333%; }
   h1 { font-size: 31px; }
   .canvas-frame { height: calc(100vh - 310px); min-height: 470px; }
   .diagram-stage { padding: 50px 18px 52px; }
