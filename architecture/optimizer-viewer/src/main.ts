@@ -1,6 +1,6 @@
 import './style.css'
 
-import {Braces, Check, Clipboard, createIcons, Download, Focus, GitBranch, Info, Maximize2, Menu, Minus, Plus, RotateCcw, X,} from 'lucide'
+import {createIcons, Download, Focus, GitBranch, Info, Menu, Minus, Plus, X,} from 'lucide'
 import mermaid from 'mermaid'
 import svgPanZoom, {type SvgPanZoomInstance} from 'svg-pan-zoom'
 
@@ -43,7 +43,7 @@ const app = document
       <div class="brand">
         <div class="brand-mark"><i data-lucide="git-branch"></i></div>
         <div>
-          <span class="eyebrow">Architecture atlas</span>
+          <span class="eyebrow">Architecture</span>
           <strong>EPS optimizer</strong>
         </div>
         <button class="icon-button sidebar-close" id="sidebar-close" aria-label="Close navigation" title="Close navigation">
@@ -52,7 +52,7 @@ const app = document
       </div>
 
       <nav class="view-nav" aria-label="Architecture views">
-        <p class="nav-label">Diagram set</p>
+        <p class="nav-label">Views</p>
         ${
     diagrams
         .map(
@@ -67,10 +67,6 @@ const app = document
         .join('')}
       </nav>
 
-      <div class="sidebar-footer">
-        <div class="status-line"><span></span> Synced to Python implementation</div>
-        <p>Source-defined diagrams. No generated bitmap assets.</p>
-      </div>
     </aside>
 
     <main class="workspace">
@@ -78,9 +74,8 @@ const app = document
         <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation" title="Open navigation">
           <i data-lucide="menu"></i>
         </button>
-        <div class="breadcrumb"><span>entanglement-purification-scheduler</span><b>/</b><span>optimizer</span></div>
+        <div class="breadcrumb">Optimizer architecture</div>
         <div class="top-actions">
-          <button class="command-button" id="source-button" aria-label="View diagram source" title="View diagram source"><i data-lucide="braces"></i><span>Source</span></button>
           <button class="command-button primary" id="export-button" aria-label="Export diagram as SVG" title="Export diagram as SVG"><i data-lucide="download"></i><span>Export SVG</span></button>
         </div>
       </header>
@@ -92,7 +87,6 @@ const app = document
             <h1 id="diagram-title"></h1>
             <p id="diagram-description"></p>
           </div>
-          <div class="metrics" id="metrics"></div>
         </div>
 
         <div class="canvas-frame">
@@ -101,15 +95,12 @@ const app = document
             <button class="icon-button" id="zoom-out" aria-label="Zoom out" title="Zoom out"><i data-lucide="minus"></i></button>
             <span></span>
             <button class="icon-button" id="fit-view" aria-label="Fit diagram" title="Fit diagram"><i data-lucide="focus"></i></button>
-            <button class="icon-button" id="reset-view" aria-label="Reset view" title="Reset view"><i data-lucide="rotate-ccw"></i></button>
-            <button class="icon-button" id="fullscreen" aria-label="Toggle fullscreen" title="Toggle fullscreen"><i data-lucide="maximize-2"></i></button>
           </div>
           <div class="diagram-stage" id="diagram-stage">
             <div class="loading-state"><span></span><p>Compiling diagram source</p></div>
           </div>
           <div class="canvas-caption">
-            <span><i data-lucide="info"></i> Select a diagram element to inspect its role.</span>
-            <span id="view-counter">View 1 of ${diagrams.length}</span>
+            <span><i data-lucide="info"></i> Select an element for implementation details.</span>
           </div>
         </div>
       </section>
@@ -130,60 +121,30 @@ const app = document
     </aside>
   </div>
 
-  <dialog class="source-dialog" id="source-dialog">
-    <div class="dialog-head">
-      <div><span class="eyebrow">Mermaid definition</span><h2 id="source-title"></h2></div>
-      <div class="dialog-actions">
-        <button class="command-button" id="copy-source"><i data-lucide="clipboard"></i><span>Copy</span></button>
-        <button class="icon-button" id="source-close" aria-label="Close source" title="Close source"><i data-lucide="x"></i></button>
-      </div>
-    </div>
-    <pre><code id="source-code"></code></pre>
-  </dialog>
 `
 
 createIcons({
   icons: {
-    Braces,
-    Check,
-    Clipboard,
     Download,
     Focus,
     GitBranch,
     Info,
-    Maximize2,
     Menu,
     Minus,
     Plus,
-    RotateCcw,
     X,
   },
 })
 
 const stage = document.querySelector<HTMLDivElement>('#diagram-stage')!;
-const frame = document.querySelector<HTMLDivElement>('.canvas-frame')!;
 const inspector = document.querySelector<HTMLElement>('#inspector')!;
 const inspectorBody =
     document.querySelector<HTMLDivElement>('#inspector-body')!;
-const sourceDialog =
-    document.querySelector<HTMLDialogElement>('#source-dialog')!;
 let activeDiagram = diagrams[0];
 let panZoom: SvgPanZoomInstance|null = null;
 let renderSequence = 0;
 
-function metricMarkup(diagram: DiagramSpec): string{return diagram.notes
-                                                        .map(
-                                                            (note) => `
-      <div class="metric ${note.tone ?? 'ink'}">
-        <span>${note.label}</span>
-        <strong>${note.value}</strong>
-      </div>`,
-                                                            )
-                                                        .join('')}
-
-function showInspector(detail: NodeDetail):
-    void {
-      inspector.classList.add('open')
+function showInspector(detail: NodeDetail): void{inspector.classList.add('open')
       inspectorBody.innerHTML = `
     <div class="detail-type">${detail.type}</div>
     <h2>${detail.title}</h2>
@@ -197,128 +158,115 @@ function showInspector(detail: NodeDetail):
 
 function attachInspection(diagram: DiagramSpec):
     void {
-      const candidates =
-          stage.querySelectorAll<SVGGElement>('g.node, g.classGroup, g.actor')
-      candidates.forEach((element) => {
-        const text = element.textContent?.replace(/\s+/g, ' ').trim() ?? ''
-        const detail = diagram.details.find((item) => text.includes(item.match))
-        if (!detail) {
-          return;
-        }
-        element.classList.add('inspectable')
-        element.setAttribute('tabindex', '0')
-        element.setAttribute('role', 'button')
-        element.setAttribute('aria-label', `Inspect ${detail.title}`)
-        element.addEventListener('click', () => showInspector(detail))
-        element.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            showInspector(detail)
-          }
-        })
-      })
+  const candidates =
+      stage.querySelectorAll<SVGGElement>('g.node, g.classGroup, g.actor')
+  candidates.forEach((element) => {
+    const text = element.textContent?.replace(/\s+/g, ' ').trim() ?? ''
+    const detail = diagram.details.find((item) => text.includes(item.match))
+    if (!detail) {
+      return;
+    }
+    element.classList.add('inspectable')
+    element.setAttribute('tabindex', '0')
+    element.setAttribute('role', 'button')
+    element.setAttribute('aria-label', `Inspect ${detail.title}`)
+    element.addEventListener('click', () => showInspector(detail))
+    element.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        showInspector(detail)
+      }
+    })
+  })
     }
 
 async function renderDiagram(diagram: DiagramSpec):
     Promise<void> {
-      const sequence = ++renderSequence
-      activeDiagram = diagram
-      document.querySelector('#diagram-kind')!.textContent = diagram.kind
-      document.querySelector('#diagram-title')!.textContent = diagram.title
-      document.querySelector('#diagram-description')!.textContent =
-          diagram.description
-      document.querySelector('#metrics')!.innerHTML = metricMarkup(diagram)
-      document.querySelector('#view-counter')!.textContent =
-          `View ${diagrams.indexOf(diagram) + 1} of ${diagrams.length}`
-      document.querySelectorAll<HTMLButtonElement>('.view-button')
-          .forEach(
-              (button) => {button.classList.toggle(
-                  'active', button.dataset.diagram === diagram.id)})
+  const sequence = ++renderSequence
+  activeDiagram = diagram
+  document.querySelector('#diagram-kind')!.textContent = diagram.kind
+  document.querySelector('#diagram-title')!.textContent = diagram.title
+  document.querySelector('#diagram-description')!.textContent =
+      diagram.description
+  document.querySelectorAll<HTMLButtonElement>('.view-button')
+      .forEach(
+          (button) => {button.classList.toggle(
+              'active', button.dataset.diagram === diagram.id)})
 
-      panZoom?.destroy()
-      panZoom = null
-      stage.innerHTML =
-          '<div class="loading-state"><span></span><p>Compiling diagram source</p></div>'
+  panZoom?.destroy()
+  panZoom = null
+  stage.innerHTML =
+      '<div class="loading-state"><span></span><p>Compiling diagram source</p></div>'
 
-      try {
-        const {svg} = await mermaid.render(
-            `optimizer-${diagram.id}-${sequence}`, diagram.source)
-        if (sequence !== renderSequence) {
-          return;
-        }
-        stage.innerHTML = svg;
-        const svgElement = stage.querySelector<SVGSVGElement>('svg')!
-                           svgElement.removeAttribute('height')
-        svgElement.removeAttribute('width')
-        svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
-        svgElement.style.width = '100%'
-        svgElement.style.height = '100%'
-        attachInspection(diagram)
-        panZoom = svgPanZoom(svgElement, {
-          controlIconsEnabled: false,
-          fit: true,
-          center: true,
-          minZoom: 0.25,
-          maxZoom: 8,
-          zoomScaleSensitivity: 0.24,
-          dblClickZoomEnabled: true,
-        })
+  try {
+    const {svg} = await mermaid.render(
+        `optimizer-${diagram.id}-${sequence}`, diagram.source)
+    if (sequence !== renderSequence) {
+      return;
+    }
+    stage.innerHTML = svg;
+    const svgElement = stage.querySelector<SVGSVGElement>('svg')!
+                       svgElement.removeAttribute('height')
+    svgElement.removeAttribute('width')
+    svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+    svgElement.style.width = '100%'
+    svgElement.style.height = '100%'
+    attachInspection(diagram)
+    panZoom = svgPanZoom(svgElement, {
+      controlIconsEnabled: false,
+      fit: true,
+      center: true,
+      minZoom: 0.25,
+      maxZoom: 8,
+      zoomScaleSensitivity: 0.24,
+      dblClickZoomEnabled: true,
+    })
     requestAnimationFrame(() => {
       panZoom?.resize()
     panZoom?.fit()
       panZoom?.center()
     })
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        stage.innerHTML =
-            `<div class="error-state"><strong>Diagram could not be compiled</strong><p>${
-                message}</p></div>`
-      }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    stage.innerHTML =
+        `<div class="error-state"><strong>Diagram could not be compiled</strong><p>${
+            message}</p></div>`
+  }
     }
 
 function exportSvg():
     void {
-      const svg = stage.querySelector<SVGSVGElement>('svg')
-      if (!svg) {
-        return;
-      }
-      const clone = svg.cloneNode(true) as SVGSVGElement;
-      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-      const blob =
-          new Blob([clone.outerHTML], {type: 'image/svg+xml;charset=utf-8'})
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = `optimizer-${activeDiagram.id}.svg`
-      link.click()
-      URL.revokeObjectURL(link.href)
+  const svg = stage.querySelector<SVGSVGElement>('svg')
+  if (!svg) {
+    return;
+  }
+  const clone = svg.cloneNode(true) as SVGSVGElement;
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  const blob =
+      new Blob([clone.outerHTML], {type: 'image/svg+xml;charset=utf-8'})
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `optimizer-${activeDiagram.id}.svg`
+  link.click()
+  URL.revokeObjectURL(link.href)
     }
 
 document.querySelectorAll<HTMLButtonElement>('.view-button')
     .forEach(
         (button) => {button.addEventListener('click', () => {
-          const next =
-              diagrams.find((diagram) => diagram.id === button.dataset.diagram)
-          if (next) void renderDiagram(next)
-          document.querySelector('#sidebar')?.classList.remove('mobile-open')
+  const next = diagrams.find((diagram) => diagram.id === button.dataset.diagram)
+  if (next) void renderDiagram(next)
+  document.querySelector('#sidebar')?.classList.remove('mobile-open')
         })})
 
-document.querySelector('#zoom-in')
-    ?.addEventListener('click', () => panZoom?.zoomIn())
-document.querySelector('#zoom-out')
-    ?.addEventListener('click', () => panZoom?.zoomOut())
+      document.querySelector('#zoom-in')
+          ?.addEventListener('click', () => panZoom?.zoomIn())
+      document.querySelector('#zoom-out')
+          ?.addEventListener('click', () => panZoom?.zoomOut())
 document.querySelector('#fit-view')?.addEventListener('click', () => {
   panZoom?.fit()
   panZoom?.center()
 })
-document.querySelector('#reset-view')?.addEventListener('click', () => {
-  panZoom?.resetZoom()
-  panZoom?.center()
-})
-  document.querySelector('#fullscreen')?.addEventListener('click', () => {
-    if (document.fullscreenElement)
-      void document.exitFullscreen()
-      else void frame.requestFullscreen()
-  })
   document.querySelector('#export-button')?.addEventListener('click', exportSvg)
   document.querySelector('#inspector-close')
       ?.addEventListener('click', () => inspector.classList.remove('open'))
@@ -333,27 +281,4 @@ document.querySelector('#reset-view')?.addEventListener('click', () => {
           () => document.querySelector('#sidebar')
                     ?.classList.remove('mobile-open'))
 
-document.querySelector('#source-button')?.addEventListener('click', () => {
-  document.querySelector('#source-title')!.textContent = activeDiagram.title
-document.querySelector('#source-code')!.textContent = activeDiagram.source
-  sourceDialog.showModal()
-})
-  document.querySelector('#source-close')
-      ?.addEventListener('click', () => sourceDialog.close())
-document.querySelector('#copy-source')?.addEventListener('click', async (event) => {
-  await navigator.clipboard.writeText(activeDiagram.source)
-const button = event.currentTarget as HTMLButtonElement
-button.innerHTML = '<i data-lucide="check"></i><span>Copied</span>'
-createIcons({icons: {Check}})
-  window.setTimeout(() => {
-    button.innerHTML = '<i data-lucide="clipboard"></i><span>Copy</span>'
-    createIcons({ icons: { Clipboard } })
-  }, 1400)
-})
-    sourceDialog.addEventListener(
-        'click',
-        (event) => {
-          if (event.target === sourceDialog) sourceDialog.close()
-        })
-
-        void renderDiagram(activeDiagram)
+          void renderDiagram(activeDiagram)
