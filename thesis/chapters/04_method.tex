@@ -1,69 +1,246 @@
-\chapter{Formal Model, Research Problem, and Assumptions}
+\chapter{The Formal Model}
 \label{chap:model}
+
+% Sources: docs/instructions/Validated Formal Model Def.md,
+%          src/hrgs_scheduler/models/network_config.py,
+%          src/hrgs_scheduler/schedule/node.py,
+%          Benchasattabuse et al. 2025 (Integrating), Benchasattabuse et al.
+%          2026 (Bridging)
+
+Chapter~\ref{chap:related} showed that the source paper
+\cite{Benchasattabuse2025Integrating} demonstrates purification schedules that
+mix generation, link-level, and end-node purification, but only through one
+hand-picked example, and leaves the search for a better schedule as an open
+problem. Turning this into a problem that can actually be searched requires a
+precise object to search over. This chapter builds that object step by step:
+the physical network (Section~\ref{sec:model:network}), the state carried by
+each partially-built Bell pair (Section~\ref{sec:model:state}), the schedule
+itself as a graph of operations (Section~\ref{sec:model:dag}), the resources it
+is allowed to consume (Section~\ref{sec:model:budget}), and finally the
+optimization problem this thesis solves (Section~\ref{sec:model:objectives}).
+Section~\ref{sec:model:scope} closes the chapter by stating precisely which
+schedules are excluded from this model and why.
+
+The building blocks reused from Chapter~\ref{chap:background}, namely the
+error vector $\mathbf{e}$, the three purification circuits, and the
+decoherence law, are not redefined here. This chapter is only concerned with
+how those pieces are assembled into a schedule and how schedules are compared.
 
 \section{Network Configuration}
 \label{sec:model:network}
 
-\TODO{Define the physical parameters: number of hops $N$, per-photon
-loss and gate error rates, memory coherence time, and the half-RGS
-branching factor. Explain which parameters are fixed in this work and
-which are swept in experiments.}
+% Source: NetworkConfig / HopConfig classes, Integrating §V-A,
+%          Bridging §III, §VI-A
 
-\section{State Space}
+A network configuration fixes everything about the physical link that a
+schedule cannot change. Following the notation of the source papers, it is the
+tuple
+\[
+    \mathcal{N} = \bigl(N,\ \{\ell_i\},\ \{\vec{b}^{(i)}\},\ \{k_i\},\
+    \{(p_{\mathrm{in},i}^{X}, p_{\mathrm{in},i}^{Z})\},\ \{\eta_i\},\
+    e_d,\ \gamma,\ c\bigr),
+\]
+where $N$ is the number of hops between the two end stations, $\ell_i$ is the
+length of hop $i$, $\vec{b}^{(i)}$ is the tree-code branching vector used to
+build that hop's half-RGS, $k_i$ is the number of redundant BSM arms at hop
+$i$, $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$ are the inner-qubit
+measurement error rates, $\eta_i$ is the photon survival probability,
+$e_d$ is the outer-photon depolarizing rate, $\gamma$ is the memory dephasing
+rate, and $c$ is the speed of light in the fiber.
+A useful fact carried over from the source papers is that Bell-state
+measurement success is capped at 50\% per arm regardless of $\eta_i$ or $e_d$,
+which is exactly why the arm count $k_i$ exists as a redundancy knob.
+
+Every experiment in this thesis starts from one configuration, the source
+paper's own setup: $N=10$, $\ell_i = 2$\,km, $k_i=18$, branching $(16,14,1)$,
+$e_d = 0.01$, $\gamma = 0$. This is what
+\texttt{NetworkConfig.integrating\_paper\_config()} returns in the codebase.
+Individual chapters in Chapter~\ref{chap:results} vary one or two of these
+fields at a time (inner-qubit error, arm count, $\gamma$) while holding the
+rest fixed, and this is stated again at the start of each experiment.
+
+\TODO{Add a table listing every field of $\mathcal{N}$, its nominal value, and
+which sweep (if any) varies it, with a pointer to the relevant section of
+Chapter~\ref{chap:results}.}
+
+\section{Representing a Partial Bell Pair}
 \label{sec:model:state}
 
-Each edge is represented by a state object
+% Source: Validated Formal Model Def.md §3.1, schedule/state.py
+
+At any point during its construction, a partially-built Bell pair is
+represented by a state
 \[
-    S = \bigl(\mathbf{e},\; s,\; t,\; t_{\mathrm{gen}},\; \kappa,\; r,\; h\bigr),
+    S = \bigl(\mathbf{e},\; s,\; t,\; t_{\mathrm{gen}},\; \kappa,\; r,\; h\bigr).
 \]
-where $\mathbf{e}$ is the error vector, $s$ the accumulated Z side-effect
-parity, $t$ and $t_{\mathrm{gen}}$ the current and generation times,
-$\kappa \in \{\mathrm{RGSS}\} \cup \{\mathrm{Span}(a,b)\}$ the span,
-$r$ the number of purification rounds applied, and $h \in
-\{\mathrm{pending}, \mathrm{resolved}\}$ the heralding status.
-\TODO{Motivate each field and state the \emph{legality constraint}: two
-states may be purified together only if they share the same $\kappa$.}
+The vector $\mathbf{e}$ is the error vector introduced in
+Section~\ref{sec:bg:errorvec}, and $s$ is the Z side-effect parity from
+Section~\ref{sec:bg:sideffects}. The remaining four fields are new to the
+scheduling layer:
+\begin{itemize}
+    \item $t$ and $t_{\mathrm{gen}}$ are the current simulated time and the
+          time this particular resource was generated. Their difference is the
+          idle time used by the decoherence law of
+          Section~\ref{sec:bg:decoherence}.
+    \item $\kappa$ is the \emph{span} of the resource: either \texttt{RGSS} for
+          a resource that has not yet crossed a hop, or $\mathrm{Span}(a,b)$
+          for an edge that already connects station $a$ to station $b$.
+    \item $r$ counts how many purification rounds have already been applied to
+          this branch.
+    \item $h \in \{\mathit{pending}, \mathit{resolved}\}$ records whether the
+          classical heralding signal for this resource has been received yet.
+\end{itemize}
+The field that matters most for what a schedule is allowed to do is $\kappa$:
+two states can only be combined by a purification circuit if they carry the
+\emph{same} $\kappa$. Two branches with different histories, one purified
+twice and the other purified once for instance, can still be combined as long
+as both currently sit at the same span. This single rule is what lets the
+model express schedules that mix purification strategies across different
+parts of the chain, which is exactly the kind of schedule the source paper's
+Fig.\,4 example uses.
 
-\section{Schedule as a Formal Object}
-\label{sec:model:schedule}
-
-\subsection{DAG Representation}
+\section{Schedules as Directed Acyclic Graphs}
 \label{sec:model:dag}
 
-\TODO{Define a schedule $\Sigma = (T, \phi)$ as a directed acyclic graph
-whose nodes are typed operations
-(\texttt{Gen}, \texttt{AbsaBsm}, \texttt{Join}, \texttt{Purify},
-\texttt{Herald}, \texttt{PauliCorrect}, and \texttt{Idle}) and whose
-edges encode data dependencies. Explain the semantics and parameters of
-each node type. There is no \texttt{Discard} node in the implemented
-schedule model.}
+% Source: Validated Formal Model Def.md §4, schedule/node.py,
+%          Justification of Implementation.md §5.1
 
-\subsection{Canonical Timing Scenarios}
-\label{sec:model:timing}
+A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted,
+directed, acyclic graph and $\phi$ maps every node of $T$ to the span $\kappa$
+of the state it produces. The leaves of $T$ are always \texttt{Gen} nodes
+(half-RGS generation) and the root is always a \texttt{PauliCorrect} node at
+$\kappa = \mathrm{Span}(0,N)$, the finished end-to-end pair.
+Between leaves and root, five more node types appear:
+\texttt{AbsaBsm} (the photonic Bell-state measurement that turns two
+same-hop half-RGSs into a single-hop edge),
+\texttt{Join} (entanglement swapping, stitching two adjacent spans into a
+wider one),
+\texttt{Purify} (a two-to-one YY, ZX, or XZ circuit, Section~\ref{sec:bg:circuits}),
+\texttt{Herald} (resolving the classical heralding signal for a branch), and
+\texttt{Idle} (an explicit wait, used only where the schedule's timing
+requires one).
 
-\TODO{Reproduce the three closed-form generation- and memory-time
-expressions from the Integrating paper (raw, baseline, optimistic) and
-show they are special cases of the general DAG evaluator.}
+A graph $T$ is a \emph{legal} schedule only if four conditions hold:
+\texttt{Gen} nodes may only appear at $\kappa = \mathtt{RGSS}$;
+a \texttt{Purify} node's two children must share the same $\kappa$;
+a \texttt{Join} node's two children must be adjacent spans, i.e.\ $(a,b)$ and
+$(b,d)$, and it then produces $(a,d)$;
+and the root must sit at $\kappa=\mathrm{Span}(0,N)$.
+These four rules, together with the span-sharing constraint from
+Section~\ref{sec:model:state}, are the complete legality specification: any
+graph satisfying them is a schedule the physical hardware described in
+Section~\ref{sec:model:network} could actually run.
 
-\section{Objective Functions and Resource Budget}
+This representation was checked against the source paper's own Fig.\,4
+schedule, which builds one Bell pair from purified individual links, a second
+from two purified 5-hop segments, and a third with no purification at all,
+then combines all three with a final purification round at the end nodes. This
+is a mixed-granularity, mixed-history schedule, and it is exactly the class of
+graph this model can express: allowing $\kappa$ to be an arbitrary span, and
+requiring \texttt{Purify} to check only $\kappa$ and not provenance, is what
+makes that combination legal.
+\TODO{Insert the worked $N=2$ DAG figure from
+\texttt{docs/instructions/Validated Formal Model Def.md} §9 (also used in
+Appendix~\ref{app:dags}) as a running example.}
+
+Section~\ref{sec:exp:validation} confirms this representation is not just
+descriptive: evaluating the three canonical schedule shapes (raw, end-node
+heralded, end-node optimistic) through the same bottom-up pass used everywhere
+else in this thesis reproduces the source paper's own closed-form fidelity
+numbers to four significant figures.
+
+\section{Resource Budget}
+\label{sec:model:budget}
+
+% Source: Validated Formal Model Def.md §5, ResourceBudget class
+
+A schedule is only meaningful together with a budget
+\[
+    B = (n_{\mathrm{pur}},\ e_{\max},\ M_{\max}),
+\]
+where $n_{\mathrm{pur}}$ is the number of extra half-RGS copies generated per
+purification round, $e_{\max}$ is the maximum number of \texttt{Gen} leaves
+$T$ is allowed to contain, and $M_{\max}$ is the maximum number of branches
+that may be under construction at the same time.
+A schedule $\Sigma$ is \emph{feasible} with respect to $B$ if it uses at most
+$e_{\max}$ \texttt{Gen} leaves and never holds more than $M_{\max}$ branches
+open at once. The resource cost $C(\Sigma)$ used throughout
+Chapter~\ref{chap:results} is simply the number of \texttt{Gen} leaves in $T$,
+so feasibility with respect to $e_{\max}$ is the same as $C(\Sigma) \le
+e_{\max}$.
+
+The source paper's own budget convention is $e_{\max} = 10N$: five half-RGS
+copies per side, on both sides, for every hop. This convention is used as the
+reference budget throughout the experiments, and Section~\ref{sec:exp:budget}
+asks directly whether it remains large enough as $N$ grows.
+$M_{\max}$ is part of the formal budget but, as stated in
+Section~\ref{sec:model:scope}, it is not currently enforced by the search or
+by the DAG validator; every reported result should be read with this in mind.
+
+\section{Objective Functions and the Optimization Problem}
 \label{sec:model:objectives}
 
-\TODO{Define the implemented resource budget $e_{\max}$ as the maximum
-number of \texttt{GenNode} leaves (half-RGS resources) consumed per trial.
-Distinguish it from $M_{\max}$, the maximum concurrent open branches,
-which is represented in the resource model but is not enforced by the
-search or DAG validator. State the two candidate objectives:
-(1)~fidelity subject to a throughput floor, and
-(2)~throughput subject to a fidelity floor $F \ge 0.9$.}
+% Source: cost_functions.py, Validated Formal Model Def.md §6,
+%         Optimizer Status.md §Shared Optimization Contract
 
-\section{Optimality Scope and Known Limitations}
+Four quantities can be read off the finished schedule DAG by a single
+bottom-up pass: fidelity $F(\Sigma)$, the $w$ component of the error vector at
+the root; rate $R(\Sigma) = P_{\mathrm{success}} / T_{\mathrm{gen}}$, combining
+the schedule's overall success probability with its expected generation time
+under a renewal argument (full restart on failure); resource cost $C(\Sigma)$,
+defined in Section~\ref{sec:model:budget}; and latency $L(\Sigma)$, the
+makespan of $T$.
+
+The optimization problem this thesis addresses is then
+\[
+    \Sigma^{*}(\mathcal{N}, B) = \argmax_{\substack{\Sigma \text{ legal w.r.t. } \mathcal{N} \\ \Sigma \text{ feasible w.r.t. } B}}
+    R(\Sigma;\mathcal{N}) \quad \text{s.t.} \quad F(\Sigma;\mathcal{N}) \ge F_{\min}.
+\]
+In words: among every legal, feasible schedule, find the one with the highest
+rate that still clears a minimum fidelity requirement. This is the objective
+used in every headline result in Chapter~\ref{chap:results} unless stated
+otherwise, with $F_{\min}=0.9$ matching the source paper's own quality bar.
+
+The same four cost functions support other research questions by swapping
+which one is maximized and which are constrained: maximizing $F$ subject to a
+rate floor asks for the best achievable quality at a given throughput;
+minimizing $C$ subject to floors on $F$ and $R$ asks for the cheapest hardware
+that still works. Both are implemented as alternative
+\texttt{ObjectiveConfig} presets, and Section~\ref{sec:exp:objectives} shows
+that switching between all three presets requires no change at all to the
+search algorithms of Chapter~\ref{chap:algorithms}, only to which quantity is
+scored and which are checked for feasibility.
+
+\section{Scope and Assumptions}
 \label{sec:model:scope}
 
-\TODO{State precisely what the recursion finds natively: per-hop
-link-level purification with variable copies and circuits, arbitrary
-span-partition joins, and one two-copy same-span pumping move. Explain
-that pumping candidates and stored frontiers are capped by default, so
-default DP and beam results are heuristic. \texttt{exact\_pumping=True}
-removes these caps but is only practical for very small instances.
-Reference the merged fixed families and the remaining non-guarantee:
-the search need not find every optimal legal schedule.}
+% Source: Optimizer Status.md §Known Limits
+
+Three modelling choices bound what this thesis can claim, and it is worth
+being explicit about them before presenting any algorithm or result.
+
+First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before
+execution starts and cannot branch on an intermediate measurement outcome.
+A fully adaptive scheme, where the choice of the next purification round
+depends on the fidelity estimate so far, would need a different formulation,
+most naturally a Markov decision process. \TOCITE{standard reference for
+MDP / sequential decision-making formulation, e.g. Puterman or Sutton and
+Barto, not yet in references.bib}. This is left to future work
+(Section~\ref{sec:conc:future}).
+
+Second, $M_{\max}$ is part of the budget $B$ but is not enforced anywhere in
+the current implementation, neither during search nor during DAG validation.
+Every reported resource cost $C(\Sigma)$ is therefore a lower bound on the
+number of physical qubit slots a real device would need to run that schedule,
+since it does not account for how many branches must be held in memory at
+once.
+
+Third, the error model throughout this thesis is the Pauli channel, the same
+assumption made by the source paper. \TOCITE{general reference on Pauli
+channels / stabilizer error models, e.g. Nielsen and Chuang, not yet in
+references.bib}. Comparisons between schedules are made under this one noise
+model, so a ranking that holds here is not automatically guaranteed to
+transfer to a device dominated by a different error channel, for example pure
+photon loss without any depolarizing component. This point is returned to in
+Section~\ref{sec:disc:limitations}.
+
