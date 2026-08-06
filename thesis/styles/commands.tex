@@ -6,7 +6,7 @@
 % Orange marker for places that need a fix or clarification, but are not
 % necessarily wrong. For example, a section that is not yet fully written or
 % a figure that is not yet finalized.
-\newcommand{\TOFIX}[1]{\textcolor{orange}{TOFIX: #1}}
+\newcommand{\TOFIX}[2]{\textcolor{orange}{[#1: #2]}}
 
 % Dark blue marker for places that need a citation to external work
 % (not yet in references.bib, or not yet decided which source to use).
@@ -17,3 +17,7 @@
 \DeclareMathOperator{\Span}{Span}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
+
+%% ==============================
+% Acronyms (definitions live in sections/acronyms.tex)
+\makeglossaries
