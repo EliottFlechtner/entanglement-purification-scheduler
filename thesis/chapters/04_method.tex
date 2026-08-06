@@ -4,27 +4,28 @@
 % Sources: docs/instructions/Validated Formal Model Def.md,
 %          src/hrgs_scheduler/models/network_config.py,
 %          src/hrgs_scheduler/schedule/node.py,
-%          Benchasattabuse et al. 2025 (Integrating), Benchasattabuse et al.
-%          2026 (Bridging)
+%          Benchasattabuse2025Integrating,
+%          Benchasattabuse2026Bridging
 
 Chapter~\ref{chap:related} showed that the source paper
 \cite{Benchasattabuse2025Integrating} demonstrates purification schedules that
 mix generation, link-level, and end-node purification, but only through one
-hand-picked example, and leaves the search for a better schedule as an open
+hand-picked example and leaves the search for a better schedule as an open
 problem. Turning this into a problem that can actually be searched requires a
 precise object to search over. This chapter builds that object step by step:
-the physical network (Section~\ref{sec:model:network}), the state carried by
+the given physical network configuration (Section~\ref{sec:model:network}), the state carried by
 each partially-built Bell pair (Section~\ref{sec:model:state}), the schedule
 itself as a graph of operations (Section~\ref{sec:model:dag}), the resources it
 is allowed to consume (Section~\ref{sec:model:budget}), and finally the
-optimization problem this thesis solves (Section~\ref{sec:model:objectives}).
+optimization problem this thesis \TOFIX{decide}{aims to solve/solves} (Section~\ref{sec:model:objectives}).
 Section~\ref{sec:model:scope} closes the chapter by stating precisely which
 schedules are excluded from this model and why.
 
-The building blocks reused from Chapter~\ref{chap:background}, namely the
+The building blocks introduced in Chapter~\ref{chap:background}, namely the
 error vector $\mathbf{e}$, the three purification circuits, and the
-decoherence law, are not redefined here. This chapter is only concerned with
-how those pieces are assembled into a schedule and how schedules are compared.
+decoherence law, are not redefined here but reused in what follows. This chapter
+is only concerned with how those pieces are assembled into a schedule and
+how schedules are compared.
 
 \section{Network Configuration}
 \label{sec:model:network}
@@ -33,35 +34,50 @@ how those pieces are assembled into a schedule and how schedules are compared.
 %          Bridging §III, §VI-A
 
 A network configuration fixes everything about the physical link that a
-schedule cannot change. Following the notation of the source papers, it is the
-tuple
+schedule cannot change. Stations are numbered $0,1,\dots,N$ along the chain,
+so a hop is the link between two consecutive stations $i-1$ and $i$: an
+$N$-hop chain has $N$ hops but $N+1$ stations. With $i=1,\dots,N$ indexing the hops, the
+configuration is the tuple
 \[
-    \mathcal{N} = \bigl(N,\ \{\ell_i\},\ \{\vec{b}^{(i)}\},\ \{k_i\},\
-    \{(p_{\mathrm{in},i}^{X}, p_{\mathrm{in},i}^{Z})\},\ \{\eta_i\},\
-    e_d,\ \gamma,\ c\bigr),
+    \mathcal{N} = \Bigl(N,\ \{\ell_i\},\ \{\vec{b}^{(i)}\},\
+    \{k_i\},\ \bigl\{(p_{\mathrm{in},i}^{X}, p_{\mathrm{in},i}^{Z})\bigr\},\
+    \{\eta_i\},\ e_d,\ \gamma,\ c\Bigr),
 \]
-where $N$ is the number of hops between the two end stations, $\ell_i$ is the
-length of hop $i$, $\vec{b}^{(i)}$ is the tree-code branching vector used to
-build that hop's half-RGS, $k_i$ is the number of redundant BSM arms at hop
-$i$, $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$ are the inner-qubit
-measurement error rates, $\eta_i$ is the photon survival probability,
-$e_d$ is the outer-photon depolarizing rate, $\gamma$ is the memory dephasing
-rate, and $c$ is the speed of light in the fiber.
-A useful fact carried over from the source papers is that Bell-state
-measurement success is capped at 50\% per arm regardless of $\eta_i$ or $e_d$,
-which is exactly why the arm count $k_i$ exists as a redundancy knob.
+where, for each hop $i$: $\ell_i$ is its length, $\vec{b}^{(i)}$ is the
+tree-code branching vector used to build its half-RGS, $k_i$ is its number of
+redundant \gls{bsm} arms, $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$
+are its inner-qubit measurement error rates, and $\eta_i$ is its photon
+survival probability. The remaining three parameters are shared across the
+whole chain rather than defined per hop: $e_d$ is the outer-photon
+depolarizing rate, $\gamma$ is the memory dephasing rate, and $c$ is the
+speed of light in the fiber.
+Per-arm \gls{bsm} success is capped at 50\%, independent of $\eta_i$ or
+$e_d$\TOCITE{recheck integrating para + find where that comes from}; this
+cap is exactly why each hop is built from $k_i$ redundant arms rather than a
+single attempt.
 
-Every experiment in this thesis starts from one configuration, the source
-paper's own setup: $N=10$, $\ell_i = 2$\,km, $k_i=18$, branching $(16,14,1)$,
-$e_d = 0.01$, $\gamma = 0$. This is what
-\texttt{NetworkConfig.integrating\_paper\_config()} returns in the codebase.
-Individual chapters in Chapter~\ref{chap:results} vary one or two of these
-fields at a time (inner-qubit error, arm count, $\gamma$) while holding the
-rest fixed, and this is stated again at the start of each experiment.
+\TOFIX{rewrite after chap 6}{Every experiment in this thesis starts from the same configuration, the one
+used throughout the source paper. Writing it as $\mathcal{N}_{\mathrm{src}}$,
+it is $\mathcal{N}$ with every hop identical:
+\[
+    N = 10,\quad \ell_i = 2\text{ km},\quad \vec{b}^{(i)} = (16,14,1),\quad
+    k_i = 18\ \ \forall i,\qquad e_d = 0.01,\quad \gamma = 0.
+\]
+$\mathcal{N}_{\mathrm{src}}$ is the starting point for every experiment in
+Chapter~\ref{chap:results}; each section there then varies one or two of its
+fields (most often $e_d$, $k_i$, or $\gamma$) while holding the rest fixed at
+these values, and restates which fields are varied at the start of that
+section.}
 
-\TODO{Add a table listing every field of $\mathcal{N}$, its nominal value, and
-which sweep (if any) varies it, with a pointer to the relevant section of
-Chapter~\ref{chap:results}.}
+\TODO{Add a table with one row per field of $\mathcal{N}$ ($N$, $\ell_i$,
+$\vec{b}^{(i)}$, $k_i$, $p_{\mathrm{in},i}^{X}$, $p_{\mathrm{in},i}^{Z}$,
+$\eta_i$, $e_d$, $\gamma$, $c$): its symbol, its value in
+$\mathcal{N}_{\mathrm{src}}$, and, if it is ever swept away from that value,
+a pointer to the section of Chapter~\ref{chap:results} that sweeps it (e.g.\
+$e_d$ in Section~\ref{sec:exp:budgeted}, $k_i$ in
+Section~\ref{sec:exp:excluded}, $\gamma$ in Section~\ref{sec:exp:timing}).
+Check these section labels are actually the right ones once
+Chapter~\ref{chap:results} is finalized.}
 
 \section{Representing a Partial Bell Pair}
 \label{sec:model:state}
