@@ -17,7 +17,7 @@ the given physical network configuration (Section~\ref{sec:model:network}), the 
 each partially-built Bell pair (Section~\ref{sec:model:state}), the schedule
 itself as a graph of operations (Section~\ref{sec:model:dag}), the resources it
 is allowed to consume (Section~\ref{sec:model:budget}), and finally the
-optimization problem this thesis \TOFIX{decide}{aims to explore} (Section~\ref{sec:model:objectives}).
+optimization problem this thesis addresses (Section~\ref{sec:model:objectives}).
 Section~\ref{sec:model:scope} closes the chapter by stating precisely which
 schedules are excluded from this model and why.
 
@@ -106,10 +106,10 @@ scheduling layer:
           used by the decoherence law of Section~\ref{sec:bg:decoherence}.
     \item $\kappa \in \mathcal{K}$ is the \emph{span} of the resource, where
           $\mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a
-          < b \le N\}$ is the set of possible spans \TOFIX{recheck}{(defined formally in
-          Section~\ref{sec:model:dag})} for a given network configuration: either \texttt{RGSS} for a resource
-          that has not yet crossed a hop, or $\mathrm{Span}(a,b)$ for an edge
-          that already connects station $a$ to station $b$.
+          < b \le N\}$ is the set of possible spans for a given network configuration
+          (defined formally in Section~\ref{sec:model:dag}): either \texttt{RGSS}
+          for a resource that has not yet crossed a hop, or $\mathrm{Span}(a,b)$
+          for an edge that already connects station $a$ to station $b$.
     \item $r$ counts how many purification rounds have already been applied to
           this branch.
     \item $h \in \{\mathit{pending}, \mathit{resolved}\}$ records whether the
@@ -161,27 +161,24 @@ for a distinct physical or logical action in the schedule:
 \subsection{Legality Conditions}
 \label{sec:model:legality}
 
-A graph $T$ is a \emph{legal} schedule \TOFIX{recheck equivalence/imp}{if and only if / only if} the following four conditions
+A graph $T$ is a \emph{legal} schedule if and only if the following four conditions
 all hold:
 \begin{enumerate}
     \item[(i)] \texttt{Gen} nodes may only appear at $\kappa = \mathtt{RGSS}$;
     \item[(ii)] a \texttt{Purify} node's two children must share the same
-          $\kappa$ which is the same span-matching rule previously mentioned informally in
-          Section~\ref{sec:model:state}, \TOFIX{keep?}{given here as a structural condition
-          on $T$ rather than a property of two states};
+          $\kappa$ \TOFIX{em dash}{---} the same span-matching rule stated informally in
+          Section~\ref{sec:model:state}, now expressed as a structural condition
+          on $T$ rather than a property of two states;
     \item[(iii)] a \texttt{Join} node's two children must share an endpoint,
-          i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$ \TOFIX{in footnote/keep?}{(the two spans need not
-          come from neighbouring hops, only meet at station $b$)}, and it then
+          i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$ (the two spans need not
+          come from neighbouring hops, only meet at station $b$), and it then
           produces $(a,c)$;
     \item[(iv)] the root must sit at $\kappa=\mathrm{Span}(0,N)$.
 \end{enumerate}
 These four conditions are the complete legality specification: any graph
-satisfying them is a schedule the physical hardware described in
-Section~\ref{sec:model:network} could \TOFIX{fix?}{actually} run.
+satisfying all four is a schedule that the physical hardware described in
+Section~\ref{sec:model:network} is capable of executing.
 
-\TOFIX{what is that??}{Section~\ref{sec:model:state} already checked this same example at the level
-of individual states; it is revisited here as a graph, to confirm the
-legality conditions above do not accidentally rule it out.}
 This representation was checked against the source paper's own Fig.\,4
 schedule~\cite{Benchasattabuse2025Integrating}, which builds one Bell pair
 from purified individual links, a second from two purified 5-hop segments,
@@ -278,17 +275,16 @@ rate floor asks for the best achievable quality at a given throughput;
 minimizing $C$ subject to floors on $F$ and $R$ asks for the cheapest hardware
 that still works. Both variants were implemented as alternative objective
 presets while exploring these questions. Section~\ref{sec:exp:objectives}
-shows that switching between all three presets requires no change at all to
-the search algorithms of Chapter~\ref{chap:algorithms}\TOFIX{what is that part 2? help}{, only to which
-quantity is scored and which are checked for feasibility.}
+shows that switching between all three presets requires no change to the
+search algorithms of Chapter~\ref{chap:algorithms}: only the scoring
+function and the feasibility constraints need to be swapped.
 
 \section{Scope and Assumptions}
 \label{sec:model:scope}
 
 % Source: Optimizer Status.md §Known Limits
 
-This model rests on three modelling choices, stated explicitly here before any subsequent discussions
-on algorithm design or experimental results.
+This model rests on three simplifying choices, stated explicitly here before any algorithm or result depends on them.
 
 First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before
 execution starts and cannot branch on an intermediate measurement outcome.
