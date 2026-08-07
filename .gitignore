@@ -18,7 +18,7 @@
 *.ist
 *.acn
 *.bcf*
-
+*.bbl*
 
 # Allow PDF figures committed explicitly inside thesis/figures/
 !thesis/figures/**/*.pdf
