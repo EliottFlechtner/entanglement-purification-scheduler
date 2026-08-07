@@ -45,6 +45,8 @@ Usage
 
 from __future__ import annotations
 
+import html as _html
+import subprocess
 import sys
 from pathlib import Path
 
@@ -52,7 +54,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 from hrgs_scheduler.models.network_config import NetworkConfig
-from hrgs_scheduler.models.stage import RGSS, Span
+from hrgs_scheduler.models.stage import RGSS, RGSSStage, Span
 from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.evaluator import Evaluator
@@ -66,6 +68,85 @@ from hrgs_scheduler.schedule.node import (
     JoinNode,
 )
 from hrgs_scheduler.schedule.visualize import render, save_dot
+
+# ---------------------------------------------------------------------------
+# Thesis-quality DAG rendering: simplified labels, no node IDs, larger font
+# ---------------------------------------------------------------------------
+
+_THESIS_NODE_STYLE: dict = {
+    GenNode: ("#AED6F1", "ellipse", "filled"),
+    AbsaBsmNode: ("#F5B041", "box", "filled"),
+    JoinNode: ("#82E0AA", "box", "filled"),
+    PurifyNode: ("#C39BD3", "box", "filled"),
+    HeraldNode: ("#F7DC6F", "diamond", "filled"),
+    PauliCorrectNode: ("#F1948A", "doublecircle", "filled"),
+}
+
+
+def _thesis_label(node: object) -> str:
+    """Simplified node label: no ID, no redundant timing fields."""
+    if isinstance(node, GenNode):
+        return f"Gen\\nhop {node.hop_index}"
+    if isinstance(node, AbsaBsmNode):
+        s = node.output_stage
+        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
+        return f"BSM\\nhop {node.hop_index}\\n\u03ba={stage}"
+    if isinstance(node, JoinNode):
+        s = node.output_stage
+        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
+        return f"Join\\n\u03ba={stage}"
+    if isinstance(node, PurifyNode):
+        s = node.output_stage
+        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
+        return f"Purify-{node.circuit.name}\\n\u03ba={stage}"
+    if isinstance(node, HeraldNode):
+        return "Herald"
+    if isinstance(node, PauliCorrectNode):
+        return "PauliCorrect\\n(root)"
+    return type(node).__name__
+
+
+def to_dot_thesis(dag: ScheduleDAG) -> str:
+    """DOT source with simplified labels and larger font for thesis figures."""
+    lines = [
+        "digraph Sigma_N2_thesis {",
+        '    rankdir="BT";',
+        '    node [fontname="Helvetica", fontsize=16];',
+        '    edge [fontname="Helvetica", color="#555555"];',
+    ]
+    for nid, node in dag.nodes.items():
+        label = _thesis_label(node)
+        fillcolor, shape, style = _THESIS_NODE_STYLE.get(
+            type(node), ("#FFFFFF", "box", "filled")
+        )
+        penwidth = "3" if nid == dag.root_id else "1"
+        label_escaped = _html.escape(label).replace("\\n", "<BR/>")
+        lines.append(
+            f"    n{nid} [label=<{label_escaped}>, shape={shape}, "
+            f'style="{style}", fillcolor="{fillcolor}", penwidth={penwidth}];'
+        )
+    for nid, node in dag.nodes.items():
+        children = getattr(node, "children", ())
+        for child_id in children:
+            lines.append(f"    n{child_id} -> n{nid};")
+    lines.append("}")
+    return "\n".join(lines)
+
+
+def render_thesis_png(dag: ScheduleDAG, path: str, dpi: int = 200) -> None:
+    """Render thesis-quality PNG using simplified labels at *dpi* resolution."""
+    dot_src = to_dot_thesis(dag)
+    proc = subprocess.run(
+        ["dot", "-Tpng", f"-Gdpi={dpi}", "-o", path],
+        input=dot_src.encode("utf-8"),
+        capture_output=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise subprocess.CalledProcessError(
+            proc.returncode, proc.args, output=proc.stdout, stderr=proc.stderr
+        )
+
 
 OUTPUT_DIR = _PROJECT_ROOT / "outputs" / "worked_example_n2"
 N = 2
@@ -280,6 +361,11 @@ def main() -> None:
 
     render(dag, svg_path, fmt="svg", graph_name="Sigma_N2_example")
     print(f"SVG rendered: {svg_path}", flush=True)
+
+    # Thesis-quality version: simplified labels, no IDs, larger font
+    thesis_png_path = str(OUTPUT_DIR / "dag_thesis.png")
+    render_thesis_png(dag, thesis_png_path, dpi=200)
+    print(f"Thesis PNG rendered: {thesis_png_path}", flush=True)
 
     # Evaluate against N=2 version of the paper config for the README
     network = NetworkConfig.uniform(
