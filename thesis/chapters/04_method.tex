@@ -166,7 +166,7 @@ all hold:
 \begin{enumerate}
     \item[(i)] \texttt{Gen} nodes may only appear at $\kappa = \mathtt{RGSS}$;
     \item[(ii)] a \texttt{Purify} node's two children must share the same
-          $\kappa$ \TOFIX{em dash}{---} the same span-matching rule stated informally in
+          $\kappa$, i.e.\ the span-matching rule stated informally in
           Section~\ref{sec:model:state}, now expressed as a structural condition
           on $T$ rather than a property of two states;
     \item[(iii)] a \texttt{Join} node's two children must share an endpoint,
@@ -189,9 +189,22 @@ ways, and this is exactly the class of schedule this model can express:
 allowing $\kappa$ to be an arbitrary span, and requiring \texttt{Purify} to
 check only $\kappa$ and not how each branch was built, is what makes that
 combination legal.
-\TODO{Insert the worked $N=2$ DAG figure from
-\texttt{docs/instructions/Validated Formal Model Def.md} §9 (also used in
-Appendix~\ref{app:dags}) as a running example.}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
+    \caption{\small%
+        \TOFIX{make longer maybe?}{Worked $N=2$ example schedule $\Sigma$
+        ($B=(n_{\mathrm{pur}}{=}2,\ e_{\max}{=}12,\ M_{\max}{=}6)$;
+        $C(\Sigma)=10$).
+        Two independent trials (left/right subtrees) each apply
+        \texttt{Purify-YY} at $\kappa=\mathrm{RGSS}$ on hop~0 and a raw hop~1,
+        joined into $\kappa=(0,2)$.
+        A final \texttt{Purify-XZ} combines both trials; \texttt{Herald}
+        follows (optimistic placement); \texttt{PauliCorrect} is the root.
+        Edges run bottom-to-top (leaves at bottom)}.
+    }
+    \label{fig:model:dag-example}
+\end{figure}
 
 \TOFIX{rewrite after chap 6}{Recheck this claim and the exact figure (four
 significant figures) once Chapter~\ref{chap:results}/Section~6.2 is
@@ -237,7 +250,7 @@ by the DAG validator; every reported result should be read with this in mind.
 $M_{\max}$ enforcement is actually added, this thesis currently only defines
 it.}
 
-\section{Objective Functions and the Optimization Problem}
+\section{Objective Functions and \TOFIX{keep?}{the} Optimization Problem}
 \label{sec:model:objectives}
 
 % Source: cost_functions.py, Validated Formal Model Def.md §6,
