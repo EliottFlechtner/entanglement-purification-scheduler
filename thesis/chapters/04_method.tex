@@ -138,24 +138,41 @@ A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted
 \]
 assigning to every node of $T$ the span $\kappa \in \mathcal{K}$ of the state
 that node produces, using the same $\kappa$ introduced in
-Section~\ref{sec:model:state}. The leaves of $T$ are always \texttt{Gen}
-nodes (half-RGS generation) and the root is always a \texttt{PauliCorrect}
-node at $\kappa = \mathrm{Span}(0,N)$, the finished end-to-end pair.
-
-Between leaves and root, nodes come in several further kinds, each standing
-for a distinct physical or logical action in the schedule:
+Section~\ref{sec:model:state}. Each node kind stands for a distinct physical
+or logical action. The colours and shapes below form the legend used in the
+worked schedule of Figure~\ref{fig:model:dag-example}:
 \begin{itemize}
-    \item \texttt{AbsaBsm}: the photonic \gls{bsm} that turns two same-hop
-          half-RGSs into a single-hop edge;
-    \item \texttt{Join}: entanglement swapping, stitching two adjacent spans
-          into a wider one;
-    \item \texttt{Purify}: a two-to-one YY, ZX, or XZ circuit
-          (Section~\ref{sec:bg:circuits});
-    \item \texttt{Herald}: resolving the classical heralding signal for a
-          branch;
-    \item \texttt{Idle}: an explicit wait, used only where the schedule's
-          timing requires one.
+    \item \cswatch{dagGen}\enspace\texttt{GenNode} (light-blue ellipse): half-RGS generation; these
+        nodes are always the leaves of $T$ at $\kappa=\mathtt{RGSS}$;
+    \item \cswatch{dagBsm}\enspace\texttt{AbsaBsmNode} (orange box): the photonic \gls{bsm} that turns
+        two same-hop half-RGSs into a single-hop edge;
+    \item \cswatch{dagJoin}\enspace\texttt{JoinNode} (green box): entanglement swapping, stitching two
+        adjacent spans into a wider one;
+    \item \cswatch{dagPurify}\enspace\texttt{PurifyNode} (purple box): a two-to-one YY, ZX, or XZ circuit
+        (Section~\ref{sec:bg:circuits});
+    \item \cswatch{dagHerald}\enspace\texttt{HeraldNode} (yellow diamond): resolving the classical
+        heralding signal for a branch;
+    \item \cswatch{dagIdle}\enspace\texttt{IdleNode} (grey dashed box): an explicit wait, used only
+        where the schedule's timing requires one;
+    \item \cswatch{dagRoot}\enspace\texttt{PauliCorrectNode} (red double circle): the root of $T$ at
+        $\kappa=\mathrm{Span}(0,N)$, representing the finished end-to-end
+        pair after final Pauli correction.
 \end{itemize}
+
+\paragraph{Optimistic versus heralded schedules.}
+A schedule $\Sigma$ is called \emph{optimistic} if no \texttt{HeraldNode}
+appears as an ancestor of any \texttt{PurifyNode} in $T$; equivalently,
+all heralding is deferred to the single \texttt{HeraldNode} placed
+directly below \texttt{PauliCorrectNode} at the root.
+This is not a predefined property of the schedule object: it is read
+directly from the graph structure of $T$.
+A schedule in which \texttt{HeraldNode} appears \emph{between}
+consecutive \texttt{PurifyNode} steps is \emph{heralded}; each such
+intermediate herald forces a classical round-trip ($2L/c$) before the
+next purification round may begin.
+Every schedule in this thesis is either fully optimistic or fully
+heralded; the DAG representation supports mixed cases, but the
+experiments do not explore them.
 
 
 \subsection{Legality Conditions}
@@ -164,12 +181,12 @@ for a distinct physical or logical action in the schedule:
 A graph $T$ is a \emph{legal} schedule if and only if the following four conditions
 all hold:
 \begin{enumerate}
-    \item[(i)] \texttt{Gen} nodes may only appear at $\kappa = \mathtt{RGSS}$;
-    \item[(ii)] a \texttt{Purify} node's two children must share the same
+    \item[(i)] \texttt{GenNode} nodes may only appear at $\kappa = \mathtt{RGSS}$;
+    \item[(ii)] a \texttt{PurifyNode} node's two children must share the same
           $\kappa$, i.e.\ the span-matching rule stated informally in
           Section~\ref{sec:model:state}, now expressed as a structural condition
           on $T$ rather than a property of two states;
-    \item[(iii)] a \texttt{Join} node's two children must share an endpoint,
+    \item[(iii)] a \texttt{JoinNode} node's two children must share an endpoint,
           i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$ (the two spans need not
           come from neighbouring hops, only meet at station $b$), and it then
           produces $(a,c)$;
@@ -186,22 +203,28 @@ and a third with no purification at all,
 then combines all three with a final purification round at the end nodes. It
 combines branches purified to different degrees and built up in different
 ways, and this is exactly the class of schedule this model can express:
-allowing $\kappa$ to be an arbitrary span, and requiring \texttt{Purify} to
+allowing $\kappa$ to be an arbitrary span, and requiring \texttt{PurifyNode} to
 check only $\kappa$ and not how each branch was built, is what makes that
 combination legal.
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
     \caption{\small%
-        \TOFIX{make longer maybe?}{Worked $N=2$ example schedule $\Sigma$
-        ($B=(n_{\mathrm{pur}}{=}2,\ e_{\max}{=}12,\ M_{\max}{=}6)$;
-        $C(\Sigma)=10$).
-        Two independent trials (left/right subtrees) each apply
-        \texttt{Purify-YY} at $\kappa=\mathrm{RGSS}$ on hop~0 and a raw hop~1,
-        joined into $\kappa=(0,2)$.
-        A final \texttt{Purify-XZ} combines both trials; \texttt{Herald}
-        follows (optimistic placement); \texttt{PauliCorrect} is the root.
-        Edges run bottom-to-top (leaves at bottom)}.
+        $N=2$ example schedule $\Sigma$ illustrating all seven node types
+        ($C(\Sigma)=10$ \texttt{GenNode} leaves).
+        \textbf{Trial~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY}
+        at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{AbsaBsmNode};
+        hop~1 is raw.
+        \textbf{Trial~B} (right subtree): identical except the right-side
+        hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed)
+        modelling a synchronisation wait before the \texttt{AbsaBsmNode}.
+        Both trials are joined into $\kappa=(0,2)$ by a \texttt{JoinNode}, then
+        combined by \texttt{PurifyNode-XZ}.
+        The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ}
+        makes this an optimistic schedule (Section~\ref{sec:model:dag}).
+        \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$.
+        Edges run bottom-to-top.
     }
     \label{fig:model:dag-example}
 \end{figure}
