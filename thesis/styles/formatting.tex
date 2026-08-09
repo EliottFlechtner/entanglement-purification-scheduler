@@ -5,6 +5,16 @@
 \definecolor{titlerule}{RGB}{80,80,80}     % soft dark-grey rule on titlepage
 \definecolor{contentsblack}{RGB}{0,0,0}    % pure black for table of contents links
 \definecolor{tocite}{RGB}{21,67,148}
+% DAG node colours (match schedule/visualize.py _NODE_STYLE)
+\definecolor{dagGen}{HTML}{AED6F1}        % light blue -- GenNode
+\definecolor{dagBsm}{HTML}{F5B041}        % orange     -- AbsaBsmNode
+\definecolor{dagJoin}{HTML}{82E0AA}       % green      -- JoinNode
+\definecolor{dagPurify}{HTML}{C39BD3}     % purple     -- PurifyNode
+\definecolor{dagIdle}{HTML}{D5D8DC}       % grey       -- IdleNode
+\definecolor{dagHerald}{HTML}{F7DC6F}     % yellow     -- HeraldNode
+\definecolor{dagRoot}{HTML}{F1948A}       % red        -- PauliCorrectNode
+% Tiny filled square used as a colour swatch in node-type legends
+\newcommand{\cswatch}[1]{\textcolor{#1}{\rule{0.85em}{0.85em}}}
 
 %==============================
 % Hyperlink colours
