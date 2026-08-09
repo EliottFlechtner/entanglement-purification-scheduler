@@ -31,9 +31,9 @@ C(Σ) = 10 Gen nodes
 
 - Fidelity: 0.972820
 - Success probability: 0.949090
-- Rate: 47454.5140
+- Rate: 0.9491
 - Resource cost C: 10
-- Latency: 0.0000
+- Latency: 1.0000
 
 ## Files
 
@@ -61,3 +61,4 @@ PYTHONPATH=src python3 experiments/worked_example_n2_dag.py
 | purple | box | PurifyNode | 2→1 purification circuit |
 | yellow | diamond | HeraldNode | heralding resolution |
 | red | doublecircle | PauliCorrectNode | root; final Pauli correction |
+| gray | ellipse | IdleNode | placeholder for idle time (no operation) |

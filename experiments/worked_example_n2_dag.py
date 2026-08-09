@@ -62,6 +62,7 @@ from hrgs_scheduler.schedule.node import (
     AbsaBsmNode,
     GenNode,
     HeraldNode,
+    IdleNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
@@ -78,6 +79,7 @@ _THESIS_NODE_STYLE: dict = {
     AbsaBsmNode: ("#F5B041", "box", "filled"),
     JoinNode: ("#82E0AA", "box", "filled"),
     PurifyNode: ("#C39BD3", "box", "filled"),
+    IdleNode: ("#D5D8DC", "box", "filled,dashed"),
     HeraldNode: ("#F7DC6F", "diamond", "filled"),
     PauliCorrectNode: ("#F1948A", "doublecircle", "filled"),
 }
@@ -99,6 +101,8 @@ def _thesis_label(node: object) -> str:
         s = node.output_stage
         stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
         return f"Purify-{node.circuit.name}\\n\u03ba={stage}"
+    if isinstance(node, IdleNode):
+        return f"Idle\\nuntil={node.until:g}"
     if isinstance(node, HeraldNode):
         return "Herald"
     if isinstance(node, PauliCorrectNode):
@@ -155,8 +159,9 @@ N = 2
 def _build_trial(
     nodes: dict[NodeId, object],
     nid: int,
+    idle_until: float = 0.0,
 ) -> tuple[NodeId, int]:
-    """Build one independent trial (trial_A or trial_B) of the N=2 example.
+    """Build one independent trial of the N=2 example.
 
     Returns (join_node_id, next_free_nid).
 
@@ -166,9 +171,12 @@ def _build_trial(
       AbsaBsm(purified, raw_right, hop=0) → Span(0,1)
 
     Hop 1: raw (2 Gen nodes)
-      Gen(hop=1) ×2 → AbsaBsm(hop=1) → Span(1,2)
+      Gen(hop=1) ×2 [→ optional IdleNode] → AbsaBsm(hop=1) → Span(1,2)
 
     Join(hop0_edge, hop1_edge) → Span(0,2)
+
+    If idle_until > 0, the right-side hop-1 Gen is wrapped in an IdleNode
+    modelling a synchronization wait (e.g. waiting for the left side to arrive).
     """
     # --- Hop 0: RGSS-level purification ---
     g0a = GenNode(node_id=nid, hop_index=0)
@@ -207,9 +215,22 @@ def _build_trial(
     nodes[g1a.node_id] = g1a
     nodes[g1b.node_id] = g1b
 
+    # Optional synchronization wait on the right-side Gen of hop 1
+    if idle_until > 0.0:
+        idle = IdleNode(
+            node_id=nid,
+            children=(g1b.node_id,),
+            until=idle_until,
+        )
+        nid += 1
+        nodes[idle.node_id] = idle
+        g1b_feed = idle.node_id
+    else:
+        g1b_feed = g1b.node_id
+
     bsm1 = AbsaBsmNode(
         node_id=nid,
-        children=(g1a.node_id, g1b.node_id),
+        children=(g1a.node_id, g1b_feed),
         hop_index=1,
     )
     nid += 1
@@ -233,7 +254,9 @@ def build_n2_worked_example() -> ScheduleDAG:
     nid = 0
 
     trial_a_id, nid = _build_trial(nodes, nid)
-    trial_b_id, nid = _build_trial(nodes, nid)
+    # Trial B: same structure but hop-1 right-side Gen waits (IdleNode)
+    # to illustrate timing synchronisation between the two arms.
+    trial_b_id, nid = _build_trial(nodes, nid, idle_until=1.0)
 
     # End-node purification: Purify-XZ(trial_A, trial_B)
     pur_end = PurifyNode(
@@ -364,7 +387,7 @@ def main() -> None:
 
     # Thesis-quality version: simplified labels, no IDs, larger font
     thesis_png_path = str(OUTPUT_DIR / "dag_thesis.png")
-    render_thesis_png(dag, thesis_png_path, dpi=200)
+    render_thesis_png(dag, thesis_png_path, dpi=300)
     print(f"Thesis PNG rendered: {thesis_png_path}", flush=True)
 
     # Evaluate against N=2 version of the paper config for the README
