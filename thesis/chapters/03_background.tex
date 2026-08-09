@@ -85,8 +85,17 @@ legality constraint (both inputs must share the same span $\kappa$).}
 \subsection{Heralded versus Optimistic Purification}
 \label{sec:bg:optimistic}
 
-\TODO{Explain the optimistic (blind) execution model: generation and
-purification are pipelined without waiting for heralding; classical
-outcomes are compared in a single round at the end. Show how the
-position of \texttt{Herald} nodes in the schedule DAG determines
-whether a branch is heralded or optimistic.}
+In the \emph{heralded} model, each purification round waits for a
+full classical round-trip ($2L/c$) to confirm the previous round's
+success before the next round begins. The \emph{optimistic} (or blind)
+model instead \TOFIX{change to something more human}{pipelines} generation and purification without waiting:
+all operations are executed speculatively, and all classical outcomes
+are compared in a single, deferred communication round at the very end.
+This cuts the classical overhead from $n_{\mathrm{pur}}$ separate
+round-trips to a single one-way confirmation, which is the dominant
+source of the rate advantage reported in~\cite{Benchasattabuse2025Integrating}.
+
+Crucially, \emph{optimistic} is not a predefined label attached to a
+purification operation: it is an emergent structural property of how the
+schedule is arranged. Section~\ref{sec:model:dag} makes this precise once
+the formal DAG representation is in place.
