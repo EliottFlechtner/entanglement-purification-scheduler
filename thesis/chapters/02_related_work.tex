@@ -4,35 +4,85 @@
 \section{Quantum Repeater Protocols}
 \label{sec:rw:repeaters}
 
-\TODO{Survey second-generation (matter-qubit) and third-generation
-(all-photonic) repeater proposals. Situate the HRGS within the
-all-photonic branch.}
+Direct transmission of a photonic qubit through an optical fiber or free space is limited by the channel's transmissivity, i.e. the probability that a photon is successfully transmitted through the lossy communication link: $\eta = e^{-\alpha L}$ for a fiber of length $L$ and attenuation coefficient $\alpha$, which at the telecom C-band's typical $\alpha_{\mathrm{dB}}\approx0.2~\mathrm{dB/km}$~\cite{ITUT2024Cable} already gives $\eta\sim10^{-40}$ at 2000~km. Thus, even with ideal single-photon sources and detectors, the probability that an individual photon survives such a channel becomes vanishingly small, making direct transmission impractical over long distances. Consequently, the achievable communication rate decreases exponentially with distance~\cite{Sangouard2011Quantum}, and, more generally, the \emph{repeaterless capacity} (or PLOB bound) of a lossy channel exhibits the same exponential distance scaling in the high-loss regime~\cite{Pirandola2017Fundamental,Pant2017Ratedistance,Azuma2023Quantum}.
+
+A quantum repeater~\cite{Briegel1998Quantum} divides a long channel into shorter elementary links, for which entanglement generation is more feasible, then stitches the resulting short-range entanglement into a single end-to-end pair by entanglement swapping~\cite{Zukowski1993Eventreadydetectors,Grudka2008Entanglementswapping}. Repeater proposals are commonly grouped into three generations according to how they address photon loss and operational errors along the chain~\cite{Muralidharan2016Efficient,Azuma2023Quantum}. First-generation (1G) repeaters address both through \gls{heg} and entanglement purification~\cite{Bennett1996Purification,Deutsch1996Quantum} (Section~\ref{sec:rw:purification}), storing successfully generated entangled pairs in matter-qubit memories while other links are established~\cite{Briegel1998Quantum,Duan2001Longdistance}. Second-generation (2G) repeaters replace entanglement purification with \gls{qec} to protect against operational errors, while still relying on heralding to detect photon loss~\cite{Jiang2009Quantum,Wo2023Resourceefficient}. Third-generation (3G) repeaters use quantum error-correcting codes to protect against both loss and operational errors, thereby avoiding the need to herald successful transmission across each elementary link, in turn eliminating the distance-dependent two-way communication latency associated with such heralding~\cite{Fowler2010Surface,Azuma2015All}.
+
+The all-photonic quantum repeaters~\cite{Azuma2015All} studied in this thesis belong to the third generation, but \TOFIX{wording is very AI, to rewrite}{reach it by a different route than most matter-qubit, code-based proposals}: rather than protecting a stationary matter qubit, they encode the transmitted qubit itself in a multi-photon graph state~\cite{Raussendorf2002oneway,Raussendorf2002Computational,Raussendorf2003Measurementbased}: the \gls{rgs}~\cite{Azuma2015All}. This allows loss and error correction to directly happen on flying qubits and requires no quantum memory at any intermediate station~\cite{Azuma2015All}. \TOFIX{to reword}{Photonic realisations of this idea range from} \TOFIX{sentence is too long}{\glspl{rgs} built by fusing small entangled photon sets with linear optics~\cite{Azuma2015All,Pant2017Ratedistance}, to schemes that build the graph state directly from a small number of deterministic photon emitters~\cite{Borregaard2020OneWay,Li2022Photonic,Ghanbari2024Optimization,Thomas2024Fusion}, to code-concatenated variants that target loss and operational error with two separate, specialised codes rather than one~\cite{Wo2023Resourceefficient}}. \TOFIX{shorten this a bit, just say its covered in details in later sections, this feels like an intro structure paragrpah to the chapter...}{Section~\ref{sec:rw:rgs} surveys this family in more detail and situates the half-RGS architecture used throughout this thesis within it; its exact mechanics, station roles, the joining operation, and the resulting error model, are only introduced formally in Chapter~\ref{chap:background}.}
+
+\TOFIX{keep?}{A related but architecturally distinct proposal, the measurement-based quantum repeater, keeps small pre-prepared entangled resource states at each station and couples them to incoming photons with simple \gls{bsm}, rather than building one graph state that spans the whole repeater chain~\cite{Zwerger2012Measurementbased,Zwerger2018Longrange}; its emphasis on minimising the qubit count held at each station is a useful point of comparison for the resource costs studied in Chapter~\ref{chap:results}.}
 
 \section{Entanglement Purification Protocols}
 \label{sec:rw:purification}
 
-\TODO{Review DEJMPS, BBPSSW, and entanglement pumping.
-Discuss purification trees as introduced by Varnava et al.~\cite{Varnava2008How}
-and the trade-off between circuit depth and success probability.}
+Entanglement purification takes several noisy copies of an entangled pair -- each with fidelity below 1 to the ideal, maximally entangled Bell state, due to accumulated channel and operational noise -- and, using only \gls{locc}, returns fewer copies of higher fidelity. The two founding two-qubit protocols are BBPSSW~\cite{Bennett1996Purification}, which purifies against a fixed, depolarised noise model, and DEJMPS~\cite{Deutsch1996Quantum}, which extends the same idea to general Bell-diagonal states without first forcing the state into that depolarised form by applying random local Pauli operations. Both protocols consume two copies and return one, succeeding only when the two parties' local measurement outcomes agree.
+
+This trade-off between resource count and output fidelity reappears throughout the purification literature, and so does a closely related strategy: chaining several purification rounds along a nested sequence rather than purifying once~\cite{Briegel1998Quantum,Dur1999Quantum}. When the same working pair is repeatedly topped up against freshly generated ones this way, it is often called \emph{entanglement pumping}\TOCITE{dedicated entanglement-pumping reference that coins this exact term; not yet identified for references.bib}. Both ideas, the resource/fidelity trade-off and pumping, recur in the RGS-specific circuits this thesis's formal model is built on (Section~\ref{sec:bg:circuits}).
+
+Later work treats the purification circuit itself as an object to optimise rather than fix in advance. These approaches search directly over local Clifford operations to find shorter circuits with higher success probability and better output fidelity than the BBPSSW/DEJMPS family~\cite{Krastanov2019Optimized}, particularly once finite resources and imperfect local operations are taken into account rather than only the asymptotic regime. Purification has also been generalised from bipartite Bell pairs to general graph states~\cite{Dur2003Multiparticle,Kruszynska2006Entanglement}; the RGS-specific two-to-one circuits used by the Integrating paper (Section~\ref{sec:bg:circuits}) descend from this graph-state generalisation, rather than from the original two-qubit BBPSSW/DEJMPS protocols directly.
+
+The mechanisms above all address noise, not photon loss. Loss tolerance is covered here too, for contrast, since it is frequently mentioned alongside purification in the photonic-repeater literature despite addressing a different failure mode: tree-encoding a logical qubit across several physical photons and reconstructing its measurement outcome from whichever branches survive. This approach was introduced for one-way, measurement-based quantum computation~\cite{Varnava2006Loss} and later specialised into a loss-tolerant quantum memory~\cite{Varnava2007Loss} and a resource-efficiency threshold for when it becomes practical~\cite{Varnava2008How}. It is this tree-encoding, not purification, that the RGS's inner qubits rely on to survive photon loss (Section~\ref{sec:bg:hrgs}).
 
 \section{Resource-Graph-State Architectures}
 \label{sec:rw:rgs}
 
-\TODO{Summarise the original RGS proposal~\cite{Azuma2015All}, the
-half-RGS variant (Bridging paper), and the Integrating paper that showed
-purification can be incorporated without new heralding round-trips.}
+The \gls{rgs} was proposed as the resource state for the first all-photonic quantum repeater: a graph state whose outer qubits carry the entangling links to neighbouring stations and whose inner qubits are tree-encoded (Section~\ref{sec:rw:purification}) so that the logical connection survives even when most physical photons are lost~\cite{Azuma2015All}. Follow-up work has mostly optimised two aspects of this proposal: how cheaply the \gls{rgs} itself can be generated, and how much loss and operational error it can tolerate for a given resource budget. On generation, deterministic emitter-based schemes reduce the number of physical devices needed per station~\cite{Li2022Photonic,Ghanbari2024Optimization} and have since been demonstrated experimentally at small scale~\cite{Thomas2024Fusion}; on tolerance, alternative connectivities and adaptive measurement strategies improve the entanglement rate for a fixed loss and error budget~\cite{Patil2024Improved,Li2025Generalized,Zhan2023Performance}, and code-concatenated variants target loss and operational error with two separate, specialised codes rather than a single tree code~\cite{Wo2023Resourceefficient}.
+
+The Bridging paper introduces the half-RGS (\gls{hrgs}) building block used throughout this thesis, which splits the \gls{rgs} construction across two stations instead of requiring the whole $2m$-qubit state to exist in one place~\cite{Benchasattabuse2026Bridging} (an earlier conference version of the same architecture appears in~\cite{Benchasattabuse2024Architecture}). Its main consequence is architectural rather than purely photonic: because a half-RGS only needs to be generated and briefly held, an end node equipped with a single quantum memory can act as its own source, letting the all-photonic \gls{rgs} scheme interoperate with conventional, memory-equipped repeater nodes instead of requiring every intermediate station to be purely photonic. Chapter~\ref{chap:background} gives this architecture, and the resulting station roles, \gls{rgss} versus \gls{absa}, their full formal treatment.
+
+The Integrating paper then asks a question the \gls{rgs} literature had so far left open: whether purification can be inserted into this scheme at all, given that an \gls{rgs} is normally generated and consumed within a single fast round-trip that a classical purification herald would otherwise have to interrupt~\cite{Benchasattabuse2025Integrating}. Its answer, optimistic (blind) purification performed directly on half-RGS primitives without waiting for heralding outcomes, is what Section~\ref{sec:bg:optimistic} formalises, and is also what makes a purification schedule for this architecture a genuinely open combinatorial question rather than a fixed formula, which Section~\ref{sec:rw:positioning} returns to.
 
 \section{Schedule Optimisation in Quantum Networks}
 \label{sec:rw:scheduling}
 
-\TODO{Cover adaptive scheduling~\TOCITE{munro2015}, reinforcement-learning
-approaches, and combinatorial optimisation methods applied to repeater
-chains. Identify the absence of systematic schedule search for
-HRGS-like architectures.}
+Even once entanglement purification is available at every stage of a
+repeater chain, deciding when and where to apply it is a separate
+problem. In adaptive schemes, a repeater node chooses its next
+operation from the fidelity or heralding outcomes observed so far,
+rather than following a fixed
+plan\TOCITE{W. J. Munro, K. Azuma, K. Tamaki, K. Nemoto, "Inside Quantum
+Repeaters," IEEE Journal of Selected Topics in Quantum Electronics
+21(3), 78--90 (2015); a representative survey of adaptive repeater
+control strategies}. Reinforcement learning and other data-driven
+controllers have also been proposed for related quantum-network control
+problems\TOCITE{representative reference for a learned or data-driven
+quantum-repeater/quantum-network scheduling controller; not yet
+identified for references.bib}. Closer to the non-adaptive setting this
+thesis studies, optimistic entanglement purification has also been
+studied directly in generic quantum
+networks~\cite{Mobayenjarihani2023Optimistic}, independently of any
+RGS-specific construction, showing that deferring heralding is useful
+well beyond the architecture studied here; and the
+choice of how to multiplex the qubits of a logical channel across
+serial or parallel physical links is itself a scheduling decision with
+a measurable performance cost~\cite{Meter2007Communication}.
+
+None of this prior work, however, performs a systematic search over the
+schedule space of an HRGS-based repeater. The closest starting point,
+the Integrating paper, demonstrates that purification can be placed at
+the generation, link, or end-node stage of an HRGS chain, and mixed
+freely between them, but only through a single, hand-picked example
+schedule; it explicitly leaves the search for a better schedule, given a
+fixed physical network and resource budget, as an open
+problem~\cite{Benchasattabuse2025Integrating}. That is the gap this
+thesis addresses.
 
 \section{Positioning of This Work}
 \label{sec:rw:positioning}
 
-\TODO{One concise paragraph: prior work specifies the physics and
-fixes a single hand-chosen schedule; this thesis performs the first
-systematic search of the schedule space for HRGS repeaters.}
+Across Sections~\ref{sec:rw:repeaters}--\ref{sec:rw:scheduling}, the
+pattern is consistent: each generation of quantum repeater, and each
+proposed purification circuit or scheduling strategy built on top of
+it, is specified and evaluated in isolation, one design at a time,
+rather than searched over systematically. For the specific architecture
+this thesis builds on, the Bridging paper fixes the physical building
+block, the half-RGS, and the Integrating paper shows that purification
+can be inserted into it without breaking its round-trip-free operation,
+but both stop at a single demonstration schedule. This thesis takes
+that demonstration as a starting point rather than an endpoint:
+Chapter~\ref{chap:background} restates the physical building blocks
+just surveyed with the precision needed to reason about them formally,
+Chapter~\ref{chap:model} turns the space of purification schedules over
+those building blocks into an object that can actually be searched, and
+Chapters~\ref{chap:algorithms}--\ref{chap:results} report the first
+systematic search of that space.
