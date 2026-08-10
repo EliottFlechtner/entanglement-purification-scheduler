@@ -90,9 +90,20 @@
     style=ieee,
     doi=true,
     url=false,
-    isbn=false,
-    eprint=false
+    isbn=false
 ]{biblatex}
+
+% Suppress "(visited on ...)" access-date clauses from every @online-type
+% bibliography entry (the ieee style prints these whenever urlyear/month/day
+% are set, regardless of the url=false option above), without editing every
+% urldate field in references.bib.
+\AtEveryBibitem{\clearfield{urlday}\clearfield{urlmonth}\clearfield{urlyear}}
+
+% standard.bbx only quotes titles for [article,inbook,incollection,
+% inproceedings,patent,thesis,unpublished]; @misc falls back to italics with
+% no quotes. Add @misc so it matches the same quoted-title style as the rest
+% of the bibliography (e.g. the ITUT2024Cable entry).
+\DeclareFieldFormat[misc]{title}{\mkbibquote{#1\isdot}}
 
 \addbibresource{bibliography/references.bib}
 
