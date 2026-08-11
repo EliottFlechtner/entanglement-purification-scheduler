@@ -99,6 +99,19 @@
   keywords = {All-photonic repeaters,Architecture,graph states,Logic gates,Memory management,network protocols,Photonics,Protocols,quantum communication,Quantum entanglement,quantum networking,quantum repeaters,Quantum repeaters,Quantum state,Qubit,Repeaters}
 }
 
+@online{Benchasattabuse2026Resource,
+  title = {Resource {{Management}} in {{Heterogeneous Quantum Repeater Networks}}},
+  author = {Benchasattabuse, Naphan},
+  date = {2026},
+  doi = {10.48550/ARXIV.2605.25132},
+  url = {https://arxiv.org/abs/2605.25132},
+  urldate = {2026-08-11},
+  abstract = {In this thesis, I explore whether it is possible to build a unified Quantum Internet architecture that supports different types of quantum repeaters—especially the two most distinct and seemingly incompatible ones: memory-based quantum repeaters and allphotonic, memoryless repeaters. These technologies have traditionally been developed with the aim of becoming the single dominant solution, but I ask: Can they work together in the same network? What kind of architecture would support both? And how can simulation help us understand what is needed to manage such a network at scale? To address these questions, I propose an architecture based on an existing recursive network design and programmable RuleSet-based protocols that can coordinate diverse hardware components. I introduce a new emitter-photon building block to bridge memory-based and all-photonic segments, and show how classical networking abstractions can be extended to manage quantum operations. While I have developed a simulation tool grounded in these architectural principles and validated it against existing simulators and analytical models, a full-scale investigation of the resource trade-offs and performance implications remains future work. Nevertheless, the results so far suggest that a unified, heterogeneous quantum network is not only possible but increasingly practical with current technologies—though ongoing experimental progress will be essential to fully realize this vision.},
+  pubstate = {prepublished},
+  version = {1},
+  keywords = {FOS: Physical sciences,Quantum Physics (quant-ph)}
+}
+
 @article{Bennett1996Purification,
   title = {Purification of {{Noisy Entanglement}} and {{Faithful Teleportation}} via {{Noisy Channels}}},
   author = {Bennett, Charles H. and Brassard, Gilles and Popescu, Sandu and Schumacher, Benjamin and Smolin, John A. and Wootters, William K.},
@@ -137,7 +150,7 @@
   abstract = {We propose a novel one-way quantum repeater architecture based on photonic tree-cluster states. Encoding a qubit in a photonic tree cluster protects the information from transmission loss and enables long-range quantum communication through a chain of repeater stations. As opposed to conventional approaches that are limited by the two-way communication time, the overall transmission rate of the current quantum repeater protocol is determined by the local processing time enabling very high communication rates. We further show that such a repeater can be constructed with as little as two stationary qubits and one quantum emitter per repeater station, which significantly increases the experimental feasibility. We discuss potential implementations with diamond defect centers and semiconductor quantum dots efficiently coupled to photonic nanostructures and outline how such systems may be integrated into repeater stations.}
 }
 
-@article{Briegel1998Quantum,
+@online{Briegel1998Quantum,
   title = {Quantum Repeaters for Communication},
   author = {Briegel, H.-J. and Dür, W. and Cirac, J. I. and Zoller, P.},
   date = {1998-03-20},
@@ -147,7 +160,24 @@
   url = {http://arxiv.org/abs/quant-ph/9803056},
   urldate = {2026-06-16},
   abstract = {In quantum communication via noisy channels, the error probability scales exponentially with the length of the channel. We present a scheme of a quantum repeater that overcomes this limitation. The central idea is to connect a string of (imperfect) entangled pairs of particles by using a novel nested purification protocol, thereby creating a single distant pair of high fidelity. The scheme tolerates general errors on the percent level.},
+  pubstate = {prepublished},
   keywords = {Quantum Physics}
+}
+
+@article{Briegel2001Persistent,
+  title = {Persistent {{Entanglement}} in {{Arrays}} of {{Interacting Particles}}},
+  author = {Briegel, Hans J. and Raussendorf, Robert},
+  date = {2001-01-29},
+  journaltitle = {Physical Review Letters},
+  shortjournal = {Phys. Rev. Lett.},
+  volume = {86},
+  number = {5},
+  pages = {910--913},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevLett.86.910},
+  url = {https://link.aps.org/doi/10.1103/PhysRevLett.86.910},
+  urldate = {2026-06-08},
+  abstract = {We study the entanglement properties of a class of 𝑁-qubit quantum states that are generated in arrays of qubits with an Ising-type interaction. These states contain a large amount of entanglement as given by their Schmidt measure. They also have a high persistency of entanglement which means that ∼𝑁/2 qubits have to be measured to disentangle the state. These states can be regarded as an entanglement resource since one can generate a family of other multiparticle entangled states such as the generalized Greenberger-Horne-Zeilinger states of {$<$}𝑁/2 qubits by simple measurements and classical communication.}
 }
 
 @article{Browne2005Resourceefficient,
@@ -374,7 +404,7 @@
   keywords = {Quantum Physics}
 }
 
-@book{Greenberger2009Compendiuma,
+@book{Greenberger2009Compendium,
   title = {Compendium of {{Quantum Physics}}: {{Concepts}}, {{Experiments}}, {{History}} and {{Philosophy}}},
   shorttitle = {Compendium of {{Quantum Physics}}},
   author = {Greenberger, Daniel},
@@ -428,7 +458,7 @@
 
 @online{Hein2006Entanglement,
   title = {Entanglement in {{Graph States}} and Its {{Applications}}},
-  author = {Hein, M. and Dür, W. and Eisert, J. and Raussendorf, R. and family=Nest, given=M. Van, prefix=den, useprefix=false and Briegel, H. -J.},
+  author = {Hein, M. and Dür, W. and Eisert, J. and Raussendorf, R. and {M. Van den Nest} and Briegel, H. -J.},
   date = {2006},
   doi = {10.48550/ARXIV.QUANT-PH/0602096},
   url = {https://arxiv.org/abs/quant-ph/0602096},
@@ -634,6 +664,22 @@
   urldate = {2026-06-04},
   eventtitle = {2023 {{IEEE International Conference}} on {{Quantum Computing}} and {{Engineering}} ({{QCE}})},
   isbn = {979-8-3503-4323-6}
+}
+
+@article{Munro2015Quantum,
+  title = {Inside {{Quantum Repeaters}}},
+  author = {Munro, William J. and Azuma, Koji and Tamaki, Kiyoshi and Nemoto, Kae},
+  date = {2015-05},
+  journaltitle = {IEEE Journal of Selected Topics in Quantum Electronics},
+  volume = {21},
+  number = {3},
+  pages = {78--90},
+  issn = {1558-4542},
+  doi = {10.1109/JSTQE.2015.2392076},
+  url = {https://ieeexplore.ieee.org/document/7010905},
+  urldate = {2026-08-11},
+  abstract = {Most quantum communication tasks need to rely on the transmission of quantum signals over long distances. Unfortunately, transmission of such signals is most often limited by losses in the channel, the same issue that affects classical communication. Simple signal amplification provides an elegant solution for the classical world, but this is not possible in the quantum world, as the no-cloning theorem forbids such an operation and, thus, an alternative approach, a quantum repeater, is needed. Quantum repeaters enable one to create a known maximally entangled state between the end points of the network by first segmenting the network into pieces, creating entanglement between the segments, and then, connecting those entanglement to create the required long range entanglement. Quantum teleportation then allows an unknown quantum message to be transmitted between them using the long-range entangled state. This form of quantum communication will be at the heart of the future quantum Internet. In this review, we will detail various approaches to quantum repeaters, and discuss their expected performance and limitations.},
+  keywords = {Cavity resonators,Photonics,Protocols,Quantum communication,Quantum entanglement,Repeaters,repeaters and networks,Repeaters and Networks,Teleportation}
 }
 
 @article{Muralidharan2016Efficient,
