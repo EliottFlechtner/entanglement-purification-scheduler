@@ -27,8 +27,8 @@ follows. Together they make up what this thesis calls the \emph{backbone
 layer}: the fixed, protocol-determined process of establishing entanglement,
 which no schedule can alter. This chapter is concerned with the
 \emph{scheduling layer} built on top of it: which of the genuinely optional
-decisions, where to insert purification, with which circuit, and in what
-order, a schedule actually makes, and how competing schedules are compared.}
+decisions -- where to insert purification, with which circuit, and in what
+order -- a schedule actually makes, and how competing schedules are compared.}
 
 \section{Network Configuration}
 \label{sec:model:network}
@@ -187,12 +187,12 @@ experiments do not explore them.
 A graph $T$ is a \emph{legal} schedule if and only if the following four conditions
 all hold:
 \begin{enumerate}
-    \item[(i)] \texttt{GenNode} nodes may only appear at $\kappa = \mathtt{RGSS}$;
-    \item[(ii)] a \texttt{PurifyNode} node's two children must share the same
+    \item[(i)] \texttt{GenNode}s may only appear at $\kappa = \mathtt{RGSS}$;
+    \item[(ii)] a \texttt{PurifyNode}'s two children must share the same
           $\kappa$, i.e.\ the span-matching rule stated informally in
           Section~\ref{sec:model:state}, now expressed as a structural condition
           on $T$ rather than a property of two states;
-    \item[(iii)] a \texttt{JoinNode} node's two children must share an endpoint,
+    \item[(iii)] a \texttt{JoinNode}'s two children must share an endpoint,
           i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$ (the two spans need not
           come from neighbouring hops, only meet at station $b$), and it then
           produces $(a,c)$;
@@ -328,31 +328,11 @@ function and the feasibility constraints need to be swapped.
 
 This model rests on three simplifying choices, stated explicitly here before any algorithm or result depends on them.
 
-First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before
-execution starts and cannot branch on an intermediate measurement outcome.
-A fully adaptive scheme, where the choice of the next purification round
-depends on the fidelity estimate so far, would need a different formulation,
-most naturally a Markov decision process. \TOCITE{standard reference for
-MDP / sequential decision-making formulation, e.g. Puterman or Sutton and
-Barto, not yet in references.bib}. This is left to future work
-(Section~\ref{sec:conc:future}).
+First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before execution starts and cannot branch on an intermediate measurement outcome. A fully adaptive scheme, where the choice of the next purification round depends on the fidelity estimate so far, would need a different formulation, most naturally a Markov decision process~\cite{Puterman2009Markov,Sutton2014Reinforcement}. This is left to future work (Section~\ref{sec:conc:future}).
 
-Second, $M_{\max}$ is part of the budget $B$ but is not enforced anywhere in
-the current implementation, neither during search nor during DAG validation.
-Every reported resource cost $C(\Sigma)$ is therefore a lower bound on the
-number of physical qubit slots a real device would need to run that schedule,
-since it does not account for how many branches must be held in memory at
-once.
-\TOFIX{future work}{Consistent with the notes in Section~\ref{sec:model:budget}:
-$M_{\max}$ is defined but not enforced; keep this paragraph in sync if that
-changes.}
+Second, $M_{\max}$ is part of the budget $B$ but is not enforced anywhere in the current implementation, neither during search nor during DAG validation. Every reported resource cost $C(\Sigma)$ is therefore a lower bound on the number of physical qubit slots a real device would need to run that schedule, since it does not account for how many branches must be held in memory at once.
 
-Third, the error model throughout this thesis is the Pauli channel, the same
-assumption made by the source paper. \TOCITE{general reference on Pauli
-channels / stabilizer error models, e.g. Nielsen and Chuang, not yet in
-references.bib}. Comparisons between schedules are made under this one noise
-model, so a ranking that holds here is not automatically guaranteed to
-transfer to a device dominated by a different error channel, for example pure
-photon loss without any depolarizing component. This point is returned to in
-Section~\ref{sec:disc:limitations}.
+\TOFIX{future work}{Consistent with the notes in Section~\ref{sec:model:budget}: $M_{\max}$ is defined but not enforced; keep this paragraph in sync if that changes.}
+
+Third, the error model throughout this thesis is the Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, the same assumption made by the source paper. Comparisons between schedules are made under this one noise model, so a ranking that holds here is not automatically guaranteed to transfer to a device dominated by a different error channel, for example pure photon loss without any depolarizing component. This point is returned to in Section~\ref{sec:disc:limitations}.
 
