@@ -162,6 +162,32 @@
 
 \usepackage[acronym]{glossaries}
 
+% Source - https://tex.stackexchange.com/a/134509
+% Posted by karlkoeller
+% Retrieved 2026-08-15, License - CC BY-SA 3.0
+
+\makeatletter
+\let\oldmakefirstuc\makefirstuc
+\renewcommand*{\makefirstuc}[1]{%
+  \def\gls@add@space{}%
+  \mfu@capitalisewords#1 \@nil\mfu@endcap
+}
+\def\mfu@capitalisewords#1 #2\mfu@endcap{%
+  \def\mfu@cap@first{#1}%
+  \def\mfu@cap@second{#2}%
+  \gls@add@space
+  \oldmakefirstuc{#1}%
+  \def\gls@add@space{ }%
+  \ifx\mfu@cap@second\@nnil
+    \let\next@mfu@cap\mfu@noop
+  \else
+    \let\next@mfu@cap\mfu@capitalisewords
+  \fi
+  \next@mfu@cap#2\mfu@endcap
+}
+\makeatother
+
+
 %==============================
 % PDF inclusion
 %==============================
