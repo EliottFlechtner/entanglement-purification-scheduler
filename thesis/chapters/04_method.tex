@@ -48,13 +48,13 @@ configuration is the tuple
 \]
 where, for each hop $i$: $\ell_i$ is its length, $\vec{b}^{(i)}$ is the
 tree-code branching vector used to build its half-RGS, $k_i$ is its number of
-redundant \gls{bsm} arms, $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$
+redundant \Gls{bsm} arms, $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$
 are its inner-qubit measurement error rates, and $\eta_i$ is its photon
 survival probability. The remaining three parameters are shared across the
 whole chain rather than defined per hop: $e_d$ is the outer-photon
 depolarizing rate, $\gamma$ is the memory dephasing rate, and $c$ is the
 speed of light in the fiber.
-Per-arm \gls{bsm} success is capped at 50\%, independent of $\eta_i$ or
+Per-arm \Gls{bsm} success is capped at 50\%, independent of $\eta_i$ or
 $e_d$, a structural limit of passive linear-optical Bell measurement rather
 than a noise effect~\cite{Varnava2006Loss,Ewert20143,Benchasattabuse2026Bridging}\TOCITE{recheck if its varnava for the 50\% cloning}; this
 cap is exactly why each hop is built from $k_i$ redundant arms rather than a
@@ -137,7 +137,7 @@ Fig.\,4 example uses~\cite{Benchasattabuse2025Integrating}.
 %          Justification of Implementation.md §5.1
 
 A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted
-\gls{dag} and $\phi$ is a labelling function
+\Gls{dag} and $\phi$ is a labelling function
 \[
     \phi: T \to \mathcal{K}, \qquad
     \mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\},
@@ -150,7 +150,7 @@ worked schedule of Figure~\ref{fig:model:dag-example}:
 \begin{itemize}
     \item \cswatch{dagGen}\enspace\texttt{GenNode} (light-blue ellipse): half-RGS generation; these
         nodes are always the leaves of $T$ at $\kappa=\mathtt{RGSS}$;
-    \item \cswatch{dagBsm}\enspace\texttt{AbsaBsmNode} (orange box): the photonic \gls{bsm} that turns
+    \item \cswatch{dagBsm}\enspace\texttt{AbsaBsmNode} (orange box): the photonic \Gls{bsm} that turns
         two same-hop half-RGSs into a single-hop edge;
     \item \cswatch{dagJoin}\enspace\texttt{JoinNode} (green box): entanglement swapping, stitching two
         adjacent spans into a wider one;
