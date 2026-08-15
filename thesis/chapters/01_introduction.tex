@@ -4,60 +4,90 @@
 \section{Motivation}
 \label{sec:intro:motivation}
 
-\TODO{Quantum networks promise secure communication and distributed quantum
-computation. Noisy Bell pairs are the central bottleneck. Purification
-protocols improve fidelity at the cost of consuming additional copies. Searching
-for optimal purification schedules is a combinatorial problem that has not been
-fully addressed.}
+Realizing a Quantum Internet~\cite{VanMeter2014Quantum,Kozlowski2023Architectural}, i.e. a network connecting quantum devices over long distances, would enable applications with no classical equivalent~\cite{Azuma2023Quantum,Hajdusek2023Quantum}. \Gls{qkd} provides a shared secret key whose secrecy is guaranteed by the laws of physics rather than by an eavesdropper's computing power~\cite{Bennett1992Quantum,Bennett2014Quantum,Scarani2009Security}. \Gls{dqc} lets several small quantum processors, connected by such a network, act together as one larger one~\cite{Cirac1999Distributed,Boschero2025Distributed}. Finally, networked quantum sensing improves measurement precision beyond what independent classically connected sensors can reach~\cite{Azuma2023Quantum,Proctor2017Networked,Proctor2018Multiparameter}. What each of these applications needs from the network is the same underlying resource: entanglement, distributed between distant nodes as a shared high-fidelity Bell pair, also called an \emph{ebit}. Direct photon transmission cannot supply it over long distances: channel loss grows exponentially with length, so the probability of a photon surviving the trip becomes negligible well before metropolitan-scale distances are reached. Quantum repeaters address this by dividing a long channel into shorter elementary links and combining the resulting short-range entanglement into a single end-to-end pair~\cite{Briegel1998Quantum,Grudka2008Entanglementswapping}; Chapter~\ref{chap:related} reviews how successive repeater generations achieve this.
+
+Regardless of what repeater generation is used, the delivered entanglement is noisy. Entanglement purification is one of the standard tools for turning that noisy entanglement into a usable resource. It consumes several independently generated copies of a shared pair and returns fewer copies of higher fidelity~\cite{Bennett1996Purification,Deutsch1996Quantum}. Each purification round spends copies and generation effort for a fidelity gain, and succeeds only probabilistically. In a multi-hop repeater chain, purification can be applied at many points at once: during generation, at intermediate swapping stations, or at the two end nodes. Each application can be made in varying amounts and with different circuit choices. This thesis studies one specific and practically motivated instance of that decision: the all-photonic repeater architecture built from \glspl{rgs}~\cite{Azuma2015All}, in which purification can be applied directly during generation and swapping rather than only after entanglement is already established. Deciding how to allocate a fixed purification budget across such a chain, so that the resulting rate or fidelity is as good as possible, is a combinatorial scheduling problem and the central one this thesis addresses.
 
 \section{The Scheduling Gap}
 \label{sec:intro:gap}
 
-\TODO{Bencha et al.\ established the HRGS architecture and showed that
-purification can be inserted at any stage (RGSS, link, end-node) with
-optimistic (blind) execution to avoid double heralding round-trips.
-Their numerical results use a single hand-chosen schedule and explicitly
-note that schedule optimization remains open. This thesis aims to fill that gap.
-Define the two source-paper shorthand names here, the first time both papers
-are discussed, rather than in Chapter~\ref{chap:background}: introduce
-\cite{Benchasattabuse2026Bridging} as \emph{the Bridging paper} and
-\cite{Benchasattabuse2025Integrating} as \emph{the Integrating paper}
-(both by Benchasattabuse, Hajdušek, and Van Meter), and state that every
-later chapter uses these two shorthand names consistently instead of
-repeating the full citations or author list.}
+Two recent papers, by Benchasattabuse, Hajdušek, and Van Meter, set up the specific architecture and the specific scheduling flexibility this thesis builds on. Throughout this thesis, \cite{Benchasattabuse2026Bridging} is referred to as \emph{the Bridging paper} and \cite{Benchasattabuse2025Integrating} as \emph{the Integrating paper}; every later chapter uses these two shorthand names instead of repeating the full citation or author list.
+
+The Bridging paper introduces the \gls{hrgs} building block: half of a \gls{rgs}, generated and held at a single station rather than requiring the full state to exist in one place, allowing an end node to act as its own source of entanglement. This enables the all-photonic scheme to interoperate with conventional memory-equipped repeater nodes instead of requiring every intermediate station to be purely photonic~\cite{Benchasattabuse2026Bridging}. The Integrating paper then shows that entanglement purification can be inserted into this architecture at any stage, generation, link, or end node, and mixed freely between stages, provided it is executed \emph{optimistically}~\cite{Benchasattabuse2025Integrating}, i.e. without waiting for a classical heralding outcome. All outcomes are then compared only once, in a single deferred round at the end. This avoids paying a classical round-trip delay for every purification attempt, which is what makes purification worth inserting at all under the Integrating paper's timing model.
+
+Both papers, however, demonstrate this flexibility with a single hand-chosen schedule, and the Integrating paper explicitly identifies searching for a better one, given a fixed physical network and resource budget, as an open problem. No systematic account exists of how the resulting schedule space should be searched, which allocations of a fixed budget across a chain actually perform best, or whether the conclusions drawn from one hand-picked schedule still hold once the noise model or the chain length change. This is the scheduling gap this thesis addresses. Concretely, the research problem is: given a fixed network configuration (topology, per-hop noise parameters, and a resource budget), find a purification schedule, from the combinatorially many ways of choosing where to purify, how many copies to consume, with which circuit, and in what order, that optimizes a stated objective such as rate, fidelity, or cost. The working hypothesis is that systematically searching this space yields schedules that are measurably better than the hand-picked baseline at matched cost. More importantly, it should also yield schedules that stay feasible in regimes where the hand-picked baseline does not. Characterising this advantage across network configurations the source papers never tested, and not only at their own nominal configuration, is a central part of this thesis.
 
 \section{Research Objectives and Contributions}
 \label{sec:intro:contributions}
 
-\TODO{State the four concrete contributions:
+Addressing this gap requires, first, a precise object to search over, since neither source paper formalises the schedule space itself, and second, algorithms that can search that space automatically rather than by hand. This thesis makes four concrete contributions toward that end.
+
 \begin{enumerate}
-    \item A formal DAG-based model of the schedule space for HRGS-based
-          quantum repeaters, with a bottom-up evaluator that reproduces
-          closed-form benchmarks from prior work to 4 significant figures.
-    \item A three-tier search framework (structured brute force,
-          span-partition DP, and beam search). The pumping-enabled DP and
-          beam tiers are bounded heuristics; every returned schedule is,
-          however, structurally validated and evaluated by the same physical
-          model. At the paper configuration, the matched-cost result improves
-          rate by $2.5\%$; the current default budget-relaxed result achieves
-          rate 6195.95 at cost 60, while a pinned pre-pumping reproduction
-          obtains 6713.18 at cost 50.
-    \item An empirical characterisation of the regimes where scheduling
-          changes feasibility or quality, covering outer and inner-qubit
-          noise, BSM-arm redundancy, hop count, memory decoherence
-          ($\gamma$), and generation timing ($\tau_{\mathrm{emit}}$).
-    \item Five named, evidence-backed design findings. In particular, within
-          the searched families the minimum feasible budget over $N=10$--28
-          is described by $e_{\max}^{\min} \approx 1.369\,N^{1.620}$;
-          this is a descriptive fit, not an asymptotic law, and its
-          crossover with $10N$ is beam-width-sensitive.
-\end{enumerate}}
+    \item A formal, \gls{dag}-based model of the schedule space for
+          \gls{hrgs}-based quantum repeaters (Chapter~\ref{chap:model}), together
+          with a bottom-up evaluator that reproduces the source paper's own
+          fidelity benchmarks for the three canonical schedule types (raw,
+          baseline, and flexible) to four significant figures
+          (Chapter~\ref{chap:algorithms}).
+    \item A three-tier search framework, comprising structured brute-force
+          baselines, an exact span-partition \gls{dp} with a
+          same-span pumping extension, and a beam search
+          (Chapter~\ref{chap:algorithms}). The pumping-enabled \gls{dp} and beam
+          tiers are bounded heuristics, but every schedule they return is
+          structurally validated and evaluated by the same physical model as
+          the exact tiers, with no separate search-time approximation of
+          fidelity, rate, or cost. At the paper's own configuration, the
+          matched-cost result improves rate by $2.5\%$; the default
+          budget-relaxed result achieves rate $6195.95$ at cost $60$
+          ($52.8\%$ higher rate than the paper's schedule, at $60\%$ of its
+          budget), while a pinned pre-pumping reproduction obtains rate
+          $6713.18$ at cost $50$ (Chapter~\ref{chap:results}).
+    \item An empirical study of the regimes in which scheduling changes
+          feasibility rather than only quality, varying outer- and
+          inner-qubit noise, redundancy in the number of \gls{bsm} arms per
+          hop, the number of hops, memory decoherence, and generation timing
+          (Chapters~\ref{chap:results}--\ref{chap:discussion}). The strongest
+          result in this category is a feasibility advantage rather than a
+          rate improvement: under non-ideal inner-qubit error, the paper's
+          own schedule fails the $F \ge 0.9$ fidelity floor, while a searched
+          schedule at the same budget still clears it.
+    \item \TOFIX{confirm these findings and their framing before finalising}{Five
+          named design findings extracted from that characterisation
+          (Chapter~\ref{chap:discussion}). In particular, within the
+          searched families the minimum feasible budget over $N=10$--28 is
+          described by $e_{\max}^{\min} \approx 1.369\,N^{1.620}$; this is a
+          descriptive fit, not an asymptotic law, and its crossover with the
+          paper's linear budget formula $10N$ is beam-width-sensitive.}
+\end{enumerate}
+
+\TOFIX{confirm framing before finalising}{Every result above is an existence claim within the families of schedules actually searched, not a proof of global optimality; Section~\ref{sec:disc:scope} returns to this distinction.}
 
 \section{Thesis Outline}
 \label{sec:intro:outline}
 
-\TODO{Give the roadmap in this order: state of the art and project
-positioning (Chapter~2), background and notation (Chapter~3), formal
-model and research problem (Chapter~4), algorithms and implementation
-(Chapter~5), experiments and results (Chapter~6), discussion and
-limitations (Chapter~7), and conclusion and perspectives (Chapter~8).}
+The remaining chapters proceed as follows. Chapter~\ref{chap:related}
+(\emph{Related Work and State of the Art}) surveys quantum repeater
+protocols, entanglement purification, and repeater-graph-state
+architectures, and positions this thesis relative to that state of the
+art. Chapter~\ref{chap:background} (\emph{Background and Preliminaries})
+introduces the physical objects the rest of the thesis builds on:
+\TOFIX{to revisit once chapter 3 is finished}{Bell pairs and the
+\gls{hrgs} architecture, the error-vector and side-effect
+representations used to track a resource's quality through a schedule,
+and the purification circuits and optimistic-execution model from the
+Bridging and Integrating papers.} Chapter~\ref{chap:model} (\emph{The
+Formal Model}) turns these objects into a formal, searchable model: the
+network configuration, the state carried by each partially built
+resource, the schedule itself as a \gls{dag} of operations, the resource
+budget, and the optimization objectives this thesis considers.
+Chapter~\ref{chap:algorithms} (\emph{Search Methods}) describes the
+shared evaluator and the three search tiers built on top of that model.
+Chapter~\ref{chap:results} (\emph{Experiments and Results}) reports the
+experimental setup, validates the evaluator against the source papers,
+and presents the search results across the tested regimes.
+Chapter~\ref{chap:discussion} (\emph{Discussion}) draws out the five
+design findings and discusses when scheduling matters and when it does
+not. It also states the scope within which the reported results should
+be read as optimal, and lists the limitations of this work.
+Chapter~\ref{chap:conclusion} (\emph{Conclusion}) summarises the
+contributions and outlines directions for future work.
