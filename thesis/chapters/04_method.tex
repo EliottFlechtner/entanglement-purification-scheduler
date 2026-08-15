@@ -7,10 +7,10 @@
 %          Benchasattabuse2025Integrating,
 %          Benchasattabuse2026Bridging
 
-Chapter~\ref{chap:related} showed that the source paper
+As established in Chapter~\ref{chap:intro} (Section~\ref{sec:intro:gap}), the source paper
 \cite{Benchasattabuse2025Integrating} demonstrates purification schedules that
-mix generation, link-level, and end-node purification; however, this is only done through one
-hand-picked example and leaves the search for a better schedule as an open
+mix generation, link-level, and end-node purification through a single
+hand-picked example, leaving the search for a better schedule as an open
 problem. Turning this into a problem that can actually be searched requires a
 precise object to search over. This chapter builds that object step by step:
 the given physical network configuration (Section~\ref{sec:model:network}), the state carried by
@@ -54,9 +54,8 @@ survival probability. The remaining three parameters are shared across the
 whole chain rather than defined per hop: $e_d$ is the outer-photon
 depolarizing rate, $\gamma$ is the memory dephasing rate, and $c$ is the
 speed of light in the fiber.
-Per-arm \Gls{bsm} success is capped at 50\%, independent of $\eta_i$ or
-$e_d$, a structural limit of passive linear-optical Bell measurement rather
-than a noise effect~\cite{Varnava2006Loss,Ewert20143,Benchasattabuse2026Bridging}\TOCITE{recheck if its varnava for the 50\% cloning}; this
+As established in Section~\ref{sec:bg:bellpairs}, per-arm \Gls{bsm} success is capped at 50\%, independent of $\eta_i$ or
+$e_d$~\cite{Varnava2006Loss,Ewert20143,Benchasattabuse2026Bridging}\TOCITE{recheck if its varnava for the 50\% cloning}; this
 cap is exactly why each hop is built from $k_i$ redundant arms rather than a
 single attempt.
 
