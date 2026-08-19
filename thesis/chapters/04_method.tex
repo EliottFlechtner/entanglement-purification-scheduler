@@ -134,6 +134,8 @@ Fig.\,4 example uses~\cite{Benchasattabuse2025Integrating}.
 % Source: Validated Formal Model Def.md §4, schedule/node.py,
 %          Justification of Implementation.md §5.1
 
+\glsreset{dag}
+
 A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted
 \Gls{dag} and $\phi$ is a labelling function
 \[
@@ -255,27 +257,20 @@ where $n_{\mathrm{pur}}$ is the number of extra half-RGS copies generated per
 purification round, $e_{\max}$ is the maximum number of \texttt{Gen} leaves
 $T$ is allowed to contain, and $M_{\max}$ is the maximum number of branches
 that may be under construction at the same time.
-\TOFIX{future work}{$M_{\max}$ is defined here as part of the formal budget
-but is not yet used anywhere in this thesis; fit its actual enforcement in as
-a future-work extension rather than pretending it is already handled.}
 
-A schedule $\Sigma$ is \emph{feasible} with respect to $B$ if it uses at most
+A schedule $\Sigma$ is \emph{formally feasible} with respect to $B$ if it uses at most
 $e_{\max}$ \texttt{Gen} leaves and never holds more than $M_{\max}$ branches
 open at once. The resource cost $C(\Sigma)$ used throughout
 Chapter~\ref{chap:results} is simply the number of \texttt{Gen} leaves in $T$,
-so feasibility with respect to $e_{\max}$ is the same as $C(\Sigma) \le
-e_{\max}$.
+so the enforced budget condition in the present implementation is
+$C(\Sigma) \le e_{\max}$. The simultaneous-branch condition $M_{\max}$ is
+part of the formal model but is not yet enforced; its practical consequence is
+stated in Section~\ref{sec:model:scope}.
 
 The source paper's own budget convention is $e_{\max} = 10N$: five half-RGS
 copies per side, on both sides, for every hop. This convention is used as the
 reference budget throughout the experiments, and Section~\ref{sec:exp:budget}
 asks directly whether it remains large enough as $N$ grows.
-$M_{\max}$ is part of the formal budget but, as stated in
-Section~\ref{sec:model:scope}, it is not currently enforced by the search or
-by the DAG validator; every reported result should be read with this in mind.
-\TOFIX{future work}{Same note as above: revisit this paragraph once/if
-$M_{\max}$ enforcement is actually added, this thesis currently only defines
-it.}
 
 \section{Objective Functions and the Optimization Problem}
 \label{sec:model:objectives}
@@ -329,8 +324,6 @@ This model rests on three simplifying choices, stated explicitly here before any
 First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before execution starts and cannot branch on an intermediate measurement outcome. A fully adaptive scheme, where the choice of the next purification round depends on the fidelity estimate so far, would need a different formulation, most naturally a Markov decision process~\cite{Puterman2009Markov,Sutton2014Reinforcement}. This is left to future work (Section~\ref{sec:conc:future}).
 
 Second, $M_{\max}$ is part of the budget $B$ but is not enforced anywhere in the current implementation, neither during search nor during DAG validation. Every reported resource cost $C(\Sigma)$ is therefore a lower bound on the number of physical qubit slots a real device would need to run that schedule, since it does not account for how many branches must be held in memory at once.
-
-\TOFIX{future work}{Consistent with the notes in Section~\ref{sec:model:budget}: $M_{\max}$ is defined but not enforced; keep this paragraph in sync if that changes.}
 
 Third, the error model throughout this thesis is the Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, the same assumption made by the source paper. Comparisons between schedules are made under this one noise model, so a ranking that holds here is not automatically guaranteed to transfer to a device dominated by a different error channel, for example pure photon loss without any depolarizing component. This point is returned to in Section~\ref{sec:disc:limitations}.
 
