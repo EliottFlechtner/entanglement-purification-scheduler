@@ -7,28 +7,9 @@
 %          Benchasattabuse2025Integrating,
 %          Benchasattabuse2026Bridging
 
-As established in Chapter~\ref{chap:intro} (Section~\ref{sec:intro:gap}), the source paper
-\cite{Benchasattabuse2025Integrating} demonstrates purification schedules that
-mix generation, link-level, and end-node purification through a single
-hand-picked example, leaving the search for a better schedule as an open
-problem. Turning this into a problem that can actually be searched requires a
-precise object to search over. This chapter builds that object step by step:
-the given physical network configuration (Section~\ref{sec:model:network}), the state carried by
-each partially-built Bell pair (Section~\ref{sec:model:state}), the schedule
-itself as a graph of operations (Section~\ref{sec:model:dag}), the resources it
-is allowed to consume (Section~\ref{sec:model:budget}), and finally the
-optimization problem this thesis addresses (Section~\ref{sec:model:objectives}).
-Section~\ref{sec:model:scope} closes the chapter by stating precisely which
-schedules are excluded from this model and why.
+As established in Chapter~\ref{chap:intro} (Section~\ref{sec:intro:gap}), the Integrating paper \cite{Benchasattabuse2025Integrating} demonstrates purification schedules that mix generation, link-level, and end-node purification through a single hand-picked example, leaving the search for a better schedule as an open problem. Turning this into a problem that can actually be searched requires a precise object to search over. This chapter builds that object step by step: the given physical network configuration (Section~\ref{sec:model:network}), the state carried by each partially-built Bell pair (Section~\ref{sec:model:state}), the schedule itself as a graph of operations (Section~\ref{sec:model:dag}), the resources it is allowed to consume (Section~\ref{sec:model:budget}), and finally the optimization problem this thesis addresses (Section~\ref{sec:model:objectives}). Section~\ref{sec:model:scope} closes the chapter by stating precisely which schedules are excluded from this model and why.
 
-\TOFIX{proofread}{The building blocks introduced in Chapter~\ref{chap:background}, generation,
-joining, and backbone selection, are reused without redefinition in what
-follows. Together they make up what this thesis calls the \emph{backbone
-layer}: the fixed, protocol-determined process of establishing entanglement,
-which no schedule can alter. This chapter is concerned with the
-\emph{scheduling layer} built on top of it: which of the genuinely optional
-decisions -- where to insert purification, with which circuit, and in what
-order -- a schedule actually makes, and how competing schedules are compared.}
+The building blocks introduced in Chapter~\ref{chap:background} -- generation, joining, and backbone selection -- are reused without redefinition below. Together, they form the \emph{backbone layer}: the fixed, protocol-determined process of establishing entanglement. This chapter defines the \emph{scheduling layer} built on top of it: where to insert purification, which circuit to use, in what order to apply operations, and how to compare the resulting schedules.
 
 \section{Network Configuration}
 \label{sec:model:network}
@@ -44,23 +25,21 @@ configuration is the tuple
 \[
     \mathcal{N} = \Bigl(N,\ \{\ell_i\},\ \{\vec{b}^{(i)}\},\
     \{k_i\},\ \bigl\{(p_{\mathrm{in},i}^{X}, p_{\mathrm{in},i}^{Z})\bigr\},\
-    \{\eta_i\},\ e_d,\ \gamma,\ c\Bigr),
+    \{\eta_i\},\ e_d,\ \gamma,\ c,\ \tau_{\mathrm{emit}}\Bigr),
 \]
-where, for each hop $i$: $\ell_i$ is its length, $\vec{b}^{(i)}$ is the
-tree-code branching vector used to build its half-RGS, $k_i$ is its number of
-redundant \Gls{bsm} arms, $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$
-are its inner-qubit measurement error rates, and $\eta_i$ is its photon
-survival probability. The remaining three parameters are shared across the
-whole chain rather than defined per hop: $e_d$ is the outer-photon
-depolarizing rate, $\gamma$ is the memory dephasing rate, and $c$ is the
-speed of light in the fiber.
-As established in Section~\ref{sec:bg:bellpairs}, per-arm \Gls{bsm} success is capped at 50\%, independent of $\eta_i$ or
-$e_d$~\cite{Varnava2006Loss,Ewert20143,Benchasattabuse2026Bridging}\TOCITE{recheck if its varnava for the 50\% cloning},
-which is why $k_i$ is part of $\mathcal{N}$.
+where, for each hop $i$: $\ell_i$ is its length; $\vec{b}^{(i)}$ is the list
+of tree-encoding branching factors at successive levels; $k_i$ is its number
+of redundant \Gls{bsm} arms; $p_{\mathrm{in},i}^{X}$ and
+$p_{\mathrm{in},i}^{Z}$ are its inner-qubit measurement error rates; and
+$\eta_i$ is its photon survival probability. The remaining parameters are
+shared across the chain: $e_d$ is the outer-photon depolarizing rate, $\gamma$
+is the memory dephasing rate, $c$ is the signal propagation speed in the fiber,
+and $\tau_{\mathrm{emit}}$ is an optional per-qubit emission or gate-cycle time
+used to model branching-dependent generation latency. Conditional on photon
+arrival, per-arm \Gls{bsm} success is capped at 50\%~\cite{Ewert20143,Benchasattabuse2026Bridging}. The factor $\eta_i$ accounts separately for transmission loss, while $k_i$ supplies redundancy against the measurement ceiling.
 
-\TOFIX{rewrite after chap 6}{Every experiment in this thesis starts from the same configuration, the one
-used throughout the source paper. Writing it as $\mathcal{N}_{\mathrm{src}}$,
-it is $\mathcal{N}$ with every hop identical:
+Unless stated otherwise, experiments start from the source-paper reference
+configuration, written $\mathcal{N}_{\mathrm{src}}$. It has identical hops:
 \[
     N = 10,\quad \ell_i = 2\text{ km},\quad \vec{b}^{(i)} = (16,14,1),\quad
     k_i = 18\ \ \forall i,\qquad e_d = 0.01,\quad \gamma = 0,
@@ -70,32 +49,43 @@ it is $\mathcal{N}$ with every hop identical:
     c = 2\times 10^{5}\text{ km/s}.
 \]
 The remaining per-hop parameter, $\eta_i$, is not itself set to a fixed
-number: it is computed from $\ell_i$ through a fixed fiber attenuation
-coefficient, so specifying $\ell_i$ above already fixes it.
-$\mathcal{N}_{\mathrm{src}}$ is the starting point for every experiment in
-Chapter~\ref{chap:results}; each section there then varies one or two of its
-fields (most often $e_d$, $k_i$, or $\gamma$) while holding the rest fixed at
-these values, and restates which fields are varied at the start of that
-section.}
+number: it is computed from $\ell_i$ with attenuation
+$\alpha=0.2\text{ dB/km}$, so $\eta_i=10^{-\alpha\ell_i/10}\approx0.912$.
+The reference configuration leaves $\tau_{\mathrm{emit}}$ unset, so the default
+evaluator adds no branching-derived generation offset to the latency.
+Section~\ref{sec:exp:timing} explicitly enables and varies this parameter.
 
-\TODO{Add a table with one row per field of $\mathcal{N}$ ($N$, $\ell_i$,
-$\vec{b}^{(i)}$, $k_i$, $p_{\mathrm{in},i}^{X}$, $p_{\mathrm{in},i}^{Z}$,
-$\eta_i$, $e_d$, $\gamma$, $c$): its symbol, its value in
-$\mathcal{N}_{\mathrm{src}}$, and, if it is ever swept away from that value,
-a pointer to the section of Chapter~\ref{chap:results} that sweeps it (e.g.\
-$e_d$ in Section~\ref{sec:exp:budgeted}, $k_i$ in
-Section~\ref{sec:exp:excluded}, $\gamma$ in Section~\ref{sec:exp:timing}).
-Check these section labels are actually the right ones once
-Chapter~\ref{chap:results} is finalized.}
+\begin{table}[ht]
+    \centering
+    \caption{Reference configuration and parameter studies. Values marked
+    ``held fixed'' remain unchanged in the reported sweeps.}
+    \label{tab:model:reference-config}
+    \small
+    \begin{tabular}{lll}
+        \hline
+        Parameter & Reference value & Varied in \\
+        \hline
+        $N$ & $10$ & Section~\ref{sec:exp:budget} \\
+        $\ell_i$ & $2\text{ km}$ & held fixed \\
+        $\vec{b}^{(i)}$ & $(16,14,1)$ & held fixed \\
+        $k_i$ & $18$ & Section~\ref{sec:exp:netgen} \\
+        $p_{\mathrm{in},i}^{X},p_{\mathrm{in},i}^{Z}$ & $0,0$ & Section~\ref{sec:exp:netgen} \\
+        $\eta_i$ & $\approx0.912$ (derived) & held fixed \\
+        $e_d$ & $0.01$ & Sections~\ref{sec:exp:edsweep}, \ref{sec:exp:budgeted} \\
+        $\gamma$ & $0$ & Section~\ref{sec:exp:timing} \\
+        $\tau_{\mathrm{emit}}$ & unset & Section~\ref{sec:exp:timing} \\
+        $c$ & $2\times10^5\text{ km/s}$ & held fixed \\
+        \hline
+    \end{tabular}
+\end{table}
 
 \section{Representing a Partially-Built Bell Pair}
 \label{sec:model:state}
 
 % Source: Validated Formal Model Def.md §3.1, schedule/state.py
 
-At any point during its construction, a partially-built Bell pair, meaning one
-that has not yet been extended all the way to the two end stations, is
-represented by a state:
+Every resource produced while a schedule is evaluated, from a local half-RGS
+to the final end-to-end pair, is represented by a state:
 \[
     S = \bigl(\mathbf{e},\; s,\; t,\; t_{\mathrm{gen}},\; \kappa,\; r,\; h\bigr).
 \]
@@ -104,10 +94,11 @@ Section~\ref{sec:bg:errorvec}, and $s$ is the Z side-effect parity from
 Section~\ref{sec:bg:sideffects}. The remaining fields are new to the
 scheduling layer:
 \begin{itemize}
-    \item $t$ and $t_{\mathrm{gen}}$ are the current simulated time and the
-          time this particular resource was generated at, respectively. Their difference,
-          $\Delta t_{\mathrm{idle}} = t - t_{\mathrm{gen}}$, is the idle time
-          used by the decoherence law of Section~\ref{sec:bg:decoherence}.
+        \item $t$ and $t_{\mathrm{gen}}$ are the current simulated time and the
+            time at which the resource was first generated, respectively. Their
+            difference, $\Delta t_{\mathrm{idle}} = t - t_{\mathrm{gen}}$, tracks
+            its elapsed waiting time for the decoherence law of
+            Section~\ref{sec:bg:decoherence}.
     \item $\kappa \in \mathcal{K}$ is the \emph{span} of the resource, where
           $\mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a
           < b \le N\}$ is the set of possible spans for a given network configuration
@@ -137,7 +128,7 @@ Fig.\,4 example uses~\cite{Benchasattabuse2025Integrating}.
 \glsreset{dag}
 
 A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted
-\Gls{dag} and $\phi$ is a labelling function
+\Gls{dag} and $\phi$ is a labeling function
 \[
     \phi: T \to \mathcal{K}, \qquad
     \mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\},
@@ -151,7 +142,7 @@ worked schedule of Figure~\ref{fig:model:dag-example}:
     \item \cswatch{dagGen}\enspace\texttt{GenNode} (light-blue ellipse): half-RGS generation; these
         nodes are always the leaves of $T$ at $\kappa=\mathtt{RGSS}$;
     \item \cswatch{dagBsm}\enspace\texttt{AbsaBsmNode} (orange box): the photonic \Gls{bsm} that turns
-        two same-hop half-RGSs into a single-hop edge;
+        two RGSS-local resources from the same hop into a single-hop edge;
     \item \cswatch{dagJoin}\enspace\texttt{JoinNode} (green box): entanglement swapping, stitching two
         adjacent spans into a wider one;
     \item \cswatch{dagPurify}\enspace\texttt{PurifyNode} (purple box): a two-to-one $\mathcal C_\mathrm{YY}$, $\mathcal C_\mathrm{ZX}$, or $\mathcal C_\mathrm{XZ}$ circuit
@@ -166,41 +157,45 @@ worked schedule of Figure~\ref{fig:model:dag-example}:
 \end{itemize}
 
 \paragraph{Optimistic versus heralded schedules.}
-A schedule $\Sigma$ is called \emph{optimistic} if no \texttt{HeraldNode}
-appears as an ancestor of any \texttt{PurifyNode} in $T$; equivalently,
-all heralding is deferred to the single \texttt{HeraldNode} placed
-directly below \texttt{PauliCorrectNode} at the root.
-This is not a predefined property of the schedule object: it is read
-directly from the graph structure of $T$.
-A schedule in which \texttt{HeraldNode} appears \emph{between}
-consecutive \texttt{PurifyNode} steps is \emph{heralded}; each such
-intermediate herald forces a classical round-trip ($2L/c$) before the
-next purification round may begin.
-Every schedule in this thesis is either fully optimistic or fully
-heralded; the DAG representation supports mixed cases, but the
-experiments do not explore them.
+A schedule $\Sigma$ is \emph{fully optimistic} when no \texttt{HeraldNode}
+separates consecutive \texttt{PurifyNode} steps on any branch. In the
+optimistic schedules used here, all heralding is deferred to one
+\texttt{HeraldNode} directly below \texttt{PauliCorrectNode} at the root.
+A schedule is \emph{fully heralded} when a \texttt{HeraldNode} is placed
+between consecutive purification rounds; each intermediate herald forces a
+classical round-trip ($2L/c$) before the next round may begin. Optimism is
+therefore a property read from the graph structure of $T$, not a label attached
+to an individual purification operation. The DAG representation supports mixed
+cases, but the experiments compare only fully optimistic and fully heralded
+schedules.
 
 
 \subsection{Legality Conditions}
 \label{sec:model:legality}
 
-A graph $T$ is a \emph{legal} schedule if and only if the following four conditions
-all hold:
+A graph $T$ is a \emph{structurally legal} schedule when it has one
+\texttt{PauliCorrectNode} root, is acyclic, contains no unreachable nodes, and
+obeys the following stage constraints:
 \begin{enumerate}
     \item[(i)] \texttt{GenNode}s may only appear at $\kappa = \mathtt{RGSS}$;
-    \item[(ii)] a \texttt{PurifyNode}'s two children must share the same
-          $\kappa$, i.e.\ the span-matching rule stated informally in
-          Section~\ref{sec:model:state}, now expressed as a structural condition
-          on $T$ rather than a property of two states;
-    \item[(iii)] a \texttt{JoinNode}'s two children must share an endpoint,
+    \item[(ii)] an \texttt{AbsaBsmNode} consumes two RGSS-local resources for
+        one hop and produces $\mathrm{Span}(i,i+1)$;
+    \item[(iii)] a \texttt{PurifyNode}'s two children must share the same
+        $\kappa$, i.e.\ the span-matching rule stated informally in
+        Section~\ref{sec:model:state};
+    \item[(iv)] a \texttt{JoinNode}'s two children must be either two
+        RGSS-local resources or \TOFIX{what does that mean?}{spans that share an endpoint}. For the latter,
           i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$ (the two spans need not
           come from neighbouring hops, only meet at station $b$), and it then
           produces $(a,c)$;
-    \item[(iv)] the root must sit at $\kappa=\mathrm{Span}(0,N)$.
+    \item[(v)] \texttt{IdleNode} and \texttt{HeraldNode} preserve their
+        child's $\kappa$;
+    \item[(vi)] the root must receive a resolved state at
+        $\kappa=\mathrm{Span}(0,N)$.
 \end{enumerate}
-These four conditions are the complete legality specification: any graph
-satisfying all four is a schedule that the physical hardware described in
-Section~\ref{sec:model:network} is capable of executing.
+The implementation checks the root, graph structure, and stage consistency
+before evaluation, while the evaluator repeats the physical preconditions on
+the corresponding resource states.
 
 This representation was checked against the source paper's own Fig.\,4
 schedule~\cite{Benchasattabuse2025Integrating}, which builds one Bell pair
@@ -219,13 +214,13 @@ combination legal.
     \caption{\small%
         $N=2$ example schedule $\Sigma$ illustrating all seven node types
         ($C(\Sigma)=10$ \texttt{GenNode} leaves).
-        \textbf{Trial~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY}
+        \textbf{Copy~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY}
         at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{AbsaBsmNode};
         hop~1 is raw.
-        \textbf{Trial~B} (right subtree): identical except the right-side
+        \textbf{Copy~B} (right subtree): identical except the right-side
         hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed)
         modelling a synchronisation wait before the \texttt{AbsaBsmNode}.
-        Both trials are joined into $\kappa=(0,2)$ by a \texttt{JoinNode}, then
+        The two copies are joined into $\kappa=(0,2)$ by a \texttt{JoinNode}, then
         combined by \texttt{PurifyNode-XZ}.
         The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ}
         makes this an optimistic schedule (Section~\ref{sec:model:dag}).
@@ -235,14 +230,11 @@ combination legal.
     \label{fig:model:dag-example}
 \end{figure}
 
-\TOFIX{rewrite after chap 6}{Recheck this claim and the exact figure (four
-significant figures) once Chapter~\ref{chap:results}/Section~6.2 is
-finalized, the numbers and the cross-reference target may still move.
-Section~\ref{sec:exp:validation} confirms this representation is not just
-descriptive: evaluating the three canonical schedule shapes (raw, end-node
-heralded, end-node optimistic) through the same bottom-up pass used everywhere
-else in this thesis reproduces the source paper's own closed-form fidelity
-numbers to four significant figures.}
+Section~\ref{sec:exp:validation} confirms that this representation is not
+merely descriptive: evaluating the raw, end-node-heralded, and end-node-
+optimistic canonical schedules through the same bottom-up pass used elsewhere
+in this thesis reproduces the source paper's fidelity values to four significant
+figures.
 
 \section{Resource Budget}
 \label{sec:model:budget}
@@ -278,33 +270,34 @@ asks directly whether it remains large enough as $N$ grows.
 % Source: cost_functions.py, Validated Formal Model Def.md §6,
 %         Optimizer Status.md §Shared Optimization Contract
 
-Four quantities can be read off the finished schedule DAG by a single
+Four metrics can be read from the finished schedule DAG by a single
 bottom-up pass:
 \begin{itemize}
     \item fidelity $F(\Sigma)$, the $w$ component of the error vector at the
           root;
-    \item rate $R(\Sigma) = P_{\mathrm{success}} / T_{\mathrm{gen}}$,
-          combining the schedule's overall success probability with its
-          expected generation time under a renewal argument: if any branch
-          of $\Sigma$ fails partway through, the entire schedule restarts
-          from scratch rather than only retrying that branch, so
-          $T_{\mathrm{gen}}$ is the expected wall-clock time per successful
-          end-to-end pair once these full restarts are accounted for;
+    \item rate $R(\Sigma) = P_{\mathrm{success}} / T_{\mathrm{attempt}}$,
+        where $T_{\mathrm{attempt}}$ is the deterministic wall-clock duration
+        of one complete schedule attempt. Under the renewal model, a failed
+        purification restarts the entire non-adaptive schedule, so the
+        expected wall-clock time per successful pair is
+        $T_{\mathrm{attempt}}/P_{\mathrm{success}}$, whose reciprocal is
+        the stated rate;
     \item resource cost $C(\Sigma)$, defined in Section~\ref{sec:model:budget};
     \item latency $L(\Sigma)$, the makespan of $T$.
 \end{itemize}
 
 The optimization problem this thesis addresses is then
 \[
-    \Sigma^{*}(\mathcal{N}, B) = \argmax_{\substack{\Sigma \text{ legal w.r.t. } \mathcal{N} \\ \Sigma \text{ feasible w.r.t. } B}}
+    \Sigma^{*}(\mathcal{N}, e_{\max}) = \argmax_{\substack{\Sigma \text{ legal w.r.t. } \mathcal{N} \\ C(\Sigma) \le e_{\max}}}
     R(\Sigma;\mathcal{N}) \quad \text{s.t.} \quad F(\Sigma;\mathcal{N}) \ge F_{\min}.
 \]
-In other words, among every legal, feasible schedule, find the one with the highest
-rate that still clears a minimum fidelity requirement. This is the objective
+In other words, among the legal schedules within the enforced generation-count
+budget, find the one with the highest rate that still clears a minimum fidelity
+requirement. This is the objective
 used in every headline result in Chapter~\ref{chap:results} unless stated
 otherwise, with $F_{\min}=0.9$ matching the source paper's own threshold.
 
-The same four cost functions support other research questions by swapping
+The same four metrics support other research questions by swapping
 which one is maximized and which are constrained: maximizing $F$ subject to a
 rate floor asks for the best achievable quality at a given throughput;
 minimizing $C$ subject to floors on $F$ and $R$ asks for the cheapest hardware
@@ -321,9 +314,9 @@ function and the feasibility constraints need to be swapped.
 
 This model rests on three simplifying choices, stated explicitly here before any algorithm or result depends on them.
 
-First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before execution starts and cannot branch on an intermediate measurement outcome. A fully adaptive scheme, where the choice of the next purification round depends on the fidelity estimate so far, would need a different formulation, most naturally a Markov decision process~\cite{Puterman2009Markov,Sutton2014Reinforcement}. This is left to future work (Section~\ref{sec:conc:future}).
+First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before execution starts and cannot branch on an intermediate measurement or heralding outcome. A fully adaptive scheme would require a different formulation, most naturally a Markov decision process~\cite{Puterman2009Markov,Sutton2014Reinforcement}. This is left to future work (Section~\ref{sec:conc:future}).
 
 Second, $M_{\max}$ is part of the budget $B$ but is not enforced anywhere in the current implementation, neither during search nor during DAG validation. Every reported resource cost $C(\Sigma)$ is therefore a lower bound on the number of physical qubit slots a real device would need to run that schedule, since it does not account for how many branches must be held in memory at once.
 
-Third, the error model throughout this thesis is the Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, the same assumption made by the source paper. Comparisons between schedules are made under this one noise model, so a ranking that holds here is not automatically guaranteed to transfer to a device dominated by a different error channel, for example pure photon loss without any depolarizing component. This point is returned to in Section~\ref{sec:disc:limitations}.
+Third, conditional on a successful transmission, the fidelity-noise model throughout this thesis is the Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, the same assumption made by the source paper; photon loss instead enters the success probability. Comparisons between schedules are made under this one fidelity-noise model, so a ranking that holds here is not automatically guaranteed to transfer to a device dominated by a different error channel. This point is returned to in Section~\ref{sec:disc:limitations}.
 
