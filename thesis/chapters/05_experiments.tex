@@ -1,71 +1,61 @@
-\chapter{Algorithms and Implementation}
+\chapter{Search Methods}
 \label{chap:algorithms}
 
-\section{DAG Evaluator}
+% Sources: src/hrgs_scheduler/search/, docs/Optimizer Status.md,
+% docs/Justification of Implementation.md §4
+
+Three search tiers are implemented on top of one shared schedule representation and one shared evaluator. Every returned candidate is a concrete schedule $\Sigma$: it passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass from Section~\ref{sec:model:objectives}. The tiers differ only in which legal DAGs they consider. Search approximations can exclude a promising DAG before final ranking, but they do not change how fidelity, success probability, latency, or cost is calculated for a DAG that is returned.
+
+The chapter moves from evaluation to increasingly broad but less exhaustive search. Section~\ref{sec:alg:evaluator} describes the shared evaluator. Section~\ref{sec:alg:bruteforce} introduces the fixed baseline families, which are also retained as a safeguard against frontier pruning. Section~\ref{sec:alg:dp} then presents the span-partition recurrence, Section~\ref{sec:alg:pumping} states the additional same-span pumping move and its cap, and Section~\ref{sec:alg:beam} describes the beam-search heuristic used for the production-scale experiments in Chapter~\ref{chap:results}.
+
+\section{The DAG Evaluator}
 \label{sec:alg:evaluator}
 
-\TODO{Describe the inner-loop pass that walks the schedule DAG, applies
-each operation to the current state, accumulates decoherence, and returns
-the final $(\mathbf{e}, P_{\mathrm{success}}, T_{\mathrm{gen}})$ triple.
-Explain validation against the three canonical closed-form benchmarks.}
+% Source: schedule/evaluator.py, experiments/fig5_fidelity_vs_noise.py
 
-\section{Brute-Force Search}
+The evaluator makes one bottom-up pass over a schedule DAG. At each node it applies the corresponding physical operation to the current Pauli-channel state, synchronizes branches that become ready at different times, applies the resulting memory decoherence, and propagates side effects and timing. At the root it returns fidelity $F$, success probability $P_{\mathrm{success}}$, resource cost $C$, and latency $L$. Rate is then $R=P_{\mathrm{success}}/L$ under the full-restart model of Section~\ref{sec:model:objectives}.
+
+Section~\ref{sec:exp:validation} shows that this pass reproduces the source paper's Fig.\,5 fidelity numbers to four significant figures. That agreement validates the physical model the evaluator implements; it says nothing about whether any given search tier below finds a good schedule under that model, which is a separate question addressed by the rest of this chapter and by Chapter~\ref{chap:results}.
+
+\section{Fixed Schedule Families}
 \label{sec:alg:bruteforce}
 
-\TODO{Define the three configurable fixed families
-(end-node heralded, end-node optimistic, and uniform link-level
-purification), plus the unconditional \texttt{raw} baseline and, for
-even $N$ within budget, the \texttt{flexible\_paper} baseline.
-and the enumeration strategy. State the exact scope of what brute force
-covers and its computational cost.}
+% Source: search/brute_force.py, Optimizer Status.md §Tier 1
 
-\section{Dynamic-Programming Search}
+The first tier enumerates four fixed structural families: (1)~a single raw end-to-end chain, with no purification; (2)~end-node pumping, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds; (3)~the optimistic counterpart, which defers classical heralding until the end; and (4)~uniform link-level purification, applying the same copy count and circuit sequence at every hop. For even $N$ within budget, the Integrating paper's hand-chosen schedule~\cite{Benchasattabuse2025Integrating} (Chapter~\ref{chap:related}) is included as a fifth fixed comparison point. Within each family, purification sequences use the three two-copy circuits $\mathcal C_\mathrm{YY}$, $\mathcal C_\mathrm{ZX}$, and $\mathcal C_\mathrm{XZ}$ (Section~\ref{sec:bg:circuits}). All $3^r$ circuit sequences are enumerated up to a configured round cutoff $r_{\max}$; above it, the implementation uses a small curated set. Thus, ``brute force'' means exhaustive enumeration within these structural families and this circuit grid, not enumeration of every legal schedule DAG.
+
+These four families serve two purposes. First, they are the explicit baselines reported throughout Chapter~\ref{chap:results}: the raw chain and the source paper's schedule bound the problem and give the comparison target, while uniform link-level purification is the natural default a practitioner would reach for without doing any search. Second, their results are always added to the candidate set produced by the two search tiers below, so that none of these well-understood schedule classes can be silently discarded by the pruning those tiers apply.
+
+\section{Span Dynamic Programming}
 \label{sec:alg:dp}
 
-\TODO{Present the \texttt{SpanPartitionSearch} recursion: leaf-level
-(per-hop link purification with variable copies and circuit sequence)
-and recursive-level (join across disjoint sub-spans). Describe
-Pareto-frontier pruning on $(\mathrm{cost}, F, P_{\mathrm{success}})$.}
+% Source: search/dp.py, Justification of Implementation.md §4
 
-\subsection{Same-Span Pumping}
+For every span $\mathrm{Span}(a,b)$, the second tier memoizes a Pareto frontier of ways to create one resource over that span. A single-hop frontier ($b=a+1$) contains the raw link and link-level purification choices. For a wider span, the recurrence tries every split point $m\in(a,b)$ and joins each retained candidate from $\mathrm{Span}(a,m)$ with each retained candidate from $\mathrm{Span}(m,b)$. Each sub-span is computed once and reused wherever it appears in a wider construction. This reuse, rather than repeatedly re-evaluating complete end-to-end schedules, is the dynamic program's main computational benefit.
+
+The frontier kept at each span is multi-objective over $(C, F, P_{\mathrm{success}})$: candidate $A$ dominates candidate $B$ only when $A$ is no worse than $B$ in all three quantities and strictly better in at least one, and only non-dominated candidates are retained, the standard Pareto-pruning rule used in multi-criteria optimization~\cite{EhrgottMulticriteria}. A single scalar value per span, as kept by a classical Bellman recursion~\cite{Bellman1984Dynamic}, is not sufficient here: a \texttt{JoinNode} sums resource cost but multiplies success probability and composes fidelity through a separate, bilinear rule, so a candidate that looks suboptimal in isolation can become the right choice once it is joined into a wider span. The span labels therefore provide the optimal-substructure needed for an interval-style recursion: any candidate for $(a,b)$ is built from candidates for smaller, adjacent spans. This statement applies to the split/join part of the search. Section~\ref{sec:alg:pumping} explains why the additional pumping move changes the default DP from an exact recurrence into a bounded search.
+
+\section{Same-Span Pumping}
 \label{sec:alg:pumping}
 
-\TODO{Describe the pumping move added to the DP: select two
-pre-pump candidates for the same Span$(a,b)$, clone the second
-candidate's subtree with fresh node IDs (fresh cloning is required ---
-reusing a memoized node ID would silently undercount resource cost),
-and apply YY/ZX/XZ. Both the input pairing pool and the frontier
-contribution are capped at 25 candidates to prevent quadratic blowup.
-Note the \texttt{enable\_pumping} flag (default \texttt{True})
-added for reproducibility: setting it \texttt{False} exactly
-reproduces pre-pumping cached results (e.g.\ the cost=50/rate=6713
-N=10 headline number).}
+% Source: search/dp.py, Design Principles.md §Reproducibility caveat
 
-\section{Heuristic Beam Search}
+The span-partition recursion also considers same-span pumping. It pairs two pre-pump candidates for the same $\mathrm{Span}(a,b)$, clones the second candidate's full subtree with fresh node identifiers, and applies one of $\mathcal C_\mathrm{YY}$, $\mathcal C_\mathrm{ZX}$, or $\mathcal C_\mathrm{XZ}$. Fresh cloning is essential: purification requires physically independent inputs, so the two operands must contain disjoint generation nodes. Reusing a memoized subtree as the second input would both violate that assumption and undercount resource cost.
+
+Both the pool from which pumping draws and the pump candidates contributed to the frontier are capped at width 25 by default. Without both caps, the number of input pairs grows quadratically and feeds an increasingly large frontier into every wider span. Consequently, the public default of \texttt{dp\_search} is a bounded heuristic whenever pumping is enabled. Its split/join recurrence remains exact in isolation, but the combined default algorithm is not.
+
+An uncapped mode, \texttt{exact\_pumping=True}, is available for targeted validation. It restores exhaustive pumping within the configured circuit and copy-count limits, but can already be impractical for a small $N$ when the budget is large. It is therefore a diagnostic comparison, not a general production setting.
+
+Pumping and ordinary join candidates compete for the same fixed-size frontier. Adding pumping can therefore remove a join-only candidate from a smaller span before that candidate can contribute to the end-to-end frontier. The optional \texttt{enable\_pumping=False} setting exactly reproduces the earlier, pumping-free search behaviour. Section~\ref{sec:exp:headline} reports both settings at the nominal configuration because they produce different top-ranked schedules.
+
+\section{Beam Search}
 \label{sec:alg:beam}
 
-\TODO{Describe beam search as the same \texttt{\_SpanPartitionSearch}
-machinery with every retained span frontier capped at a configurable
-\texttt{beam\_width} (25 by default). Explain the split between
-fidelity-preserving and efficiency-oriented slots, motivate its use at
-large $N$ or budget, and state that it is deterministic but has no global
-optimality guarantee.}
+% Source: search/heuristic.py, Optimizer Status.md §Tier 3,
+% Justification of Implementation.md §4
 
-\section{Objective Presets}
-\label{sec:alg:cost}
+The third tier, beam search, reuses the same span recursion, node construction, and evaluator as Section~\ref{sec:alg:dp}. It caps every retained span frontier at a beam width $w$, 25 by default. This bounds runtime and memory at production scale, but a candidate a wider beam would retain can be pruned before it reaches the end-to-end span. The cap is necessary in practice: an uncapped width-7 frontier already contains roughly $1{,}200$ candidates, making an uncapped search through the paper's $N=10$ chain intractable. The same $w$ also caps the same-span pumping pool, so pumping and ordinary join candidates share $w$ slots per span.
 
-\TODO{Define the three \texttt{ObjectiveConfig} presets used in
-experiments: (1)~\texttt{maximize\_rate\_with\_fidelity\_floor}
-(default; $\max R$ s.t.\ $F \ge F_{\min}$, $C \le e_{\max}$);
-(2)~\texttt{maximize\_fidelity\_with\_rate\_floor} ($\max F$ s.t.\
-$R \ge R_{\min}$); (3)~\texttt{minimize\_cost\_with\_constraints}
-($\min C$ s.t.\ constraints on $F$ and optionally $R$). Stress that
-all three use the identical search algorithms unchanged --- the
-objective layer is fully decoupled from the search layer.}
+The $w$ slots at each span are split between two rankings. Roughly half retain the highest-fidelity candidates, preserving purified building blocks that may only become useful after later joins. The remaining slots favor candidates that meet the fidelity hint $F_{\min}$, then rank by higher success probability, higher fidelity, and lower cost. A single efficiency-only ranking would reject link-level purification at short spans, where a raw link is locally cheaper and more likely to succeed. After several raw links are joined, however, their accumulated noise can leave no retained candidate able to meet the end-to-end fidelity floor.
 
-\section{Software Architecture}
-\label{sec:alg:software}
-
-\TODO{Brief description of the Python package \texttt{hrgs\_scheduler}:
-module layout, key interfaces (\texttt{NetworkConfig}, \texttt{ScheduleDAG},
-\texttt{ResourceBudget}), serialisation, and test coverage.}
+Other heuristics could search this space, but they would need a separate encoding of a schedule and custom proposal operators that preserve the DAG legality conditions of Section~\ref{sec:model:legality}. The beam tier instead keeps the span-partition representation and changes only frontier retention. This makes repeated runs deterministic and keeps all tiers on the same physical evaluation path. The benefit is reproducibility and a direct small-instance comparison with the DP recurrence; the cost is that a beam result is a valid candidate found by this bounded search, not a global optimum.
