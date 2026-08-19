@@ -1,181 +1,236 @@
-# entanglement-purification-scheduler
+# Entanglement Purification Scheduler
 
-Simulator and optimizer for entanglement purification scheduling on half-RGS-based
-all-photonic quantum repeaters.
+This repository contains the simulator, schedule representation, and search
+tools developed for an internship thesis on purification scheduling in
+half-repeater-graph-state (HRGS) all-photonic quantum-repeater networks.
 
-## Repository layout
+The central question is not whether a particular purification circuit works,
+but where, when, and in what order purification should be applied across an
+end-to-end repeater chain. Given a network model and a resource budget, the
+project constructs non-adaptive schedules, evaluates their physical metrics,
+and searches for schedules that satisfy a fidelity requirement while optimizing
+another objective, usually entanglement-generation rate.
 
+The implementation is grounded in the HRGS architecture and purification
+protocols described by the source papers. The full mathematical translation and
+its assumptions are documented in
+[Validated Formal Model Def.md](docs/instructions/Validated%20Formal%20Model%20Def.md).
+
+## What Is In This Repository
+
+At its core, a schedule is a rooted directed acyclic graph (DAG),
+$\Sigma = (T, \phi)$. Its leaves generate half-RGS resources; its internal
+nodes establish links, join adjacent spans, purify independent copies, model
+waiting and heralding, and apply the final Pauli correction. A single
+bottom-up evaluation of a valid DAG computes:
+
+- **Fidelity** $F(\Sigma)$ from the terminal Bell-diagonal error vector.
+- **Success probability** $P_{\mathrm{success}}(\Sigma)$ across all
+    probabilistic purification steps.
+- **Resource cost** $C(\Sigma)$ as the number of generated half-RGS resources.
+- **Latency** $L(\Sigma)$ from the operation and heralding structure.
+- **Rate** $R(\Sigma)=P_{\mathrm{success}}(\Sigma)/L(\Sigma)$ under a
+    full-restart renewal model.
+
+The main optimization form is
+
+$$
+\max_{\Sigma} R(\Sigma)
+\quad\text{subject to}\quad
+F(\Sigma) \geq F_{\min},\qquad C(\Sigma) \leq e_{\max}.
+$$
+
+The model also supports fidelity-, cost-, and latency-oriented objectives.
+
+## Research Scope
+
+This is a research optimizer, not a claim that arbitrary quantum-network
+policies have been solved exactly.
+
+- Schedules are fixed in advance: they do not adapt future decisions to
+    intermediate measurement outcomes.
+- Every result returned by a search tier is a concrete `ScheduleDAG`, validated
+    structurally and evaluated with the same physical evaluator.
+- Search coverage is bounded. `brute_force_search` is exhaustive only within
+    its configured fixed families; default DP and beam search prune or cap their
+    frontiers, especially for same-span pumping.
+- Therefore, a found schedule is positive evidence that a feasible construction
+    exists. A schedule not found is not proof that no legal schedule exists.
+- `e_max` constrains generated-resource count. The separate concurrent-branch
+    resource limit $M_{\max}$ is represented in the model but is not currently
+    enforced.
+
+Read [Optimality Scope.md](docs/Optimality%20Scope.md) before interpreting
+optimality or infeasibility claims. It records a concrete excluded-move example
+and the corresponding production-scale feasibility check. The current search
+guarantees, recommended uses, and known limits are consolidated in
+[Optimizer Status.md](docs/Optimizer%20Status.md).
+
+## Quick Start
+
+### Requirements
+
+- Python 3.11 or newer
+- `pip`
+- Graphviz `dot` only when rendering schedule images
+- Node.js and npm only for the optional architecture viewer
+- TeX Live, `latexmk`, and Biber only for the thesis
+
+Create an isolated environment and install the editable package with test and
+plotting dependencies:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -e '.[dev,plotting]'
 ```
-hrgs-purification-scheduler/
-├── src/hrgs_scheduler/   ← Python package: the scheduler/optimizer
-├── tests/                ← pytest suite (227 tests)
-├── pyproject.toml        ← package config & tool settings
-│
-├── experiments/          ← research experiment scripts (run against the package)
-├── outputs/              ← generated results from experiments (CSV, PNG, DOT)
-├── docs/                 ← research notes, formal model spec, roadmaps
-├── architecture/         ← interactive optimizer architecture viewer
-│
-└── thesis/               ← LaTeX internship report (build with `cd thesis && make`)
+
+Run the test suite from the repository root:
+
+```bash
+.venv/bin/python -m pytest -q
 ```
 
-See `docs/Validated Formal Model Def.md` for the full formal spec
-(`Σ = (T, φ)`, backbone + scheduling layers, cost functions).
+The package itself has no mandatory third-party runtime dependency; `pytest`
+and `matplotlib` are optional development and plotting extras.
 
-The interactive optimizer diagrams and their run commands are documented in
-[`architecture/optimizer-viewer/README.md`](architecture/optimizer-viewer/README.md).
+## Run A Search
 
-## Weeks 1-2: inner loop — **done**
+The primary command-line entry point is
+[experiments/search_results.py](experiments/search_results.py). It prints
+ranked candidates and can export summary tables or loadable DAG artifacts.
 
-**Files:**
+```bash
+# Structured baseline families on the source-paper N=10 configuration.
+.venv/bin/python experiments/search_results.py --top 10
 
-| File | Role |
+# DP on a small configurable network. Suitable for inspection and cross-checks.
+.venv/bin/python experiments/search_results.py \
+    --algorithm dp --uniform --N 4 --e_max 24 --top 10
+
+# Beam search for larger bounded searches.
+.venv/bin/python experiments/search_results.py \
+    --algorithm beam --uniform --N 10 --e_max 100 --beam-width 25 --top 10
+```
+
+The three tiers share the same DAG constructors, validation, evaluator, and
+result type:
+
+| Tier | Entry point | Best use | Guarantee |
+|---|---|---|---|
+| Structured brute force | `brute_force_search` | Named baselines and small fixed families | Exhaustive within its configured family and circuit grid |
+| Span DP | `dp_search` | Small-instance exploration and reference comparisons | Default mode is bounded when pumping is enabled; `exact_pumping=True` is only practical on very small cases |
+| Beam search | `beam_search` | Paper-scale and wider bounded searches | Heuristic frontier coverage controlled by `beam_width` |
+
+Both DP and beam search include the structured baseline families by default, so
+a single call can compare native candidates with raw, end-node, uniform-link,
+and paper-structure baselines. See [CLI Command Reference.md](docs/CLI%20Command%20Reference.md)
+for all flags and tuning parameters.
+
+### Save And Inspect A Found Schedule
+
+CSV and JSON result exports contain metrics only. Use `--save-top` when the
+actual DAG must be kept, checked, or visualized.
+
+```bash
+# Save complete DAG and network artifacts.
+.venv/bin/python experiments/search_results.py \
+    --algorithm dp --uniform --N 4 --e_max 24 \
+    --save-top 3 --save-dir outputs/schedules/example_n4
+
+# Re-evaluate an artifact, compare stored metrics, and inspect its node counts.
+.venv/bin/python experiments/load_schedule.py \
+    outputs/schedules/example_n4/rank_001_*.json --verify --print-nodes
+
+# Render an annotated SVG; requires Graphviz's `dot` executable.
+.venv/bin/python experiments/load_schedule.py \
+    outputs/schedules/example_n4/rank_001_*.json \
+    --render outputs/schedules/example_n4/rank_001.svg --annotate
+```
+
+## Reproduce And Explore Results
+
+The [`experiments/`](experiments) directory contains scripts that generate the
+CSV, figure, and schedule artifacts under [`outputs/`](outputs). Output files
+are generated research artifacts, not package inputs.
+
+Useful starting points:
+
+| Goal | Script or output |
 |---|---|
-| models/error_vector.py | `ErrorVector(w,x,y,z)` — BSM composition rule, decoherence, `from_independent_z_flips` |
-| models/stage.py | `RGSSStage`, `Span(a,b)`, `RGSS` singleton, `Span.join()` with legality checks |
-| models/state.py | `State` — the full S=(e,s,t,t_gen,κ,r,h) tuple; immutable `with_*` mutators |
-| models/network_config.py | `HopConfig` + `NetworkConfig` with `inner_error_per_hop`, `integrating_paper_config()` |
-| models/resource_budget.py | `ResourceBudget(n_pur, e_max, m_max)` |
-| operations/backbone.py | `gen`, `absa_bsm`, `join`, `idle`, `herald`, `pauli_correct` |
-| operations/purification.py | `purify(circuit, s1, s2)`, `success_prob` — exact P_YY/ZX/XZ and Pur_YY/ZX/XZ formulas |
-| schedule/node.py | All 7 frozen DAG node types |
-| schedule/dag.py | `ScheduleDAG` — topo sort, stage-consistency validation (§4.1), `raw_chain`, `baseline_end_node_pumping`, `flexible_paper_schedule`, `single_hop_yy_purified` builders |
-| schedule/evaluator.py | `Evaluator.evaluate()` — O(\|T\|) bottom-up pass → `EvaluationResult(F,R,C,L)` |
-| schedule/serde.py | Stable JSON de/serializer for `ScheduleDAG` + `NetworkConfig` artifacts (`save_schedule`, `load_schedule`) |
-| schedule/visualize.py | `to_dot`/`save_dot`/`render` — Graphviz export of a `ScheduleDAG`, color/shape-coded by node type, optionally annotated with an `EvaluationResult` |
-| cost_functions.py | `ObjectiveConfig`, `compare_schedules`, all §6.3 objective variants |
-| timing.py | Closed-form canonical timing formulas (§2.6 table) — independent cross-check; `Evaluator.rate`/`.latency` (derived from actual DAG Herald/Purify structure) is the authoritative source |
-| experiments/fig5_fidelity_vs_noise.py | Reproduces [Integrating, Fig. 5]: fidelity vs. `e_d` for raw/baseline/flexible schedules |
-| experiments/fig6_rate_ratio.py | Reproduces [Integrating, Fig. 6]: rate ratios, derived from `Evaluator.evaluate(dag).rate` |
-| experiments/load_schedule.py | CLI to load saved schedule artifacts, verify metrics, print node counts, and export DOT/rendered images |
+| Reproduce fidelity versus depolarizing noise | [fig5_fidelity_vs_noise.py](experiments/fig5_fidelity_vs_noise.py) |
+| Reproduce the timing/rate-ratio comparison | [fig6_rate_ratio.py](experiments/fig6_rate_ratio.py) |
+| Compare paper baseline and optimizer over $e_d$ | [sweep_ed.py](experiments/sweep_ed.py) and [outputs/sweep_ed_n10](outputs/sweep_ed_n10) |
+| Examine minimum searched budget over hop count | [sweep_min_budget_vs_n.py](experiments/sweep_min_budget_vs_n.py) |
+| Measure memory-dephasing and emission-time sensitivity | [sweep_gamma_and_tau_emit.py](experiments/sweep_gamma_and_tau_emit.py) |
+| Inspect a real pumping schedule | [visualize_pumping_schedule.py](experiments/visualize_pumping_schedule.py) |
+| Build a small, annotated N=2 DAG example | [worked_example_n2_dag.py](experiments/worked_example_n2_dag.py) |
 
-### Status against `docs/WbW Plan.md`'s Weeks 1-2 acceptance criteria
+Most scripts can be invoked directly with `.venv/bin/python` from the repository
+root. Some searches are intentionally expensive; their corresponding output
+README explains the configuration, runtime, and scope of each result. In
+particular, do not infer global scaling laws or universal budget lower bounds
+from a bounded search sweep.
 
-- **State object, operation catalog, bottom-up DAG evaluation (§7 inner loop):** done — see `models/`, `operations/`, `schedule/`. All models/operations manually audited term-by-term against both papers and `docs/Validated Formal Model Def.md`; two physics bugs found and fixed (spurious ZZ error at Gen time; wrong exponent variable — `arm_count` vs. `tree_depth` — in the inner-qubit error formula, [Bridging, eq. 10]).
-- **Fig. 5 (fidelity vs. `e_d`) reproduction:** near-exact match. At `e_d=0.01`: raw/baseline/flexible = 0.8234/0.9168/0.9295 vs. paper's ~0.823/0.917/0.929.
-- **Fig. 6 (rate ratio) reproduction:** only qualitative/order-of-magnitude match (~8.8x vs. paper's 45-65x for flexible/baseline). The DAG-structural mechanism (single deferred Herald vs. sequential heralded pumping rounds) is correctly modeled and *is* the authoritative source of `rate`/`latency` (not a standalone formula), but the paper doesn't state the numeric `tau_emit`/`tau_join`/`tau_pur_circ` values used for Fig. 6, so exact agreement isn't expected — do not force-fit magic numbers to hit 45-65x.
-- **Canonical timing-table cross-check (§2.6):** `timing.py` implements the three closed-form formulas as an independent check; not yet wired into an automated test asserting agreement with `Evaluator`-derived latencies for the three canonical schedules.
-- **Automated test suite:** implemented — `tests/` contains a 227-test `pytest` suite covering the models, operations, schedule layer, cost functions, outer-loop search (brute force + DP), serialization round-trips, and regression checks for the validation scripts. Run it with `python3 -m pytest` (or `/usr/local/bin/python3.13 -m pytest` in this workspace).
-- **Generated artifacts:** experiment scripts now export DAG visualizations to `outputs/reproduction_figures/` as PNG files, using the schedule visualization helpers.
+## Repository Map
 
-### Running the experiment scripts
+```text
+src/hrgs_scheduler/       Python package
+    models/                 Network, state, error-vector, stage, and budget types
+    operations/             Generation, backbone, and purification physics
+    schedule/               DAG nodes, validation, evaluator, persistence, visualization
+    search/                 Brute-force, DP, beam-search, and reporting utilities
+    cost_functions.py       Feasibility constraints and objective scoring
+
+tests/                    Unit, regression, and search/evaluator validation tests
+experiments/              Reproducible research scripts
+outputs/                  Generated tables, figures, and serialized schedules
+docs/                     Formal model, scope, design rationale, and command reference
+architecture/             Interactive optimizer architecture viewer
+thesis/                   LaTeX internship report and its figures
+```
+
+## Read The Model And Design Rationale
+
+The most useful documentation depends on what you want to do:
+
+- [Validated Formal Model Def.md](docs/instructions/Validated%20Formal%20Model%20Def.md):
+    authoritative schedule-as-DAG model, operation catalog, timing, and objectives.
+- [Optimizer Status.md](docs/Optimizer%20Status.md): current implementation
+    status, search-tier behavior, verification coverage, and known limitations.
+- [Optimality Scope.md](docs/Optimality%20Scope.md): exactness boundaries and
+    why a bounded search cannot establish non-existence.
+- [Design Principles.md](docs/Design%20Principles.md): implementation decisions
+    and reproducibility considerations, including pumping behavior.
+- [CLI Command Reference.md](docs/CLI%20Command%20Reference.md): search,
+    serialization, verification, and Graphviz commands.
+- [thesis/README.md](thesis/README.md): build instructions for the report.
+
+## Architecture Viewer
+
+The optional browser-based atlas visualizes the system map, UML model, search
+sequence, and memoized frontier lifecycle. It supports pan/zoom, element
+inspection, Mermaid source inspection, and SVG export.
 
 ```bash
-python3 experiments/fig5_fidelity_vs_noise.py
-python3 experiments/fig6_rate_ratio.py
+cd architecture/optimizer-viewer
+npm install
+npm run dev -- --host 127.0.0.1
 ```
 
-The scripts also populate `outputs/reproduction_figures/` with the corresponding DAG PNG exports.
+Open the address printed by Vite, normally `http://127.0.0.1:5173/`. Details
+and production-build instructions are in
+[architecture/optimizer-viewer/README.md](architecture/optimizer-viewer/README.md).
 
-### Visualizing a schedule
+## Thesis
+
+The accompanying report explains the physical background, formal model, search
+methods, experiments, and the limits of the claims in a linear narrative.
 
 ```bash
-python3 -c "
-from hrgs_scheduler.schedule import ScheduleDAG, render
-from hrgs_scheduler.schedule.evaluator import Evaluator
-from hrgs_scheduler.models.network_config import NetworkConfig
-
-net = NetworkConfig.uniform(N=4, length=2.0, branching=(16,14,1), arm_count=18,
-                             p_x_inner=0.001, p_z_inner=0.001, eta=1.0,
-                             e_d=0.01, gamma=1e-6, c=2e8)
-dag = ScheduleDAG.flexible_paper_schedule(N=4)
-result = Evaluator(net).evaluate(dag)
-render(dag, 'schedule.svg', result=result)  # requires Graphviz \`dot\` on PATH
-"
+cd thesis
+make
 ```
 
-## Weeks 2-3: outer loop — **done (brute force + DP)**
-
-Search over the schedule space `Σ` to find the best schedule for a given
-network, objective, and resource budget `e_max`. Two algorithms are
-implemented, both returning the same `SearchResult` type so they can be
-displayed/exported with the same tooling. See
-`docs/Outer Loop Search Design.md` for the full design rationale.
-
-**Files:**
-
-| File | Role |
-|---|---|
-| search/brute_force.py | `brute_force_search()` — exhaustive enumeration of three fixed structural families (raw, end-node pumping heralded/optimistic, uniform link-level pumping). Exact ground truth on small `N`. |
-| search/dp.py | `dp_search()` — memoized recursive search over span-partition structures (Bellman-style optimal-cost-to-go over the span partial order), with variable per-hop copy-count, arbitrary split points, and pumped (independently-purified) span pairs. Always a superset of `brute_force_search` on the same inputs. **Exact only for pumping-free schedules by default** — pumping's frontier is beam-limited for tractability, same tradeoff as `beam_search`, unless `exact_pumping=True` (uncapped, only tractable at very small `N`). See `search/dp.py`'s module docstring, "Exactness modes" section. |
-| search/report.py | `print_table`, `to_csv`, `to_json`, `save_result`, `load_result`, `save_top` — display/export utilities plus structural save/load helpers for `SearchResult` artifacts |
-| experiments/search_results.py | CLI script: run either search algorithm and print/export the results |
-| experiments/load_schedule.py | CLI script: load a saved schedule artifact, verify it, and visualize/export it |
-
-### Running the search CLI
-
-```bash
-# Brute force (default), paper config
-python3 experiments/search_results.py
-
-# DP-over-stages, small uniform network
-python3 experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24 --top 10
-
-# Export results
-python3 experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
-    --csv outputs/search/dp_run.csv --json outputs/search/dp_run.json
-
-# Save the top 3 schedules as full, loadable artifacts
-python3 experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
-    --save-top 3 --save-dir outputs/schedules/dp_n4
-```
-
-Run `python3 experiments/search_results.py --help` for the full flag list
-(both algorithms share `--N`, `--uniform`, `--e_d`, `--e_max`, `--f_min`,
-`--objective`, `--top`, `--csv`, `--json`; `--algorithm dp` adds
-`--max-link-copies`, `--max-enumerated-rounds`, `--no-bf-families`).
-
-### Persisting, reloading, and visualizing found schedules
-
-`--csv` / `--json` exports are summary tables only (rank/label/metrics).
-To keep a schedule as a reusable object, save structural artifacts with
-`--save-top` (or programmatically via `search.save_result`).
-
-```bash
-# 1) Save top-k structural artifacts from a search run
-python3 experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
-    --save-top 5 --save-dir outputs/schedules/dp_n4
-
-# 2) Inspect one saved artifact (summary)
-python3 experiments/load_schedule.py \
-    outputs/schedules/dp_n4/rank_001_*.json
-
-# 3) Re-evaluate and verify stored metrics vs fresh evaluator output
-python3 experiments/load_schedule.py \
-    outputs/schedules/dp_n4/rank_001_*.json --verify --print-nodes
-
-# 4) Export DOT and render SVG/PNG from the loaded schedule
-python3 experiments/load_schedule.py \
-    outputs/schedules/dp_n4/rank_001_*.json \
-    --dot outputs/schedules/dp_n4/rank_001.dot
-
-python3 experiments/load_schedule.py \
-    outputs/schedules/dp_n4/rank_001_*.json \
-    --render outputs/schedules/dp_n4/rank_001.svg --annotate
-```
-
-Programmatic API for the same workflow:
-
-```python
-from hrgs_scheduler.search import dp_search, save_result, load_result
-from hrgs_scheduler.schedule import load_schedule, save_schedule
-
-# save one result
-result = dp_search(network, objective, e_max=24)[0]
-save_result(result, "outputs/schedules/best.json", network=network)
-
-# load it later
-loaded_result, loaded_network = load_result("outputs/schedules/best.json")
-```
-
-### Cross-check
-
-`dp_search(...)` always returns a superset of `brute_force_search(...)`
-on identical inputs (by construction — DP merges in the brute-force
-families), which is the "cross-check DP against brute force on small
-cases" validation called for by the WbW plan. This is asserted directly
-in `tests/test_dp.py::TestDpSearch::test_superset_of_brute_force_labels`.
-
-**Next (Weeks 3+):** heuristic search (greedy/beam/simulated annealing)
-for `N`/`e_max` beyond exact DP tractability.
-
+The resulting PDF is written to `thesis/main.pdf`. The thesis can be built
+independently of the Python package once its TeX dependencies are installed.
