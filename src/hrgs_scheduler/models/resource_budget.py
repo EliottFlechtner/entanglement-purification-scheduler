@@ -12,6 +12,14 @@ A schedule Σ is *feasible* with respect to B iff:
 and
     max concurrent open branches ≤ M_max.
 
+Enforcement: ``ScheduleDAG.check_resource_budget(budget)`` checks both
+conditions directly (E_max via ``gen_node_count``, M_max via
+``max_concurrent_branches()``); ``cost_functions.satisfies_m_max_budget``
+/ ``ObjectiveConfig.m_max`` provide the same M_max check against an
+``EvaluationResult`` (which also carries M_max as
+``max_concurrent_branches``), so it participates in the objective's
+feasibility gating alongside F_min/R_min/E_max.
+
 n_pur corresponds directly to the extra-emitter count needed to generate
 multiple half-RGSs per side for purification [Integrating, §IV.A].
 """
