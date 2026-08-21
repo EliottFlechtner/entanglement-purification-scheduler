@@ -24,6 +24,11 @@ Cost function extraction
                the critical path (pessimistic: product over all Purify
                nodes in the DAG, which is an outer bound valid for
                non-adaptive schedules).
+    M(Σ)     = max_concurrent_branches(T) (§5)
+               Minimum peak number of concurrently open (held) branches,
+               under the best possible evaluation order -- see
+               ``ScheduleDAG.max_concurrent_branches`` for the derivation
+               (Sethi-Ullman register allocation on T).
 
 The evaluator also returns a per-node ``State`` cache so callers can
 inspect intermediate results.
@@ -32,12 +37,13 @@ EvaluationResult
 ----------------
 Named tuple returned by ``Evaluator.evaluate``:
 
-    fidelity        : float    F(Σ)
-    rate            : float    R(Σ)  (unnormalised; requires time unit)
-    resource_cost   : int      C(Σ)  (Gen node count)
-    latency         : float    L(Σ)  (makespan of T)
-    success_prob    : float    P[Σ succeeds] (product of Purify probs)
-    node_states     : dict     NodeId → State (full per-node cache)
+    fidelity                : float    F(Σ)
+    rate                    : float    R(Σ)  (unnormalised; requires time unit)
+    resource_cost           : int      C(Σ)  (Gen node count)
+    latency                 : float    L(Σ)  (makespan of T)
+    success_prob            : float    P[Σ succeeds] (product of Purify probs)
+    max_concurrent_branches : int      M(Σ)  (peak open-branch count, §5)
+    node_states             : dict     NodeId → State (full per-node cache)
 """
 
 from __future__ import annotations
@@ -89,6 +95,11 @@ class EvaluationResult(NamedTuple):
     success_prob : float
         P[Σ succeeds] = product of all PurifyNode success probabilities.
         For a schedule with no purification, success_prob = 1.
+    max_concurrent_branches : int
+        M(Σ) = the minimum peak number of concurrently open (held)
+        branches, under the best possible evaluation order [Validated
+        Formal Model Def, §5]. See
+        ``ScheduleDAG.max_concurrent_branches`` for the derivation.
     node_states : dict[NodeId, State]
         Full per-node State cache; useful for debugging and visualisation.
     """
@@ -99,6 +110,7 @@ class EvaluationResult(NamedTuple):
     latency: float
     success_prob: float
     node_states: dict[NodeId, State]
+    max_concurrent_branches: int = 0
 
 
 class Evaluator:
@@ -230,6 +242,7 @@ class Evaluator:
             latency=latency,
             success_prob=success_prob,
             node_states=node_states,
+            max_concurrent_branches=dag.max_concurrent_branches(),
         )
 
     # ------------------------------------------------------------------

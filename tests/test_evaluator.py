@@ -30,6 +30,14 @@ def test_raw_chain_ideal_network_gives_perfect_fidelity():
     assert result.resource_cost == dag.gen_node_count
 
 
+def test_evaluate_populates_max_concurrent_branches():
+    net = ideal_network(N=4, e_d=0.0)
+    dag = ScheduleDAG.raw_chain(N=4)
+    result = Evaluator(net).evaluate(dag)
+    assert result.max_concurrent_branches == dag.max_concurrent_branches()
+    assert result.max_concurrent_branches == 3
+
+
 def test_noisy_network_reduces_fidelity_below_one():
     net = ideal_network(N=4, e_d=0.01)
     dag = ScheduleDAG.raw_chain(N=4)

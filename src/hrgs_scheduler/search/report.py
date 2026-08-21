@@ -331,6 +331,11 @@ def load_result(
         latency=float(ev_raw.get("latency_s") or 0.0),
         success_prob=float(ev_raw.get("success_prob") or 0.0),
         node_states={},
+        # max_concurrent_branches is a purely structural DAG property (no
+        # network/physics dependency), so it is cheap to recompute here
+        # rather than persist in the JSON artifact -- see
+        # ScheduleDAG.max_concurrent_branches.
+        max_concurrent_branches=dag.max_concurrent_branches(),
     )
     raw_score = meta.get("score")
     score = float("-inf") if raw_score is None else float(raw_score)

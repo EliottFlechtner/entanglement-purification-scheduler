@@ -39,6 +39,12 @@ def test_satisfies_budget(flexible_result):
     assert not cf.satisfies_budget(flexible_result, flexible_result.resource_cost - 1)
 
 
+def test_satisfies_m_max_budget(flexible_result):
+    m = flexible_result.max_concurrent_branches
+    assert cf.satisfies_m_max_budget(flexible_result, m)
+    assert not cf.satisfies_m_max_budget(flexible_result, m - 1)
+
+
 def test_objective_config_feasibility_and_score(flexible_result):
     obj = cf.ObjectiveConfig(primary="fidelity", maximise=True, f_min=0.9)
     assert obj.is_feasible(flexible_result)
@@ -58,3 +64,13 @@ def test_objective_config_unknown_primary_raises(flexible_result):
     obj = cf.ObjectiveConfig(primary="not_a_real_metric")
     with pytest.raises(ValueError):
         obj.score(flexible_result)
+
+
+def test_objective_config_m_max_feasibility(flexible_result):
+    m = flexible_result.max_concurrent_branches
+    obj = cf.ObjectiveConfig(primary="fidelity", m_max=m)
+    assert obj.is_feasible(flexible_result)
+
+    infeasible_obj = cf.ObjectiveConfig(primary="fidelity", m_max=m - 1)
+    assert not infeasible_obj.is_feasible(flexible_result)
+    assert infeasible_obj.score(flexible_result) == float("-inf")

@@ -254,10 +254,28 @@ A schedule $\Sigma$ is \emph{formally feasible} with respect to $B$ if it uses a
 $e_{\max}$ \texttt{Gen} leaves and never holds more than $M_{\max}$ branches
 open at once. The resource cost $C(\Sigma)$ used throughout
 Chapter~\ref{chap:results} is simply the number of \texttt{Gen} leaves in $T$,
-so the enforced budget condition in the present implementation is
-$C(\Sigma) \le e_{\max}$. The simultaneous-branch condition $M_{\max}$ is
-part of the formal model but is not yet enforced; its practical consequence is
-stated in Section~\ref{sec:model:scope}.
+and every headline result enforces $C(\Sigma) \le e_{\max}$.
+$M_{\max}$ is enforced separately: since $T$ only fixes a topological partial
+order on its operations, not a concrete real-time execution order, the
+number of branches simultaneously open depends on which legal order a
+scheduler chooses. The implementation therefore computes $M(\Sigma)$, the
+minimum peak number of concurrently open branches \emph{over every legal
+execution order}, via the classical Sethi--Ullman register-allocation
+recurrence for expression trees~\cite{Sethi1970Generation}: a
+\texttt{Gen} leaf needs one register; \texttt{IdleNode}/\texttt{HeraldNode}
+inherit their child's register count (the same physical resource, merely
+waiting); and a 2-input node (\texttt{Join}/\texttt{AbsaBsm}/\texttt{Purify})
+with children needing $L$ and $R$ registers needs $\max(L, R)$ if $L \neq R$,
+or $L+1$ if $L = R$ (the classical tie case, where the first-finished side's
+result must be held while the second side is built). This recurrence is a
+proven register-minimising evaluation order for binary expression trees, so
+$M(\Sigma)$ is exact, not a heuristic bound, and is computed in a single
+$O(|T|)$ bottom-up pass requiring no timing information at all -- unlike
+$F$/$R$/$L$, $M(\Sigma)$ depends only on $T$'s shape. $\Sigma$ is feasible
+w.r.t.\ $M_{\max}$ iff $M(\Sigma) \le M_{\max}$, checked directly by both a
+DAG-level method and an optional constraint on the search objective
+(Section~\ref{sec:model:objectives}); Section~\ref{sec:model:scope} discusses
+the resulting scope limitation.
 
 The source paper's own budget convention is $e_{\max} = 10N$: five half-RGS
 copies per side, on both sides, for every hop. This convention is used as the
@@ -316,7 +334,7 @@ This model rests on three simplifying choices, stated explicitly here before any
 
 First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before execution starts and cannot branch on an intermediate measurement or heralding outcome. A fully adaptive scheme would require a different formulation, most naturally a Markov decision process~\cite{Puterman2009Markov,Sutton2014Reinforcement}. This is left to future work (Section~\ref{sec:conc:future}).
 
-Second, $M_{\max}$ is part of the budget $B$ but is not enforced anywhere in the current implementation, neither during search nor during DAG validation. Every reported resource cost $C(\Sigma)$ is therefore a lower bound on the number of physical qubit slots a real device would need to run that schedule, since it does not account for how many branches must be held in memory at once.
+Second, $M_{\max}$ is computed exactly for any concrete $\Sigma$ (Section~\ref{sec:model:budget}) and can be enforced as a feasibility constraint on the search objective, but this constraint is only applied to whole, already-built candidate schedules at the point they are scored -- it is not yet threaded into the recursive span-partition search of Chapter~\ref{chap:algorithms} as an early-pruning criterion the way $e_{\max}$ is. The reason is that $M(\Sigma)$, unlike $C(\Sigma)$, is not additive across independently-searched sub-spans: two sub-schedules built for disjoint spans can be scheduled concurrently or sequentially, so the span-partition frontiers used by \texttt{dp\_search}/\texttt{beam\_search} would need to track register-count information across sibling spans, not just within one span's own subtree, to prune on $M_{\max}$ mid-search without risk of discarding a candidate that is only infeasible under a poor scheduling choice. Every reported headline result therefore still optimizes without an $M_{\max}$ cap; where a cap is applied (Section~\ref{sec:exp:budget}), it changes which already-generated candidate is selected as best, not how many candidates are generated in the first place.
 
 Third, conditional on a successful transmission, the fidelity-noise model throughout this thesis is the Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, the same assumption made by the source paper; photon loss instead enters the success probability. Comparisons between schedules are made under this one fidelity-noise model, so a ranking that holds here is not automatically guaranteed to transfer to a device dominated by a different error channel. This point is returned to in Section~\ref{sec:disc:limitations}.
 
