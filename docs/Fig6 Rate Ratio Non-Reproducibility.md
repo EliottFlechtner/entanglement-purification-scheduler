@@ -1,101 +1,41 @@
-# Why Fig. 6 (rate ratio) cannot be exactly reproduced
+# Fig. 6 (rate ratio): confirmed numerical gap and root cause
 
-**Status:** confirmed limitation, not a bug. Fig. 5 (fidelity) reproduces
-near-exactly; Fig. 6 (rate ratio) only reproduces the correct *mechanism*
-and *order of magnitude*. This document records why, so the discrepancy
-isn't mistaken for a defect in `validation/fig6_rate_ratio.py`,
-`schedule/evaluator.py`, or the timing model in a future session.
+Fig. 5 (fidelity vs. $e_d$) reproduces near-exactly. Fig. 6 (rate ratio) does not: the mechanism and direction are correct, but the magnitude is off by roughly an order of magnitude; this file documents why.
 
-**Update (27 July 2026):** `NetworkConfig.tau_emit` and `NetworkConfig.gamma`
--- previously dead/inert fields, see §2's table below as it read before this
-update -- are now wired into `Evaluator` (`_eval_gen` for `tau_emit`,
-`_sync_to_common_time` for `gamma`; both opt-in, default `None`/`0.0`
-preserves all historical numbers exactly). This does **not** close the Fig.
-6 gap -- the paper still never publishes a numeric `τ_emit`, so there is
-still no principled value to plug in, and `gamma`'s effect is fidelity-only
-(see below), not a latency term -- but it does mean the table in §2 is now
-out of date on `GenNode`'s row specifically. See
-[outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md)
-for the quantified sensitivity now that both fields are live.
+**Update (27 July 2026):** `NetworkConfig.tau_emit` and `NetworkConfig.gamma`, previously inert fields, are now wired into `Evaluator` (`_eval_gen` for `tau_emit`, `_sync_to_common_time` for `gamma`; both opt-in, defaults `None`/`0.0` preserve all prior numbers). This does not close the Fig. 6 gap: the paper still never states a numeric `τ_emit`, and `gamma`'s effect is on fidelity only, not latency. The node-type table in §2 is partially superseded on `GenNode`'s row; see [outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md) for the quantified sensitivity.
 
-## 1. What we do reproduce exactly
+## 1. What the implementation does reproduce
 
-[Integrating, §VI] states the flexible/optimistic scheme "outperforms the
-baseline strategy by a factor ranging from approximately 45 to 65,
-depending on the noise level" and Fig. 6's caption states the raw/flexible
-ratio is "scaled by a factor of 10 for easier comparison" — i.e. the true
-raw/flexible ratio is ~5.0–8.6×. Screenshotting the actual figure
-(`x5.png` / `rate-plot.png` at `arxiv.org/html/2504.18121v1`) confirms:
+§VI of the Integrating paper states the flexible scheme "outperforms the baseline strategy by a factor ranging from approximately 45 to 65, depending on the noise level." Fig. 6's caption notes the raw/flexible ratio is "scaled by a factor of 10 for easier comparison," so the true raw/flexible ratio is ~5.0–8.6×. Reading the figure at `arxiv.org/html/2504.18121v1` confirms:
 
-| Curve | Paper's range (e_d: 0 → 0.01) |
+| Curve | Range across $e_d \in [0, 0.01]$ |
 |---|---|
-| flexible / baseline | ~46.5× → 65× |
-| raw / flexible (true scale) | ~5.0× → 8.6× |
+| flexible / baseline | ~46.5× to 65× |
+| raw / flexible (true scale) | ~5.0× to 8.6× |
 
-Our `validation/fig6_rate_ratio.py` reproduces the **structural mechanism**
-correctly: baseline's entanglement-pumping purification is *heralded*
-(sequential, two-way, `2·L_total/c` per round for each of the `n_pur - 1`
-pumping rounds), while the flexible/optimistic scheme defers *all*
-heralding to a single one-way `L_total/c` confirmation at the very end
-— exactly [Integrating, §III-B]'s distinction, encoded structurally via
-`HeraldNode` placement relative to `PurifyNode`s in the schedule DAG
-(see [`Validated Formal Model Def.md`](Validated%20Formal%20Model%20Def.md#33-herald-and-optimism)
-§3.3). Fig. 5's fidelity numbers, which depend on the *same* underlying
-error-vector/purification model, match the paper to within `±0.0005`
-absolute fidelity — confirming the physics (BSM composition, purification
-success probabilities, decoherence) is correct. Fig. 6's ratio is wrong
-in *magnitude* only, not in *direction* or *mechanism*.
+The structural mechanism is correct: the heralded-pumping baseline waits for a round-trip classical confirmation (`2·L_total/c`) after each of the $n_\mathrm{pur}-1$ pumping rounds, while the flexible scheme defers all heralding to a single one-way confirmation at the end. This is exactly the distinction in §III-B of the paper, encoded in the schedule DAG via `HeraldNode` placement relative to `PurifyNode`s (see `Validated Formal Model Def.md` §3.3). The fidelity numbers, which go through the same error-vector and purification model, match the paper's Fig. 5 to within ±0.0005 absolute, which confirms the physics is right. The Fig. 6 discrepancy is in magnitude only.
 
-## 2. Root cause: the model currently only assigns nonzero duration to `HeraldNode`s
+## 2. Root cause: only `HeraldNode`s contribute nonzero latency
 
-Tracing `Evaluator.evaluate()`'s bottom-up pass
-([`schedule/evaluator.py`](../src/hrgs_scheduler/schedule/evaluator.py)):
+Tracing `Evaluator.evaluate()`'s bottom-up pass:
 
 | Node type | Contribution to `current_time` |
 |---|---|
-| `GenNode` | fixed `gen_time`, **plus** (as of the update above, opt-in via `NetworkConfig.tau_emit`, default `None` = off) `τ_emit × Σ log₂(b_j)` over the hop's `branching` vector — still identical for every leaf of the same hop, and still `0.0` by default |
-| `AbsaBsmNode`, `JoinNode`, `PurifyNode` | `max(t_left, t_right)` after `_sync_to_common_time` **idles (decoheres, via `gamma`) whichever side is earlier up to the later side's time — fidelity-only, current_time itself is still exactly `max(t_left, t_right)`, so this adds no latency** (no `τ_pur_circ` term for `PurifyNode`) |
-| `IdleNode` | advances to `until` (decoheres `e`); the DAG node type itself is still unused by any of the three canonical builders, but the underlying `idle()` *operation* is now also invoked directly by `_sync_to_common_time` above, independent of whether an explicit `IdleNode` exists |
-| `HeraldNode` | **still the only node that adds physical time on its own**: `propagation_time × L_total/c` |
+| `GenNode` | fixed `gen_time`; optionally `τ_emit × Σ log₂(b_j)` if `NetworkConfig.tau_emit` is set (default off) |
+| `AbsaBsmNode`, `JoinNode`, `PurifyNode` | `max(t_left, t_right)`; `_sync_to_common_time` decoheres the earlier branch via `gamma`, but `current_time` itself is still `max(t_left, t_right)`, so no latency is added |
+| `IdleNode` | advances to `until`, decoheres error vector |
+| `HeraldNode` | adds `propagation_time × L_total/c` — the only node that contributes nonzero latency on its own |
 | `PauliCorrectNode` | inherits child's time |
 
-Consequently, `EvaluationResult.latency` for *any* of the three canonical
-schedules (`raw_chain`, `baseline_end_node_pumping`,
-`flexible_paper_schedule`) is still **entirely determined by how many
-`HeraldNode`s are on the path to the root, and their `propagation_time`
-multipliers, plus (if `tau_emit` is set) a uniform per-Gen-node offset that
-shifts every schedule's latency by the same amount** — not by
-[Integrating]'s actual eqs. (1)–(6), which also include `n_pur·τ_half`
-(half-RGS generation time, scaled by the number of purification copies) and
-`τ_pur_circ`/`τ_join` (local operation times, still zero). `gamma` affects
-**fidelity** at combine points with asymmetric arrival times, not latency
-at all -- see
-[outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md)
-for exactly how much.
+So `EvaluationResult.latency` is determined entirely by the Herald count and their `propagation_time` multipliers, plus (if `tau_emit` is set) a uniform offset that shifts every schedule by the same amount. The paper's eqs. (1)–(6) additionally include `n_\mathrm{pur} · τ_\mathrm{half}` (generation time scaled by copy count) and `τ_\mathrm{pur\_circ}` / `τ_\mathrm{join}` (local operation times), none of which are modelled here. `gamma` affects fidelity at asymmetric combine points; it adds no latency. See [outputs/sweep_gamma_and_tau_emit/README.md](../outputs/sweep_gamma_and_tau_emit/README.md) for exact numbers.
 
-For `baseline_end_node_pumping(N, n_pur=5)`: 4 sequential `PurifyNode`s,
-each followed by an intermediate round-trip `HeraldNode`
-(`propagation_time=2.0`), plus one final one-way `HeraldNode`
-(`propagation_time=1.0`) → total Herald weight = `4×2 + 1 = 9`.
-For `flexible_paper_schedule(N)`: only the single final one-way
-`HeraldNode` → total Herald weight = `1`.
+For `baseline_end_node_pumping(N, n_pur=5)`: 4 intermediate round-trip Heralds (`propagation_time=2.0`) plus one final one-way Herald (`propagation_time=1.0`) give total Herald weight `4×2 + 1 = 9`. For `flexible_paper_schedule(N)`: one final Herald, weight `1`. The `9:1` ratio is what `fig6_rate_ratio.py` measures; numerically `flex_over_base` runs 8.78×–9.00× across $e_d \in [0, 0.01]$, essentially flat since `success_prob` varies only mildly.
 
-**This `9:1` structural ratio is exactly what `fig6_rate_ratio.py` measures**
-(confirmed numerically: `flex_over_base` ranges `8.78×`–`9.00×` across
-`e_d ∈ [0, 0.01]`, essentially flat since it's dominated by a fixed
-node-count ratio, only lightly perturbed by the noise-dependent
-`success_prob` term in `R = success_prob / latency`).
+## 3. Why adding real `τ_half`/`τ_join`/`τ_pur_circ` values does not fix this
 
-## 3. Why wiring in real `τ_half`/`τ_join`/`τ_pur_circ` values would not by itself fix this
+`timing.py` implements eqs. (1)–(6) as an independent check. Sweeping `tau_emit` (from which `τ_half`, `τ_join`, `τ_pur_circ` are derived via `TimingParameters.default`) at the paper's config (`N=10`, `ℓ=2 km`, `c=2×10⁵ km/s`, so `L_total/c = 1×10⁻⁴`):
 
-`timing.py` independently implements [Integrating]'s closed-form eqs.
-(1)–(6) and was used to sanity-check the order of magnitude. Sweeping its
-`tau_emit` parameter (which sets `τ_half`, `τ_join`, `τ_pur_circ` via
-`TimingParameters.default`) against the paper's own
-`N=10, ℓ=2 km, c=2×10⁵ km/s` config (`L_total/c = 1×10⁻⁴`, same time
-units) gives:
-
-| `τ_emit` | `τ_half` | ratio (opt/base, `P_success=1`) |
+| `τ_emit` | `τ_half` | ratio (opt/base, $P_\mathrm{success}=1$) |
 |---|---|---|
 | `0` | `0` | `8.00` |
 | `1e-8` | `7.81e-8` | `7.94` |
@@ -105,55 +45,16 @@ units) gives:
 | `1e-4` | `7.81e-4` | `0.67` |
 | `1e-3` | `7.81e-3` | `0.59` |
 
-The ratio swings by more than an order of magnitude — even **crossing
-below 1** (i.e. the "optimistic" scheme becoming *slower* than baseline)
-— purely as a function of the never-stated absolute time scale `τ_emit`
-relative to `L_total/c`. This is because the optimistic scheme's
-generation-time term (`n_pur·τ_half`, appearing in **both** eq. (5)'s
-`τ_RGS` and eq. (6)'s `t_mem`) grows faster with `τ_emit` than baseline's
-does, since baseline's generation rate is unaffected by purification
-(`τ_RGS` stays equal to the raw case, eq. (1)/(3)) and only its *memory*
-term picks up the `n_pur·τ_half` cost once.
+The ratio crosses below 1 for moderate `τ_emit`, meaning the flexible scheme becomes *slower* than baseline once generation time is long enough. This happens because the flexible scheme's generation-time term `n_\mathrm{pur}·τ_\mathrm{half}` appears in both `τ_RGS` (eq. 5) and `t_mem` (eq. 6), whereas the baseline's `τ_RGS` is unaffected by `n_\mathrm{pur}` (eq. 1/3) and only its memory term picks up the extra copies. The ratio is therefore highly sensitive to `τ_emit` relative to `L_total/c`, spanning more than an order of magnitude across physically plausible values.
 
-**[Integrating] never states numeric values for `τ_emit` (photon
-emission/gate-cycle time), `τ_join`, or `τ_pur_circ`** — only the
-*network* configuration (`N=10`, `ℓ=2 km`, branching `(16,14,1)`, arm
-count `18`, `e_d ∈ [0, 0.01]`) is given numerically in §V-A. The paper's
-own public repository
-([`Naphann/repeater-graph-state-protocol-based-on-half-RGS`](https://github.com/Naphann/repeater-graph-state-protocol-based-on-half-RGS))
-implements only the stabilizer/fidelity simulation (confirmed by manual
-inspection in an earlier session — see repo memory), not the rate/timing
-model used to generate Fig. 6's y-axis. There is also no explicit
-closed-form "rate" equation given in the paper text combining `τ_RGS` and
-`t_mem` into a single renewal-theory cycle time — `timing.py`'s
-`τ_cycle = τ_RGS + t_mem` convention is our own reasonable-but-unverified
-interpretation, not something drawn verbatim from the paper.
+The paper states no numeric values for `τ_emit`, `τ_join`, or `τ_pur_circ` — §V-A gives only the network configuration (`N=10`, `ℓ=2 km`, branching `(16,14,1)`, arm count `18`, $e_d \in [0, 0.01]$). The public repository (`Naphann/repeater-graph-state-protocol-based-on-half-RGS`) implements the stabilizer/fidelity side only, not the rate model. There is also no explicit formula in the paper combining `τ_RGS` and `t_mem` into a renewal-theory cycle time; `timing.py`'s `τ_cycle = τ_RGS + t_mem` is a reasonable interpretation but is not stated verbatim.
 
-## 4. Conclusion
+## 4. Scope of the Fig. 6 validation
 
-Reproducing Fig. 6's exact `45×`–`65×` number requires the authors'
-specific, unpublished `τ_emit`/`τ_join`/`τ_pur_circ` constants (or
-equivalently, their exact renewal-theory cycle-time formula), neither of
-which is recoverable from the paper text or its associated code release.
-**Do not force-fit magic timing constants to hit `45–65×`** — this would
-create a false sense of validation. The correct scope for this project's
-Fig. 6 validation is:
+Hitting the paper's 45–65× requires the authors' specific, unpublished timing constants, which are not recoverable from the text or code. The implementation correctly reproduces:
 
-- ✅ Confirm the *mechanism* (Herald placement determines
-  optimistic-vs-heralded rate advantage) — done, structurally correct.
-- ✅ Confirm the *direction* (flexible/optimistic always beats baseline,
-  baseline always beats raw once resource-normalized) — done.
-- ✅ Confirm *order of magnitude* is plausible (single-digit-to-low-tens ×,
-  not e.g. 1000× or 1.001×) — done (~9×, within the same order as the
-  paper's ~45–65×).
-- ❌ Exact numeric agreement — not achievable without unpublished
-  constants; not a goal for this project's validation, and no further
-  time should be spent trying to force it.
+- the mechanism (Herald placement encodes optimistic vs. heralded advantage)
+- the direction (flexible always faster than baseline, baseline always faster than raw at the resource-normalized level)
+- the order of magnitude (~9×, same ballpark as 45–65×)
 
-If wiring real generation-time modeling into `gen_time`/`Join`/`Purify`
-node latencies becomes useful for later parts of the project (e.g. the
-outer-loop search's latency cost function `L(Σ)`), that is a legitimate
-and separate piece of future work — see the README's "Next (Weeks 2-3)"
-note — but it should be pursued for its own sake (a more physically
-complete latency model), not as an attempt to hit this specific
-unreproducible number.
+Exact numeric agreement is not achievable and was not a stated goal. The `τ_emit`/`τ_join`/`τ_pur_circ` question is a separate, open modelling question worth raising directly with the paper's authors.

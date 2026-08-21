@@ -46,7 +46,7 @@ from hrgs_scheduler.schedule import Evaluator, ScheduleDAG, render
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-PLOT = False  # set True if matplotlib is available
+PLOT = True  # set True if matplotlib is available
 N_HOPS = 10
 N_PUR = 5  # half-RGS copies per side per hop (paper: 5)
 N_POINTS = 20  # number of e_d sample points
@@ -163,7 +163,7 @@ def main() -> None:
             ax.set_xlabel(r"Depolarizing Error Probability $e_d$")
             ax.set_ylabel("Fidelity")
             ax.set_title(
-                "Fidelity vs Depolarizing Error Probability with (16, 14, 1) code"
+                "Fidelity vs Depolarizing Error Probability with (16, 14, 1) code\n(Fig. 5 reproduction from Integrating paper)"
             )
             ax.legend()
             ax.grid(alpha=0.3)
