@@ -1,0 +1,4 @@
+m_max,feasible,best_label,best_rate,best_fidelity,actual_M
+unconstrained,True,end_optimistic.n3.YY_ZX,6195.951122,0.906317,4
+4,True,end_optimistic.n3.YY_ZX,6195.951122,0.906317,4
+3,False,"beam.span.(hop0.n2.ZX+(pump[ZX](hop1.n3.YY_ZX,hop1.n3.YY_ZX)+pump[ZX]((pump[YY](hop2.n3.YY_ZX,hop2.n3.YY_ZX)+(pump[YY](hop3.n3.YY_ZX,hop3.n3.YY_ZX)+(hop4.n3.ZX_YY+(hop5.n2.YY+((hop6+hop7)+(hop8+hop9)))))),(pump[YY](hop2.n3.YY_ZX,hop2.n3.YY_ZX)+(pump[YY](hop3.n3.YY_ZX,hop3.n3.YY_ZX)+(hop4.n3.ZX_YY+(hop5.n2.YY+((hop6+hop7)+(hop8+hop9)))))))))",3967.685795,0.929011,6
