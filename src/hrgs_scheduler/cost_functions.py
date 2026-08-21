@@ -78,6 +78,17 @@ def satisfies_budget(result: EvaluationResult, e_max: int) -> bool:
     return result.resource_cost <= e_max
 
 
+def satisfies_m_max_budget(result: EvaluationResult, m_max: int) -> bool:
+    """Return True when M(Σ) ≤ m_max (concurrent-open-branch feasibility).
+
+    M(Σ) = ``result.max_concurrent_branches``: the minimum peak number of
+    simultaneously-held branches needed to build the schedule, under the
+    best possible evaluation order [Validated Formal Model Def, §5]. See
+    ``ScheduleDAG.max_concurrent_branches`` for the derivation.
+    """
+    return result.max_concurrent_branches <= m_max
+
+
 # ---------------------------------------------------------------------------
 # Objective builders
 # ---------------------------------------------------------------------------
@@ -103,6 +114,9 @@ class ObjectiveConfig:
         If set, only schedules with R(Σ) ≥ r_min are considered.
     e_max : int or None
         If set, only schedules with C(Σ) ≤ e_max are considered.
+    m_max : int or None
+        If set, only schedules with M(Σ) ≤ m_max (concurrent open
+        branches, §5) are considered.
     """
 
     primary: str = "rate"
@@ -110,6 +124,7 @@ class ObjectiveConfig:
     f_min: float | None = None
     r_min: float | None = None
     e_max: int | None = None
+    m_max: int | None = None
 
     def is_feasible(self, result: EvaluationResult) -> bool:
         """Return True when *result* satisfies all constraints."""
@@ -118,6 +133,8 @@ class ObjectiveConfig:
         if self.r_min is not None and not satisfies_rate_floor(result, self.r_min):
             return False
         if self.e_max is not None and not satisfies_budget(result, self.e_max):
+            return False
+        if self.m_max is not None and not satisfies_m_max_budget(result, self.m_max):
             return False
         return True
 
@@ -194,7 +211,10 @@ def compare_schedules(
     str
         A plain-text table.
     """
-    header = f"{'Schedule':<30} {'F':>10} {'R':>14} {'C':>5} {'L':>10} {'P_succ':>10}"
+    header = (
+        f"{'Schedule':<30} {'F':>10} {'R':>14} {'C':>5} {'M':>4} {'L':>10} "
+        f"{'P_succ':>10}"
+    )
     if objective is not None:
         header += f" {'Feasible':>9} {'Score':>10}"
     lines = [header, "-" * len(header)]
@@ -205,6 +225,7 @@ def compare_schedules(
             f"{res.fidelity:>10.6f} "
             f"{res.rate:>14.6g} "
             f"{res.resource_cost:>5d} "
+            f"{res.max_concurrent_branches:>4d} "
             f"{res.latency:>10.4f} "
             f"{res.success_prob:>10.6f}"
         )
@@ -215,3 +236,4 @@ def compare_schedules(
         lines.append(row)
 
     return "\n".join(lines)
+
