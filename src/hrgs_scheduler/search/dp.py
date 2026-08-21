@@ -138,8 +138,12 @@ Known scope limits (documented, not silently ignored)
 -------------------------------------------------------
 * Pumping combines exactly two copies of the SAME span (a, b); n>2-way
   pumping, and pumping across DIFFERENT spans, are not explored.
-* M_max (concurrent open branches) is not modeled, consistent with the
-  rest of the codebase (see repo notes on `ResourceBudget`).
+* M_max (concurrent open branches) is enforced at each finalist's
+  feasibility-scoring step (`ObjectiveConfig.m_max`, computed via
+  `ScheduleDAG.max_concurrent_branches`, Sethi-Ullman register
+  allocation), but is NOT used to prune the recursive per-span search
+  itself -- a span-partition candidate that is locally cheap can still
+  be discarded only once assembled into a final schedule and scored.
 
 Cross-check
 -----------
