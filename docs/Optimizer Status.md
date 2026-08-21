@@ -88,7 +88,7 @@ The current headline experiment at `N=10`, `e_d=0.01`, and `F_min=0.9` reports t
 - Default DP and beam results have no global optimality guarantee once bounded pumping or beam pruning is active.
 - Same-span pumping combines exactly two pre-pump candidates and pumps at most once at that span. Pumped narrower spans can still be joined and used inside wider candidates.
 - Link copy count and circuit enumeration are explicitly bounded. Larger circuit depths use curated sequences rather than full Cartesian enumeration.
-- `M_max`, the maximum number of concurrently open branches, is represented in the resource model but is not enforced by search or DAG validation.
+- `M_max`, the maximum number of concurrently open branches, is now enforced on the `feature/enforce-m-max` branch via `ScheduleDAG.max_concurrent_branches()` (Sethi-Ullman register allocation) and wired into `ObjectiveConfig.m_max`/feasibility scoring at each search tier.
 - Fully adaptive schedules that branch on measurement outcomes are outside the non-adaptive DAG model and would require an MDP or related policy formulation.
 - Beam-search feasibility need not be monotone in `e_max`, because a larger candidate set can change which candidates survive pruning. Minimum-budget sweeps are therefore empirical search results, not mathematical lower bounds.
 - The fidelity model reproduces the source paper closely, but exact Fig. 6 rate ratios cannot be recovered because the paper does not publish all timing constants. This limits comparison of absolute timing claims, not internal consistency of the optimizer.
