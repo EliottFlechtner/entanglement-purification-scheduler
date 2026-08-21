@@ -22,8 +22,12 @@ by ID and a clean separation between structure (DAG) and evaluation
     adjacent Spans (span-consistency: Span(a,b)+Span(b,d) -> Span(a,d)),
     PauliCorrect requires κ = Span(0, N).
   - Resource-budget feasibility (E_max/M_max, §5) is NOT checked here;
-    see ``cost_functions.satisfies_budget`` for the E_max (Gen-count) part;
-    M_max (max concurrent open branches) has no enforcement yet.
+    see ``cost_functions.satisfies_budget`` for the E_max (Gen-count) part.
+    M_max (max concurrent open branches) is computed by
+    ``ScheduleDAG.max_concurrent_branches()`` and enforced on demand via
+    ``ScheduleDAG.check_resource_budget()`` / ``cost_functions.
+    satisfies_m_max_budget`` -- neither is called automatically by
+    ``validate()``, since M_max requires an explicit budget argument.
 
 Convenience builders
 --------------------
@@ -41,6 +45,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Iterator, Sequence
 
+from hrgs_scheduler.models.resource_budget import ResourceBudget
 from hrgs_scheduler.models.stage import RGSS, RGSSStage, Span, Stage
 from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.node import (
@@ -290,6 +295,111 @@ class ScheduleDAG:
         for node in self.nodes.values():
             if isinstance(node, GenNode):
                 yield node
+
+    # ------------------------------------------------------------------
+    # Resource-budget introspection (M_max, §5)
+    # ------------------------------------------------------------------
+
+    def max_concurrent_branches(self) -> int:
+        """Return M(Σ): the minimum number of simultaneously-held (open)
+        entanglement resources needed to build this schedule, under the
+        best possible evaluation order.
+
+        Background [Validated Formal Model Def, §5]
+        ---------------------------------------------
+        A resource budget ``B = (n_pur, E_max, M_max)`` caps ``M_max``,
+        the maximum number of branches (partially-built resources still
+        awaiting their sibling before the next Join/AbsaBsm/Purify) that
+        may be held open in quantum memory at once. A ``ScheduleDAG``
+        only fixes a *topological partial order* on its operations, not a
+        concrete real-time execution order, so "how many branches are
+        open at once" depends on which legal order a scheduler picks.
+        This method returns the true minimum over every legal order --
+        i.e. what the best possible scheduler could achieve -- via the
+        classical Sethi-Ullman register-allocation recurrence for
+        expression trees [Sethi & Ullman 1970]:
+
+            registers(GenNode)               = 1
+            registers(IdleNode / HeraldNode) = registers(child)
+                (pass-through: same physical resource, just aging or
+                awaiting classical confirmation -- not a new branch)
+            registers(PauliCorrectNode)      = registers(child)
+                (terminal read-out, opens nothing further)
+            registers(2-input combiner)      = combine(registers(left),
+                                                        registers(right))
+
+        where a 2-input combiner is AbsaBsmNode/JoinNode/PurifyNode and
+        ``combine(L, R) = max(L, R)`` if ``L != R``, else ``L + 1``. Tying
+        needs one extra slot to hold the first-finished side's result
+        while the second is built; evaluating the higher-register child
+        first (and reusing its registers for the other child once it
+        finishes) is the standard, provably register-minimising order for
+        binary expression trees, so this recurrence gives an exact
+        minimum, not a heuristic bound.
+
+        A schedule Σ is feasible w.r.t. a given ``M_max`` iff
+        ``dag.max_concurrent_branches() <= M_max`` -- see
+        ``ScheduleDAG.check_resource_budget`` and
+        ``cost_functions.satisfies_m_max_budget`` for the enforcement
+        side of this.
+
+        Returns
+        -------
+        int
+            M(Σ): the minimum achievable peak number of concurrently
+            open branches.
+        """
+        order = self._topological_order()
+        registers: dict[NodeId, int] = {}
+        for nid in order:
+            node = self.nodes[nid]
+            if isinstance(node, GenNode):
+                registers[nid] = 1
+            elif isinstance(node, (IdleNode, HeraldNode, PauliCorrectNode)):
+                (child_id,) = node.children
+                registers[nid] = registers[child_id]
+            elif isinstance(node, (AbsaBsmNode, JoinNode, PurifyNode)):
+                left_id, right_id = node.children
+                l_reg, r_reg = registers[left_id], registers[right_id]
+                registers[nid] = l_reg + 1 if l_reg == r_reg else max(l_reg, r_reg)
+            else:
+                raise ValueError(
+                    f"Unknown node type {type(node).__name__} at node {nid}"
+                )
+        return registers[self.root_id]
+
+    def check_resource_budget(self, budget: ResourceBudget) -> None:
+        """Raise ``ValueError`` if this schedule violates *budget*.
+
+        Wires ``ResourceBudget`` [Validated Formal Model Def, §5] into
+        ``ScheduleDAG``: ``E_max`` is checked via ``gen_node_count``,
+        ``M_max`` via ``max_concurrent_branches()``. This is NOT called
+        automatically by ``validate()`` (which only checks *structural*
+        legality that holds independent of any particular budget); call
+        this separately whenever a concrete budget must be enforced.
+
+        Parameters
+        ----------
+        budget : ResourceBudget
+            The resource budget to check this schedule against.
+
+        Raises
+        ------
+        ValueError
+            If ``gen_node_count > budget.e_max`` or
+            ``max_concurrent_branches() > budget.m_max``.
+        """
+        if self.gen_node_count > budget.e_max:
+            raise ValueError(
+                f"Schedule uses {self.gen_node_count} Gen nodes, exceeding "
+                f"E_max={budget.e_max}"
+            )
+        m = self.max_concurrent_branches()
+        if m > budget.m_max:
+            raise ValueError(
+                f"Schedule requires {m} concurrently open branches at "
+                f"once, exceeding M_max={budget.m_max}"
+            )
 
     # ------------------------------------------------------------------
     # Internal building blocks (shared by convenience builders)
