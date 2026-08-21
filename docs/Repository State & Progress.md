@@ -93,7 +93,7 @@ representation (rather than a fixed formula) is the right abstraction.
 | `stage.py` | `RGSSStage`, `Span(a,b)` with `.join()` legality (adjacency required), `.width` | **Verified**. Enforces `0 ≤ a < b ≤ N` and adjacency on join, matching §3.1/§4.1. |
 | `state.py` | `State` tuple, `HeraldStatus` enum | **Verified** — direct 1:1 mapping to the formal `S = (e,s,t,t_gen,κ,r,h)` tuple. |
 | `network_config.py` | `HopConfig` (per-hop physical params), `NetworkConfig` (full `𝒩` tuple), `integrating_paper_config()` (exact paper config: N=10, ℓ=2km, branching=(16,14,1), arm_count=18) | **Verified, with one fixed bug**: `inner_error_per_hop`'s eq.(10) exponent `(m-1)` must use `arm_count` (paper's `m` = number of arms), **not** `tree_depth` (`len(branching)`) — these are different numbers in the paper's own config (arm_count=18 vs. branching-vector length=3). This was found and fixed; confirmed via direct reference to the Bridging paper text ("m denotes the number of arms"). |
-| `resource_budget.py` | `ResourceBudget(n_pur, e_max, m_max)` | Model exists and matches §5's tuple definition, but **`m_max` (max concurrent open branches) is not enforced anywhere** — see §5 (Known Gaps) below. |
+| `resource_budget.py` | `ResourceBudget(n_pur, e_max, m_max)` | Model exists and matches §5's tuple definition. **`m_max` (max concurrent open branches) is enforced** on the `feature/enforce-m-max` branch via `ScheduleDAG.max_concurrent_branches()` (Sethi-Ullman register allocation) — see §5 (Known Gaps) below. |
 
 ### 3.2 `operations/` — backbone + purification physics
 
@@ -251,14 +251,23 @@ lists.
 
 ## 5. Known gaps (not bugs — explicitly flagged, not silently skipped)
 
-- **`M_max` (max concurrent open branches, §5) is not enforced
-  anywhere.** `cost_functions.satisfies_budget` only checks `E_max`
-  (Gen-node count). `ResourceBudget` exists as a model but isn't wired
-  into `ScheduleDAG`/`Evaluator`. The current DAG representation is
-  static with no explicit time-slice/resource-holding semantics, so
-  implementing this would require real design work (would need to model
-  which branches are simultaneously "open" at any wall-clock instant),
-  not a quick fix.
+- **`M_max` (max concurrent open branches, §5) is enforced on the
+  `feature/enforce-m-max` branch.** Since the DAG's time semantics are
+  largely instantaneous, a literal wall-clock interval-overlap
+  definition of "concurrently open" is degenerate (most nodes share the
+  same `current_time`). Instead, `M(Σ)` is formalized exactly via the
+  classical Sethi-Ullman register-allocation recurrence
+  (`ScheduleDAG.max_concurrent_branches()`): the minimum number of
+  simultaneously-held branches needed to evaluate the schedule DAG under
+  the best possible evaluation order, computed bottom-up in `O(|T|)`
+  from DAG shape alone. `EvaluationResult.max_concurrent_branches` and
+  `cost_functions.satisfies_m_max_budget`/`ObjectiveConfig.m_max` wire
+  this into feasibility scoring at each search tier's finalist-scoring
+  step (`evaluator.evaluate(dag)` → `objective.score(result)`), so
+  `brute_force_search`, `dp_search`, and `beam_search` all respect
+  `m_max` without further changes. Not yet wired into per-span
+  recursive search *pruning* (only final-candidate feasibility), which
+  remains a possible follow-up.
 - **DP's recursive search doesn't explore purifying `n` independent
   copies of an already-partially-purified sub-span** (only `n`
   independent *raw* hops or `n` independent full raw chains are
@@ -343,7 +352,7 @@ src/hrgs_scheduler/
     stage.py                 RGSSStage, Span(a,b)
     state.py                  State tuple, HeraldStatus
     network_config.py        HopConfig, NetworkConfig, integrating_paper_config()
-    resource_budget.py       ResourceBudget(n_pur, e_max, m_max)  [m_max unenforced]
+    resource_budget.py       ResourceBudget(n_pur, e_max, m_max)  [m_max enforced, feature/enforce-m-max]
   operations/
     backbone.py               gen, join, absa_bsm, idle, herald, pauli_correct
     purification.py           purify(YY/ZX/XZ), success_prob
@@ -390,9 +399,9 @@ docs/
    report figure.
 2. **Sweep `beam_width`** to characterize the quality/runtime tradeoff
    of Tier 3 — itself a citable "generalizable rule of thumb" data point.
-3. Decide whether to formally implement `M_max` enforcement (§5 gap) —
-   requires real design work on concurrent-branch semantics, not a quick
-   patch; flag to the user before attempting.
+3. ~~Decide whether to formally implement `M_max` enforcement (§5 gap)~~
+   — done on the `feature/enforce-m-max` branch via Sethi-Ullman
+   register allocation; merge to `main` once reviewed.
 4. Consider whether DP/beam search should be extended to explore
    purifying copies of partially-purified sub-spans (currently only
    raw-hop or full-raw-chain copies are searched recursively; end-node
