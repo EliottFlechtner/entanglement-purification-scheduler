@@ -2,6 +2,7 @@
 
 import pytest
 
+from hrgs_scheduler.models.resource_budget import ResourceBudget
 from hrgs_scheduler.models.stage import RGSS, Span
 from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.dag import ScheduleDAG
@@ -46,6 +47,80 @@ def test_raw_chain_topological_order_root_last():
     order = dag.topological_order()
     assert order[-1] == dag.root_id
     assert len(order) == len(dag.nodes)
+
+
+# ---------------------------------------------------------------------------
+# max_concurrent_branches (M_max, §5)
+# ---------------------------------------------------------------------------
+
+
+def test_max_concurrent_branches_single_hop_needs_two():
+    # One AbsaBsm combining two fresh Gen leaves: both must be held at once.
+    dag = ScheduleDAG.raw_chain(N=1)
+    assert dag.max_concurrent_branches() == 2
+
+
+def test_max_concurrent_branches_raw_chain_is_bounded_not_linear_in_n():
+    # A left-to-right stitched chain can always be built by holding just
+    # the accumulated result (1 slot) while generating the next hop's two
+    # fresh Gens (2 slots) -- 3 total, regardless of how many hops N there
+    # are (this is exactly the Sethi-Ullman claim: peak register need does
+    # not grow with a left-skewed tree's depth).
+    for n in (2, 3, 4, 5, 10, 20):
+        dag = ScheduleDAG.raw_chain(N=n)
+        assert dag.max_concurrent_branches() == 3, f"N={n}"
+
+
+def test_max_concurrent_branches_purifying_two_equal_copies_needs_one_more():
+    # Purifying two independently-built candidates that each need R
+    # registers requires R+1 (hold the first finished copy while building
+    # the second). single_hop_yy_purified purifies two single-hop copies
+    # (each needing 2 registers) together, so it needs 3.
+    dag = ScheduleDAG.single_hop_yy_purified(N=1)
+    assert dag.max_concurrent_branches() == 3
+
+
+def test_max_concurrent_branches_idle_and_herald_are_pass_through():
+    # A HeraldNode (single child) must not count as opening a new branch;
+    # it just continues holding the same one.
+    nodes = {}
+    g_l = GenNode(node_id=0, hop_index=0)
+    g_r = GenNode(node_id=1, hop_index=0)
+    nodes[0], nodes[1] = g_l, g_r
+    bsm = AbsaBsmNode(node_id=2, children=(0, 1), hop_index=0)
+    nodes[2] = bsm
+    herald = HeraldNode(node_id=3, children=(2,))
+    nodes[3] = herald
+    root = PauliCorrectNode(node_id=4, children=(3,), N=1)
+    nodes[4] = root
+    dag = ScheduleDAG(nodes=nodes, root_id=4, N=1)
+    dag.validate()
+    assert dag.max_concurrent_branches() == 2  # same as the herald-free case
+
+
+# ---------------------------------------------------------------------------
+# check_resource_budget
+# ---------------------------------------------------------------------------
+
+
+def test_check_resource_budget_passes_when_within_budget():
+    dag = ScheduleDAG.raw_chain(N=4)
+    budget = ResourceBudget(n_pur=1, e_max=dag.gen_node_count, m_max=3)
+    dag.check_resource_budget(budget)  # must not raise
+
+
+def test_check_resource_budget_raises_on_e_max_violation():
+    dag = ScheduleDAG.raw_chain(N=4)
+    budget = ResourceBudget(n_pur=1, e_max=dag.gen_node_count - 1, m_max=3)
+    with pytest.raises(ValueError, match="Gen nodes"):
+        dag.check_resource_budget(budget)
+
+
+def test_check_resource_budget_raises_on_m_max_violation():
+    dag = ScheduleDAG.raw_chain(N=4)  # needs 3 concurrently open branches
+    budget = ResourceBudget(n_pur=1, e_max=dag.gen_node_count, m_max=2)
+    with pytest.raises(ValueError, match="concurrently open branches"):
+        dag.check_resource_budget(budget)
 
 
 # ---------------------------------------------------------------------------
