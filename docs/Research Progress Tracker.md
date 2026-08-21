@@ -30,7 +30,7 @@ Based on discussions done in meeting [[WM - 2026.07.08]]: agreed on idea 1 from 
 
 ### 2. Coding implementation (from july 17)
 
-#### Inner loop: (july 17-19)
+#### Inner loop: (july 17-18)
 
 Started by implementing the basic object models especially state & stage objects:
 ![[Pasted image 20260728155053.png]]
@@ -64,18 +64,21 @@ Reproduced figure 5 almost exactly (very small differences) but problems with fi
 
 tests written
 
-#### Outer loop (july 19 - 24)
+#### Outer loop (july 18-19)
 
-july 19-20:
-- implementation of brute force search over small & structured families
+july 18:
+- implementation of brute force search over small & structured families (same session as inner loop)
+- DP search (span-partition DP with memoization) and beam search heuristic
+- entanglement pumping sequences added to ScheduleDAG builders and search
 
-july 21-23:
-- support of DP search justified by docs + beam search heuristic
-- support of entanglement pumping sequences, lots of debugging
+july 19:
+- sweep scripts: sweep_hop_count, sweep_ed, sweep_min_budget_vs_n, excluded_move_at_scale, sweep_network_sensitivity, sweep_timing_with_pumping, pareto_frontiers, alternative_objectives
+- results generated (CSVs, plots), conclusions extracted for thesis
+- excluded-move check at N=14/18 (finds feasible schedules the DP/beam families can't reach)
 
-july 21-26:
-- sweeps + performance evaluated, evaluations given budgets, paper's configs etc
-- Extraction of conclusions, findings for thesis
+#### Code documentation pass (july 24)
+
+Docstring and comment cleanup across the whole codebase (`backbone.py`, `purification.py`, `timing.py`, `network_config.py`, `stage.py`, `state.py`, `test_serde.py`, plots); no logic changes.
 
 #### Additional tools (july 26)
 
@@ -83,7 +86,8 @@ Software architecture visualizer & software design tools (vite, UML diagrams, co
 
 ### 3. Thesis writing (from july 22)
 
-july 22-23: latex setup in vscode + internship thesis/report skeleton with defined content's structure and TODOs
+july 22: LaTeX `.gitignore` setup
+july 23: latex skeleton in vscode + internship thesis/report skeleton with defined content's structure and TODOs; docs reorganised (renamed `validation/` → `experiments/`, restructured `docs/`)
 
 july 26-27-28: corrected & adjusted title page, also upgraded content & structure
 
