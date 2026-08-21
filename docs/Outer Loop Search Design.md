@@ -173,9 +173,12 @@ families rather than introducing an inconsistent latency model.
   `brute_force_search`'s existing end-node-pumping families as-is (they
   already build fresh independent chains correctly), rather than
   reimplementing that capability inside the recursion.
-- **`M_max` (concurrent open branches)** is not modeled, consistent with
-  the rest of the codebase — `ResourceBudget.m_max` is not currently
-  enforced by either search tier or by `ScheduleDAG.validate()`.
+- **`M_max` (concurrent open branches)** is now enforced (on the
+  `feature/enforce-m-max` branch) via `ScheduleDAG.max_concurrent_branches()`
+  (Sethi-Ullman register allocation), wired into `ObjectiveConfig.m_max`
+  and checked at each search tier's finalist-scoring step. Previously it
+  was not modeled anywhere, and `ResourceBudget.m_max` was not enforced
+  by either search tier or by `ScheduleDAG.validate()`.
 
 ### 3.6 Cross-check against brute force
 

@@ -13,7 +13,7 @@ The **engineering/experimental campaign is essentially done**. Every item in Roa
 | Scales to production-size N | N=18 completes in ~140s under 3 GiB memory cap, never hits the 300s timeout | README.md |
 | Paper's linear resource-budget formula (`10N`) holds within its own tested range, diverges beyond it | Minimum feasible budget tracks close to `10N` for N<=24; visibly diverges starting N~26-28, crossing over at N=28 (min. feasible=283 > 10x28=280); crossover point is provisional (beam-width-sensitive, not exactly pinned down); at N=10 the paper overspends 2-4.8x depending on noise (this part independently solid, does not depend on the large-N crossover) | Roadmap_Derisk_and_Reframe_Results.md |
 | Known, honestly-scoped weakness | The "excluded move" (purifying two independently-optimized same-span candidates) was a real, demonstrated blind spot; pumping is now a searched move but remains heuristic — exact ground truth is unrecoverable even at N=3 within reasonable time | Optimality Scope.md §7 |
-| Explicit non-guarantee | `M_max` (concurrent-branch budget) is never enforced anywhere | Optimizer Status.md |
+| Explicit non-guarantee (resolved on `feature/enforce-m-max`) | `M_max` (concurrent-branch budget) is now enforced via Sethi-Ullman register allocation | Optimizer Status.md |
 
 So: strong on fidelity-model correctness, strong on demonstrated existence results, honestly scoped on optimality (never claims global optimum except in the exact-DP small-N regime).
 
