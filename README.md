@@ -53,9 +53,9 @@ policies have been solved exactly.
     structurally and evaluated with the same physical evaluator.
 - Search coverage is bounded. `brute_force_search` is exhaustive only within
     its configured fixed families; default DP and beam search prune or cap their
-    frontiers, especially for same-span pumping.
-- Therefore, a found schedule is positive evidence that a feasible construction
-    exists. A schedule not found is not proof that no legal schedule exists.
+    frontiers, especially for same-span pumping. Therefore, a found schedule is
+    positive evidence that a feasible construction exists. A schedule not found
+    is not proof that no legal schedule exists.
 - `e_max` constrains generated-resource count. The separate concurrent-branch
     resource limit $M_{\max}$ is represented in the model but is not currently
     enforced.
