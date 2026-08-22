@@ -343,6 +343,7 @@ class _SpanPartitionSearch:
         f_min_hint: float | None = None,
         enable_pumping: bool = True,
         exact_pumping: bool = False,
+        pump_pool_width: int | None = None,
     ) -> None:
         self._network = network
         self._max_link_copies = max_link_copies
@@ -352,6 +353,7 @@ class _SpanPartitionSearch:
         self._f_min_hint = f_min_hint
         self._enable_pumping = enable_pumping
         self._exact_pumping = exact_pumping
+        self._pump_pool_width = pump_pool_width
         self.nodes: dict[NodeId, ScheduleNode] = {}
         self._counter = count()
         self._memo: dict[tuple[int, int], list[_SpanCandidate]] = {}
@@ -441,7 +443,7 @@ class _SpanPartitionSearch:
         cloned via `_clone_candidate` so the pair is node-id-disjoint
         regardless.
         """
-        pool_width = self._pump_width()
+        pool_width = self._pump_pairing_width()
         if pool_width is not None and len(base_pool) > pool_width:
             base_pool = _beam_select(base_pool, pool_width, self._f_min_hint)
 
@@ -559,7 +561,7 @@ class _SpanPartitionSearch:
             pump_candidates = _prune_pareto(
                 self._generate_pump_candidates(a, b, base_pruned)
             )
-            pump_pool_width = self._pump_width()
+            pump_pool_width = self._pump_pairing_width()
             if pump_pool_width is not None and len(pump_candidates) > pump_pool_width:
                 pump_candidates = _beam_select(
                     pump_candidates, pump_pool_width, self._f_min_hint
@@ -600,10 +602,16 @@ class _SpanPartitionSearch:
         return pruned
 
     def _pump_width(self) -> int | None:
-        """Return the cap applied to pumping's pools/output, or None.
+        """Return the cap applied to the FINAL per-span frontier once
+        pumping is enabled (base + pump candidates merged), or None.
 
         `max_frontier_size` (set by `beam_search`) always wins when
-        present. Otherwise, `_DEFAULT_PUMP_POOL_WIDTH` applies UNLESS
+        present -- this must stay tied to `beam_width` regardless of any
+        `pump_pool_width` override, so a wider pumping search (see
+        `_pump_pairing_width`) still competes for, and is bounded by, the
+        same final beam slots as every other candidate; only the pairing
+        pool and pumping's own pre-merge output size are independently
+        overridable. Otherwise, `_DEFAULT_PUMP_POOL_WIDTH` applies UNLESS
         `exact_pumping=True`, which returns None (no cap at all) - this is
         the genuinely exhaustive mode, only tractable at very small N (see
         module docstring's "Exactness modes" section).
@@ -613,6 +621,23 @@ class _SpanPartitionSearch:
         if self._exact_pumping:
             return None
         return _DEFAULT_PUMP_POOL_WIDTH
+
+    def _pump_pairing_width(self) -> int | None:
+        """Return the cap applied to pumping's OWN pairing pool and its
+        own pre-merge candidate output, independent of the final per-span
+        frontier cap returned by `_pump_width`.
+
+        An explicit `pump_pool_width` (given at construction) always wins
+        here, letting callers widen pumping's own search (e.g.
+        `beam_search` widening pumping without widening `beam_width`
+        itself, avoiding the shared-budget crowding documented in
+        docs/Design Principles.md) without weakening the final frontier
+        cap that keeps overall span growth bounded. Falls back to
+        `_pump_width()`'s logic when no explicit override is given.
+        """
+        if self._pump_pool_width is not None:
+            return self._pump_pool_width
+        return self._pump_width()
 
 
 # ---------------------------------------------------------------------------
@@ -658,6 +683,7 @@ def dp_search(
     include_brute_force_families: bool = True,
     enable_pumping: bool = True,
     exact_pumping: bool = False,
+    pump_pool_width: int | None = None,
 ) -> list[SearchResult]:
     """Search schedules via memoized span-partition DP, sorted best-first.
 
@@ -719,6 +745,12 @@ def dp_search(
         default capped `dp_search`/`beam_search` are still tracking the
         true optimum closely at sizes where this remains affordable,
         not as a general-purpose search mode.
+    pump_pool_width : int or None
+        Explicit override for the cap applied to pumping's pairing pool
+        and its contribution to each span's frontier, in place of
+        `_DEFAULT_PUMP_POOL_WIDTH` (25). Default `None` preserves
+        existing behaviour exactly. Ignored when `exact_pumping=True`
+        (which removes the cap entirely).
 
     Returns
     -------
@@ -738,6 +770,7 @@ def dp_search(
         budget_cap=e_max,
         enable_pumping=enable_pumping,
         exact_pumping=exact_pumping,
+        pump_pool_width=pump_pool_width,
     )
     top_frontier = search.frontier(0, N)
 

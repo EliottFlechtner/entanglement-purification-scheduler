@@ -68,6 +68,7 @@ def beam_search(
     max_enumerated_rounds: int = 3,
     include_brute_force_families: bool = True,
     enable_pumping: bool = True,
+    pump_pool_width: int | None = None,
 ) -> list[SearchResult]:
     """Search schedules via beam-capped span-partition DP, sorted best-first.
 
@@ -109,6 +110,20 @@ def beam_search(
         pumping-disabled ones at matching settings (see docs/Design
         Principles.md). Default True, matching this function's
         existing default behaviour.
+    pump_pool_width : int or None
+        Explicit, independent cap for pumping's own pairing pool and its
+        pre-merge candidate output at each span, decoupled from
+        `beam_width`. Default `None` shares `beam_width` for pumping too
+        (existing behaviour, unchanged). Widens pumping's own search
+        without widening the whole beam, useful when pumping's pairing
+        pool is itself the bottleneck. This does **not** recover the
+        specific historical shared-beam regression documented in
+        docs/Design Principles.md: that crowding also happens at
+        intermediate spans' own final-frontier selection (which stays
+        capped at `beam_width` regardless of this parameter, by design --
+        see `search.dp._SpanPartitionSearch._pump_width`), so
+        `enable_pumping=False` remains the only way to exactly reproduce
+        pre-pumping results.
 
     Returns
     -------
@@ -131,6 +146,7 @@ def beam_search(
         max_frontier_size=beam_width,
         f_min_hint=objective.f_min,
         enable_pumping=enable_pumping,
+        pump_pool_width=pump_pool_width,
     )
     top_frontier = search.frontier(0, N)
 
