@@ -226,3 +226,36 @@ route to that ground truth beyond the very smallest budgets — and even
 there, its tractability depends steeply on the specific `budget_cap`
 used, not just on `N` (see `search/dp.py`'s module docstring), so "small
 N" alone does not guarantee it will finish in reasonable time.
+
+## 8. Addendum (22 August 2026) — a decoupled `pump_pool_width` knob was added, but does not close the shared-beam gap
+
+Per the "possible follow-up" flagged in `dp.py`'s own final-recap
+comment (a full fix needs two parallel per-span frontiers, previously
+attempted and reverted due to a 5x test-suite slowdown, see
+[Design Principles.md](Design%20Principles.md)): a smaller, genuinely
+safe, additive step was explored instead. `dp_search`/`beam_search` now
+accept an optional `pump_pool_width` parameter that lets pumping's own
+pairing pool and pre-merge candidate output be sized independently of
+`beam_width` (`_SpanPartitionSearch._pump_pairing_width`), without
+touching the final per-span frontier cap (`_pump_width`), which stays
+tied to `beam_width` everywhere. This is backward-compatible (`None`
+default preserves every existing result bit-for-bit; regression-tested
+in `tests/test_dp.py`).
+
+**Empirically confirmed this does not recover the historical
+reproducibility gap**: at the paper's own headline config (`N=10`,
+`e_d=0.01`, `e_max=100`), `beam_search(..., pump_pool_width=60)` still
+returns `end_optimistic.n3.YY_ZX`, cost=60, rate=6195.95 — identical to
+the plain shared-beam default, not the historical cost=50/rate=6713.18
+(`enable_pumping=False`'s result). This confirms the crowding is not
+localized to the top span's own pairing pool; it recurs at every
+intermediate span's final-frontier selection (each still capped at
+`beam_width`, by design, to keep overall growth bounded), exactly as
+`dp.py`'s prior analysis predicted. Fully fixing this still requires
+the two-parallel-frontier restructuring already ruled out on cost/risk
+grounds — **`enable_pumping=False` remains the only way to exactly
+reproduce pre-pumping results**, and this document's own conclusions
+(§7) are unchanged. The new parameter remains useful as an independent,
+lower-risk lever for cases where pumping's own pairing pool (not the
+deeper multi-span crowding) is the binding constraint.
+

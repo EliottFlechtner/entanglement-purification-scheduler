@@ -77,7 +77,7 @@ With a fixed beam width, frontier growth is bounded and the search is practical 
 
 ## Verification Status
 
-The repository currently collects **258 tests (1 skipped)** when run with `PYTHONPATH=src`. Relevant regression coverage includes Pareto dominance and budget pruning, lifting pumping caps with `exact_pumping=True`, DP and beam inclusion of brute-force labels, beam comparison against uncapped pumping at small instances, execution at `N=10`, objective feasibility, DAG validation, and evaluator behavior.
+The repository currently collects **273 tests (1 skipped)** when run with `PYTHONPATH=src`. Relevant regression coverage includes Pareto dominance and budget pruning, lifting pumping caps with `exact_pumping=True`, DP and beam inclusion of brute-force labels, beam comparison against uncapped pumping at small instances, execution at `N=10`, objective feasibility, DAG validation, and evaluator behavior.
 
 The strongest optimizer checks are in [`test_dp.py`](../tests/test_dp.py), [`test_heuristic.py`](../tests/test_heuristic.py), [`test_brute_force.py`](../tests/test_brute_force.py), and [`test_cost_functions.py`](../tests/test_cost_functions.py). Test collection was verified while preparing this document. Passing status should be established with the full test command for any release or thesis snapshot.
 

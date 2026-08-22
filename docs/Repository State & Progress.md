@@ -386,7 +386,7 @@ outputs/
   reproduction_figures/            Fig 5/6 validation script artifacts (DOT/PNG)
   headline_experiment_n10/         Weeks 3-4 headline experiment: results.csv + 4 DAGs (paper baseline vs. 3 optimizer variants) + README.md write-up
 
-tests/                              258 pytest tests (1 skipped), all passing
+tests/                              273 pytest tests (1 skipped), all passing
 
 docs/
   Validated Formal Model Def.md    authoritative formal spec (Σ = (T,φ), §1-9)
@@ -415,7 +415,16 @@ and [Design Principles.md](Design%20Principles.md) for the results.
    sub-spans — addressed via the integrated "pumping" search move
    (`enable_pumping`, see [Design Principles.md](Design%20Principles.md));
    the underlying scope limit is documented, not silently left open, in
-   [Optimality Scope.md](Optimality%20Scope.md).
-5. Automated `timing.py`/`Evaluator` cross-check test — still not
-   automated; low priority, no results depend on it (`timing.py` is
-   explicitly non-authoritative, see §3.5 above).
+   [Optimality Scope.md](Optimality%20Scope.md). A follow-up, lower-risk
+   `pump_pool_width` knob was added (22 August 2026) to decouple
+   pumping's own pairing pool from `beam_width`; confirmed to NOT close
+   the shared-beam reproducibility gap (see Optimality Scope.md §8) but
+   kept as a safe, additive, independently useful lever.
+5. ~~Automated `timing.py`/`Evaluator` cross-check test~~ — done,
+   [tests/test_timing_cross_check.py](../tests/test_timing_cross_check.py)
+   (14 tests). Confirms `raw_chain` and the optimistic pumping family
+   match `timing.py`'s closed-form formulas exactly in the reduced
+   (`tau_emit=tau_join=tau_pur=0`) regime, and pins down the previously-
+   undocumented-at-this-precision gap in `t_mem_base` (it omits the
+   final one-way herald the DAG always appends) as an explicit,
+   regression-guarded relationship rather than a silent mismatch.
