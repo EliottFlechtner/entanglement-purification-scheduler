@@ -187,6 +187,54 @@ class TestSpanPartitionSearch:
         assert len(capped_frontier) == _DEFAULT_PUMP_POOL_WIDTH
         assert len(exact_frontier) > len(capped_frontier)
 
+    def test_pump_pool_width_overrides_default_cap(self):
+        """`pump_pool_width` must independently widen pumping's own
+        pairing pool / pre-merge output, without weakening the FINAL
+        per-span frontier cap (`_pump_width`) that keeps overall growth
+        bounded -- see `_pump_pairing_width`'s docstring. In beam mode,
+        this lets `beam_search` decouple pumping's exploration from
+        `beam_width` (see docs/Design Principles.md's shared-budget
+        caveat) while the stored frontier stays capped at `beam_width`.
+        """
+        net = NetworkConfig.uniform(
+            N=3,
+            length=2.0,
+            branching=(16, 14, 1),
+            arm_count=18,
+            p_x_inner=0.003,
+            p_z_inner=0.003,
+            e_d=0.01,
+            gamma=1e-3,
+            c=2e5,
+        )
+        beam_shared = _SpanPartitionSearch(
+            net,
+            max_link_copies=3,
+            max_enumerated_rounds=3,
+            budget_cap=18,
+            max_frontier_size=5,
+        )
+        beam_decoupled = _SpanPartitionSearch(
+            net,
+            max_link_copies=3,
+            max_enumerated_rounds=3,
+            budget_cap=18,
+            max_frontier_size=5,
+            pump_pool_width=60,
+        )
+        shared_frontier = beam_shared.frontier(0, 3)
+        decoupled_frontier = beam_decoupled.frontier(0, 3)
+        # The final stored frontier stays capped at beam_width (5)
+        # regardless of pump_pool_width -- only pumping's own internal
+        # search widens, not the final number of retained candidates.
+        assert len(shared_frontier) == 5
+        assert len(decoupled_frontier) == 5
+        # A wider pumping pairing pool explores strictly more candidates
+        # before competing for those 5 slots, so it never does worse.
+        shared_best_fidelity = max(c.state.fidelity for c in shared_frontier)
+        decoupled_best_fidelity = max(c.state.fidelity for c in decoupled_frontier)
+        assert decoupled_best_fidelity >= shared_best_fidelity
+
 
 # ---------------------------------------------------------------------------
 # dp_search public API
