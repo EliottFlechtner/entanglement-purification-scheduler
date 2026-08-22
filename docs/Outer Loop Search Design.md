@@ -1,5 +1,11 @@
 # Outer-Loop Search: Design and Rationale
 
+**Reviewed and confirmed current: 22 August 2026.** All three search tiers
+(brute force, DP, beam search) are implemented; see
+[Optimizer Status.md](Optimizer%20Status.md) for the current, consolidated
+status. This document explains the original design rationale and remains
+accurate as written below.
+
 **Status:** both tiers implemented and cross-checked. `search/brute_force.py`
 (exhaustive enumeration, exact ground truth for small `N`) and
 `search/dp.py` (memoized recursive DP over span-partition structures,
@@ -39,7 +45,7 @@ adjacent/consistent spans, `Purify` only between same-stage states,
 Both algorithms return the same `SearchResult` type
 (`label`, `dag`, `eval_result`, `score`), so both share the display/export
 tooling in `search/report.py` (`print_table`, `to_csv`, `to_json`) and the
-`validation/search_results.py` CLI (`--algorithm brute_force|dp`).
+`experiments/search_results.py` CLI (`--algorithm brute_force|dp`).
 
 ## 2. Tier 1: brute force (`search/brute_force.py`)
 
@@ -174,7 +180,7 @@ families rather than introducing an inconsistent latency model.
   already build fresh independent chains correctly), rather than
   reimplementing that capability inside the recursion.
 - **`M_max` (concurrent open branches)** is now enforced (on the
-  `feature/enforce-m-max` branch) via `ScheduleDAG.max_concurrent_branches()`
+  `feature/enforce-m-max` branch, since merged to `main`) via `ScheduleDAG.max_concurrent_branches()`
   (Sethi-Ullman register allocation), wired into `ObjectiveConfig.m_max`
   and checked at each search tier's finalist-scoring step. Previously it
   was not modeled anywhere, and `ResourceBudget.m_max` was not enforced
@@ -214,10 +220,10 @@ functions.
 
 ```bash
 # Exact ground truth on a small network
-python3 validation/search_results.py --algorithm brute_force --N 4 --uniform --e_max 24
+python3 experiments/search_results.py --algorithm brute_force --N 4 --uniform --e_max 24
 
 # Broader search on the same network (superset of the above)
-python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24
+python3 experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24
 ```
 
 Or from Python:
@@ -229,7 +235,11 @@ results = dp_search(network, objective, e_max=24)
 print_table(results, top=10, show_infeasible=False)
 ```
 
-## 5. What's next
+## 5. Status
 
-Tier 3 (heuristic search — greedy/beam/simulated annealing) for `N` and
-`e_max` beyond exact DP tractability, per the WbW plan's Weeks 3+ target.
+Tier 3 (beam search, `search/heuristic.py`) is implemented and reuses
+this module's `_SpanPartitionSearch` machinery directly (see
+[Optimizer Status.md](Optimizer%20Status.md)'s Tier 3 section). The
+WbW plan's Weeks 3+ heuristic-search target is complete; there is no
+outstanding search-tier work beyond the scope limits already documented
+in §3.5 and in [Optimality Scope.md](Optimality%20Scope.md).

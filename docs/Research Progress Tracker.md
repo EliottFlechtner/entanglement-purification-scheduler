@@ -133,3 +133,8 @@ aug 16-17: iterative clarity passes on ch1, ch2, ch3 (terminology, acronyms, sou
 
 aug 19-20: search-methods description in ch4/ch5 refined; abstracts (FR + EN) written; final README update.
 
+### 8. Roadmap closure & docs cleanup (aug 22)
+
+aug 22: confirmed roadmap items 7-10 (network-config sensitivity, Pareto frontiers, alternative objectives, named design principles) were already complete with real outputs; updated `docs/archive/Roadmap Remaining Work.md` to mark them done with links. Swept `docs/` for stale content: fixed leftover `validation/` → `experiments/` path references, corrected the merged `feature/enforce-m-max` branch status, updated stale test counts (233 → 258, 1 skipped), removed the now-obsolete "what's next" TODOs in `Outer Loop Search Design.md` and `Repository State & Progress.md` §9, and added review dates to the affected files.
+
+

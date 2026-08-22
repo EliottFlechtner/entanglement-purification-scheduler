@@ -1,6 +1,6 @@
 # Python Optimizer Status
 
-**Status date:** 26 July 2026
+**Status date:** 26 July 2026. Reviewed and confirmed current: 22 August 2026.
 
 **Scope:** Python search and scoring code under `src/hrgs_scheduler/`, with the experiments and tests that exercise it.
 
@@ -77,7 +77,7 @@ With a fixed beam width, frontier growth is bounded and the search is practical 
 
 ## Verification Status
 
-The repository currently collects **243 tests** when run with `PYTHONPATH=src`. Relevant regression coverage includes Pareto dominance and budget pruning, lifting pumping caps with `exact_pumping=True`, DP and beam inclusion of brute-force labels, beam comparison against uncapped pumping at small instances, execution at `N=10`, objective feasibility, DAG validation, and evaluator behavior.
+The repository currently collects **258 tests (1 skipped)** when run with `PYTHONPATH=src`. Relevant regression coverage includes Pareto dominance and budget pruning, lifting pumping caps with `exact_pumping=True`, DP and beam inclusion of brute-force labels, beam comparison against uncapped pumping at small instances, execution at `N=10`, objective feasibility, DAG validation, and evaluator behavior.
 
 The strongest optimizer checks are in [`test_dp.py`](../tests/test_dp.py), [`test_heuristic.py`](../tests/test_heuristic.py), [`test_brute_force.py`](../tests/test_brute_force.py), and [`test_cost_functions.py`](../tests/test_cost_functions.py). Test collection was verified while preparing this document. Passing status should be established with the full test command for any release or thesis snapshot.
 
@@ -88,7 +88,7 @@ The current headline experiment at `N=10`, `e_d=0.01`, and `F_min=0.9` reports t
 - Default DP and beam results have no global optimality guarantee once bounded pumping or beam pruning is active.
 - Same-span pumping combines exactly two pre-pump candidates and pumps at most once at that span. Pumped narrower spans can still be joined and used inside wider candidates.
 - Link copy count and circuit enumeration are explicitly bounded. Larger circuit depths use curated sequences rather than full Cartesian enumeration.
-- `M_max`, the maximum number of concurrently open branches, is now enforced on the `feature/enforce-m-max` branch via `ScheduleDAG.max_concurrent_branches()` (Sethi-Ullman register allocation) and wired into `ObjectiveConfig.m_max`/feasibility scoring at each search tier.
+- `M_max`, the maximum number of concurrently open branches, is enforced (merged to `main`) via `ScheduleDAG.max_concurrent_branches()` (Sethi-Ullman register allocation) and wired into `ObjectiveConfig.m_max`/feasibility scoring at each search tier.
 - Fully adaptive schedules that branch on measurement outcomes are outside the non-adaptive DAG model and would require an MDP or related policy formulation.
 - Beam-search feasibility need not be monotone in `e_max`, because a larger candidate set can change which candidates survive pruning. Minimum-budget sweeps are therefore empirical search results, not mathematical lower bounds.
 - The fidelity model reproduces the source paper closely, but exact Fig. 6 rate ratios cannot be recovered because the paper does not publish all timing constants. This limits comparison of absolute timing claims, not internal consistency of the optimizer.

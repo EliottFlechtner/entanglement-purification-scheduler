@@ -8,7 +8,7 @@ that the known gap is real and exploitable, not merely theoretical.
 
 This is a documentation/precision task, not new code: no `src/` files
 were changed. The one new artifact is
-[validation/optimality_gap_example.py](../validation/optimality_gap_example.py),
+[experiments/optimality_gap_example.py](../experiments/optimality_gap_example.py),
 a standalone script that reproduces the counterexample below.
 
 ## 1. What the DP recursion searches natively
@@ -77,7 +77,7 @@ four brute-force fixed shapes.
 Reproducible via:
 
 ```
-PYTHONPATH=src python3 validation/optimality_gap_example.py
+PYTHONPATH=src python3 experiments/optimality_gap_example.py
 ```
 
 **Setup**: `N=3` network, `NetworkConfig.uniform(N=3, length=2.0,
@@ -130,7 +130,7 @@ reusing the same memoized `hop0` leaf). Purifying such candidates
 together would double-count one physical resource as if it were two
 independent ones, invalidating the independence assumption behind
 `purify()`'s success-probability formula. The script in
-`validation/optimality_gap_example.py` avoids this by building the two
+`experiments/optimality_gap_example.py` avoids this by building the two
 copies from **two separate `_SpanPartitionSearch` instances** with
 disjoint node-id pools and asserting no id collision before evaluating.
 This is the same "fresh Gen nodes per independent copy" requirement the

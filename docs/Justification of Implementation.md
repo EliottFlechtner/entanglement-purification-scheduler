@@ -1,5 +1,7 @@
 ## 1. Bottom line
 
+**Written 29 July 2026. Reviewed and confirmed current: 22 August 2026** — items 7-10 in §3 below are now complete (see [Design Principles.md](Design%20Principles.md)); the rest of this document's analysis is unchanged.
+
 The **engineering/experimental campaign is essentially done**. Every item in Roadmap Remaining Work.md's "critical path" (1–5) and most of "strengthening" (6, partially) plus all four items in Roadmap_Derisk_and_Reframe.md have been executed and have real CSVs/plots in outputs/. The **writing has not started** — every chapter in thesis/chapters/ is still a `\TODO{}` skeleton. That mismatch is the actual bottleneck now, not missing code.
 
 ## 2. How good is the optimizer, concretely?
@@ -13,17 +15,17 @@ The **engineering/experimental campaign is essentially done**. Every item in Roa
 | Scales to production-size N | N=18 completes in ~140s under 3 GiB memory cap, never hits the 300s timeout | README.md |
 | Paper's linear resource-budget formula (`10N`) holds within its own tested range, diverges beyond it | Minimum feasible budget tracks close to `10N` for N<=24; visibly diverges starting N~26-28, crossing over at N=28 (min. feasible=283 > 10x28=280); crossover point is provisional (beam-width-sensitive, not exactly pinned down); at N=10 the paper overspends 2-4.8x depending on noise (this part independently solid, does not depend on the large-N crossover) | Roadmap_Derisk_and_Reframe_Results.md |
 | Known, honestly-scoped weakness | The "excluded move" (purifying two independently-optimized same-span candidates) was a real, demonstrated blind spot; pumping is now a searched move but remains heuristic — exact ground truth is unrecoverable even at N=3 within reasonable time | Optimality Scope.md §7 |
-| Explicit non-guarantee (resolved on `feature/enforce-m-max`) | `M_max` (concurrent-branch budget) is now enforced via Sethi-Ullman register allocation | Optimizer Status.md |
+| Explicit non-guarantee (resolved, merged to `main`) | `M_max` (concurrent-branch budget) is now enforced via Sethi-Ullman register allocation | Optimizer Status.md |
 
 So: strong on fidelity-model correctness, strong on demonstrated existence results, honestly scoped on optimality (never claims global optimum except in the exact-DP small-N regime).
 
 ## 3. What's actually left
 
-**Not sweeps you're missing — these four analysis items, all cheap given existing infrastructure** (from Roadmap Remaining Work.md §7–10, not yet done):
-- **Item 7 — network-config sensitivity**: rerun the matched-cost comparison at a non-paper branching vector / hop length, to show the result isn't an artifact of the paper's specific tuning.
-- **Item 8 — explicit Pareto frontier plots** ($F$ vs $C$, $F$ vs $R$): the DP frontier machinery already computes this internally; it's just never been extracted and plotted as full curves (only two isolated points — matched-cost/budget-relaxed — are reported so far).
-- **Item 9 — exercise the other objective presets** (`maximize_fidelity_with_rate_floor`, `minimize_cost_with_constraints`): implemented, never run in an experiment. Cheap, and directly demonstrates the §6.3 "objective substitution" framing with real numbers.
-- **Item 10 — write down 1–3 named, generalizable design principles** from data you already have (e.g. "purification allocation should be non-uniform, concentrated where composing hops erodes fidelity fastest," "required budget grows as ~$N^{1.7}$, not linearly"). This is what turns a pile of CSVs into thesis "contributions" bullets.
+**Items 7-10 of Roadmap Remaining Work.md are done** (completed and verified 22 August 2026; the roadmap file itself is updated with links to each output):
+- **Item 7 — network-config sensitivity**: run, see [outputs/sweep_network_sensitivity/](../outputs/sweep_network_sensitivity/) and Finding 3 in [Design Principles.md](Design%20Principles.md).
+- **Item 8 — explicit Pareto frontier plots**: run, see [outputs/pareto_frontiers/](../outputs/pareto_frontiers/) and Finding 1 in [Design Principles.md](Design%20Principles.md).
+- **Item 9 — alternative objective presets**: run, see [outputs/alternative_objectives/](../outputs/alternative_objectives/) and Finding 4 in [Design Principles.md](Design%20Principles.md).
+- **Item 10 — named design principles**: written up in full as [Design Principles.md](Design%20Principles.md) (5 named findings).
 
 **Genuinely optional/stretch** (per the roadmap's own risk framing — skip unless there's real slack): fully closing the DP excluded-move gap (already attempted partially via pumping integration, further work has real schedule risk and diminishing returns), the adaptive-scheduling teaser, generalized-RGS comparison.
 
@@ -50,4 +52,4 @@ Two distinct contributions, and it's worth stating both explicitly in the report
 1. **The formalization itself.** The source paper ("Integrating") only ever *demonstrates* scheduling flexibility by example (one hand-built Fig. 4 schedule) and explicitly names optimization over that space as open/future work. Representing "any fixed purification schedule" as a single legal DAG object $\Sigma=(T,\phi)$ with composable cost functions is what turns "the paper shows one example works" into "here is the actual combinatorial object being searched" — validated directly by construction against that same Fig. 4 example (§4.2 of the formal model). That abstraction (span-generalized $\kappa$, `Purify` requiring only matching span not matching history) is the enabling idea that makes systematic search possible at all here.
 2. **A concrete, mechanism-level result, not just "an optimizer exists."** The headline finding isn't merely a percentage win — it's *why* the optimizer wins (non-uniform per-hop allocation tracking where fidelity erodes fastest), plus two separate resource-scaling findings at different N regimes: at the paper's own N=10, its fixed budget choice overspends 2-4.8x depending on noise (solid, N=10-only, no scoping caveats needed); at large N well beyond the paper's own tested range, its linear `10N` formula, which tracks the true requirement closely up to N~24, is shown to diverge starting around N~26-28. The second finding is reported with an explicit caveat that its exact crossover point is beam-width-sensitive and provisional, not a precisely located constant. Together these are the kind of scoped, honestly-caveated systems-engineering insight that suits a networking/quantum-engineering audience — real existence-and-comparison results, not an overclaimed universal scaling law.
 
-**Recommendation**: spend remaining time on items 7–10 above (a few days of scripting/plotting at most, all built on existing machinery) to round out the results section, then move to writing — that's where the actual report risk now sits, not in the optimizer's capability.
+**Recommendation**: items 7-10 are done (see §3); the remaining work is writing — that's where the actual report risk now sits, not in the optimizer's capability.

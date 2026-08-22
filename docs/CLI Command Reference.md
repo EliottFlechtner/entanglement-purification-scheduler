@@ -6,7 +6,7 @@ validating figures, and exporting visualizations.
 All commands assume you are in the repository root:
 
 ```bash
-cd /home/shark/Documents/hrgs-purification-scheduler
+cd /home/shark/Documents/entanglement-purification-scheduler
 ```
 
 ## 1) Environment and sanity checks

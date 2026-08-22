@@ -177,53 +177,28 @@ Scope this properly before starting, don't just dive in:
   perfectly fine report outcome; a half-finished, buggy extension is
   not.
 
-### 7. Sensitivity to network configs beyond the paper's own
+### 7. Sensitivity to network configs beyond the paper's own — **DONE**
 
-Run the matched-cost comparison at a couple of network configs that
-*aren't* the paper's exact one, e.g. a different branching vector (try
-a shallower tree, `(8,8,1)` or similar, and/or a longer per-hop
-distance). This tests whether the finding is specific to the paper's
-particular tuning or general. This is valuable for the networking
-framing specifically (papers in this space usually want to know if a
-result is an artifact of one config or holds more broadly), and is
-cheap to run given the sweep infrastructure from items 1-4 already
-exists by this point.
+Ran via `experiments/sweep_network_sensitivity.py`. Results:
+[outputs/sweep_network_sensitivity/README.md](../../outputs/sweep_network_sensitivity/README.md).
+Summarized as Finding 3 in [Design Principles.md](../Design%20Principles.md).
 
-### 8. Multi-objective / Pareto frontier plots
+### 8. Multi-objective / Pareto frontier plots — **DONE**
 
-Beyond the single "matched cost" and "budget-relaxed" points already
-computed, generate full Pareto frontiers (`F` vs `C`, `F` vs `R`) at a
-few representative `(N, e_d)` combinations, using the DP tier's existing
-Pareto-frontier machinery (`_SpanPartitionSearch.frontier` already keeps
-non-dominated `(cost, fidelity, success_prob)` tuples per span, per the
-repo notes, so this is largely a matter of exposing/plotting that
-existing internal data rather than computing anything new). This gives
-report readers the full tradeoff surface rather than two isolated
-points, and is a natural complement to the single-number headline
-result.
+Ran via `experiments/pareto_frontiers.py`. Results:
+[outputs/pareto_frontiers/README.md](../../outputs/pareto_frontiers/README.md).
+Summarized as Finding 1 in [Design Principles.md](../Design%20Principles.md).
 
-### 9. Run and report the alternative objective presets
+### 9. Run and report the alternative objective presets — **DONE**
 
-`cost_functions.py` already has
-`maximize_fidelity_with_rate_floor`/`minimize_cost_with_constraints`
-presets implemented but (per the progress doc) apparently not yet
-exercised in any experiment. Run the headline config through these too
-and report the results briefly, this is low-effort (infrastructure
-exists) and directly demonstrates the "objective substitution" framing
-from the formal model spec (§6.3) with real numbers instead of just
-the abstract claim.
+Ran via `experiments/alternative_objectives.py`. Results:
+[outputs/alternative_objectives/README.md](../../outputs/alternative_objectives/README.md).
+Summarized as Finding 4 in [Design Principles.md](../Design%20Principles.md).
 
-### 10. State the extracted design principles explicitly, as named findings
+### 10. State the extracted design principles explicitly, as named findings — **DONE**
 
-Once items 1, 3, and 7 are done, go back through the sweep results and
-try to state 1-3 crisp, generalizable rules explicitly (example
-templates, to be replaced with what the data actually shows, don't
-force a rule that isn't there): "non-uniform per-hop purification
-allocation outperforms uniform allocation by an increasing margin as
-`N` grows" or "the marginal rate benefit of additional RGSS-level
-purification rounds saturates beyond `n_pur = X` at this noise level."
-These become the report's "personal contributions" bullet points, not
-just "I built an optimizer and ran it once."
+Written up in full as [Design Principles.md](../Design%20Principles.md)
+(5 named findings, drawing on items 7-9 plus the pre-existing sweeps).
 
 ---
 
@@ -310,11 +285,9 @@ hold regardless of exact week boundaries:
    stays out of scope; item 13 is filler if genuinely nothing else is
    left.
 
-**Checkpoint suggestion**: after finishing items 1-5, that is a natural
-point to pause and report back (to the user, and potentially worth a
-quick sync with the mentors) with the resulting figures before deciding
-how much of "Strengthening" to pursue, since that decision should be
-informed by what the sweeps actually show (e.g. if item 3's `N`-sweep
-reveals a particularly interesting trend, that might justify spending
-more time on item 7's config-generality check to substantiate it, ahead
-of the higher-risk item 6).
+**Status update**: items 7-10 are done (see each item above for its
+output directory); item 10's write-up superseded this document's own
+"checkpoint suggestion" below as the actual synthesis step. This roadmap
+is kept as a historical planning record; current status lives in
+[Design Principles.md](../Design%20Principles.md) and
+[Justification of Implementation.md](../Justification%20of%20Implementation.md).

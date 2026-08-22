@@ -8,6 +8,14 @@ papers or re-audit the physics from scratch. Written 19 July 2026, after
 a full correctness recheck of every layer against the source papers and
 this repo's own formal-model spec.
 
+**Reviewed and confirmed current: 22 August 2026.** The engineering/
+experimental campaign described below is complete; see
+[Justification of Implementation.md](Justification%20of%20Implementation.md)
+and [Design Principles.md](Design%20Principles.md) for the consolidated
+final status and named findings. §9 below is kept as a historical record
+of what was still open as of the July write-up; every item in it is now
+done (see the note at the head of that section).
+
 **Bottom line up front:** the physics core (error model, backbone
 operations, purification, decoherence) is verified correct term-by-term
 against both source papers and reproduces the paper's own published
@@ -93,7 +101,7 @@ representation (rather than a fixed formula) is the right abstraction.
 | `stage.py` | `RGSSStage`, `Span(a,b)` with `.join()` legality (adjacency required), `.width` | **Verified**. Enforces `0 ≤ a < b ≤ N` and adjacency on join, matching §3.1/§4.1. |
 | `state.py` | `State` tuple, `HeraldStatus` enum | **Verified** — direct 1:1 mapping to the formal `S = (e,s,t,t_gen,κ,r,h)` tuple. |
 | `network_config.py` | `HopConfig` (per-hop physical params), `NetworkConfig` (full `𝒩` tuple), `integrating_paper_config()` (exact paper config: N=10, ℓ=2km, branching=(16,14,1), arm_count=18) | **Verified, with one fixed bug**: `inner_error_per_hop`'s eq.(10) exponent `(m-1)` must use `arm_count` (paper's `m` = number of arms), **not** `tree_depth` (`len(branching)`) — these are different numbers in the paper's own config (arm_count=18 vs. branching-vector length=3). This was found and fixed; confirmed via direct reference to the Bridging paper text ("m denotes the number of arms"). |
-| `resource_budget.py` | `ResourceBudget(n_pur, e_max, m_max)` | Model exists and matches §5's tuple definition. **`m_max` (max concurrent open branches) is enforced** on the `feature/enforce-m-max` branch via `ScheduleDAG.max_concurrent_branches()` (Sethi-Ullman register allocation) — see §5 (Known Gaps) below. |
+| `resource_budget.py` | `ResourceBudget(n_pur, e_max, m_max)` | Model exists and matches §5's tuple definition. **`m_max` (max concurrent open branches) is enforced** (merged to `main`) via `ScheduleDAG.max_concurrent_branches()` (Sethi-Ullman register allocation) — see §5 (Known Gaps) below. |
 
 ### 3.2 `operations/` — backbone + purification physics
 
@@ -201,7 +209,7 @@ need it). Regression-guarded by
 `load_result`/`save_top` for displaying and exporting `SearchResult`
 lists.
 
-`validation/search_results.py`: CLI entry point,
+`experiments/search_results.py`: CLI entry point,
 `--algorithm {brute_force,dp,beam}`, with algorithm-specific flags
 (`--beam-width`, `--max-link-copies`, `--max-enumerated-rounds`,
 `--no-bf-families`).
@@ -251,8 +259,8 @@ lists.
 
 ## 5. Known gaps (not bugs — explicitly flagged, not silently skipped)
 
-- **`M_max` (max concurrent open branches, §5) is enforced on the
-  `feature/enforce-m-max` branch.** Since the DAG's time semantics are
+- **`M_max` (max concurrent open branches, §5) is enforced (merged to
+  `main`).** Since the DAG's time semantics are
   largely instantaneous, a literal wall-clock interval-overlap
   definition of "concurrently open" is degenerate (most nodes share the
   same `current_time`). Instead, `M(Σ)` is formalized exactly via the
@@ -352,7 +360,7 @@ src/hrgs_scheduler/
     stage.py                 RGSSStage, Span(a,b)
     state.py                  State tuple, HeraldStatus
     network_config.py        HopConfig, NetworkConfig, integrating_paper_config()
-    resource_budget.py       ResourceBudget(n_pur, e_max, m_max)  [m_max enforced, feature/enforce-m-max]
+    resource_budget.py       ResourceBudget(n_pur, e_max, m_max)  [m_max enforced, merged to main]
   operations/
     backbone.py               gen, join, absa_bsm, idle, herald, pauli_correct
     purification.py           purify(YY/ZX/XZ), success_prob
@@ -368,7 +376,7 @@ src/hrgs_scheduler/
     heuristic.py                  Tier 3: beam_search (reuses dp.py's machinery)
     report.py                     print_table/to_csv/to_json/save_result/load_result
 
-validation/
+experiments/
   fig5_fidelity_vs_noise.py       reproduces Integrating Fig. 5 (near-exact)
   fig6_rate_ratio.py               reproduces Integrating Fig. 6 (order-of-magnitude only)
   search_results.py               CLI: --algorithm {brute_force,dp,beam}
@@ -378,7 +386,7 @@ outputs/
   reproduction_figures/            Fig 5/6 validation script artifacts (DOT/PNG)
   headline_experiment_n10/         Weeks 3-4 headline experiment: results.csv + 4 DAGs (paper baseline vs. 3 optimizer variants) + README.md write-up
 
-tests/                              233 pytest tests, all passing
+tests/                              258 pytest tests (1 skipped), all passing
 
 docs/
   Validated Formal Model Def.md    authoritative formal spec (Σ = (T,φ), §1-9)
@@ -391,22 +399,23 @@ docs/
   Repository State & Progress.md    ← this file
 ```
 
-## 9. Suggested next steps (not started, in rough priority order)
+## 9. Suggested next steps (historical, all now done as of 22 August 2026)
 
-1. **Sweep the headline experiment across `e_d ∈ [0, 0.01]`** (not just
-   the single `e_d=0.01` point) and characterize where the optimizer's
-   advantage grows/shrinks — this is the natural next deliverable for a
-   report figure.
-2. **Sweep `beam_width`** to characterize the quality/runtime tradeoff
-   of Tier 3 — itself a citable "generalizable rule of thumb" data point.
+This section is kept verbatim as a record of what was open when this
+document was written (19 July 2026). Every item below has since been
+completed; see [Justification of Implementation.md](Justification%20of%20Implementation.md)
+and [Design Principles.md](Design%20Principles.md) for the results.
+
+1. ~~Sweep the headline experiment across `e_d ∈ [0, 0.01]`~~ — done,
+   [outputs/sweep_ed_n10/](../outputs/sweep_ed_n10/).
+2. ~~Sweep `beam_width`~~ — done, [outputs/sweep_beam_width/](../outputs/sweep_beam_width/).
 3. ~~Decide whether to formally implement `M_max` enforcement (§5 gap)~~
-   — done on the `feature/enforce-m-max` branch via Sethi-Ullman
-   register allocation; merge to `main` once reviewed.
-4. Consider whether DP/beam search should be extended to explore
-   purifying copies of partially-purified sub-spans (currently only
-   raw-hop or full-raw-chain copies are searched recursively; end-node
-   pumping families are merged in as a stopgap instead, §5).
-5. Optionally wire an automated test asserting `timing.py`'s closed-form
-   formulas agree with `Evaluator`-derived latencies for the three
-   canonical schedule types (README.md notes this cross-check exists but
-   isn't yet automated).
+   — done via Sethi-Ullman register allocation, merged to `main`.
+4. Extending DP/beam search to purify copies of partially-purified
+   sub-spans — addressed via the integrated "pumping" search move
+   (`enable_pumping`, see [Design Principles.md](Design%20Principles.md));
+   the underlying scope limit is documented, not silently left open, in
+   [Optimality Scope.md](Optimality%20Scope.md).
+5. Automated `timing.py`/`Evaluator` cross-check test — still not
+   automated; low priority, no results depend on it (`timing.py` is
+   explicitly non-authoritative, see §3.5 above).
