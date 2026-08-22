@@ -35,6 +35,18 @@ Canonical timing table [Integrating, §IV-B]
     τ_RGS^(base)   = τ_half + τ_join   (same generation rate as raw)
     t_mem^(base)   ≈ n_pur·τ_half + τ_pur + n_rounds·(2·L/c)
 
+    NOTE (found via `tests/test_timing_cross_check.py`): this formula
+    counts only the n_rounds sequential round-trip heralds. The actual
+    DAG built by `ScheduleDAG.baseline_end_node_pumping`/
+    `generic_end_node_pumping(heralded=True)` always appends one more
+    final one-way herald (the same final herald every canonical builder
+    gets via `_wrap_herald_and_correct`), so the exact, verified
+    relationship is `Evaluator.evaluate(dag).latency == tau_cycle_base +
+    L/c`, not `== tau_cycle_base`. This is a real, minor imprecision in
+    this formula (not in the DAG/Evaluator, which is authoritative), left
+    as-is since `timing.py` is explicitly a non-authoritative reference
+    model -- see the cross-check test for the exact pinned-down relation.
+
   Optimistic (blind / optimistic RGSS-level purification, single herald):
     τ_RGS^(opt)    = n_pur·τ_half + max(τ_pur + τ_join, n_pur·τ_join)
     t_mem^(opt)    ≈ n_pur·τ_half + τ_pur + L/c
