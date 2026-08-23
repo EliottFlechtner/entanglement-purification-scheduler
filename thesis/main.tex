@@ -40,7 +40,13 @@
 \include{chapters/07_discussion}
 \include{chapters/08_conclusion}
 
-\printbibliography
+\printbibheading
+{
+\renewcommand*{\bibfont}{\normalfont\footnotesize}
+\begin{multicols}{2}
+\printbibliography[heading=none]
+\end{multicols}
+}
 
 \appendix
 \include{chapters/appendix}
