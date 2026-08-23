@@ -49,7 +49,7 @@ The span-partition recurrence alone constructs a resource by joining two differe
 
 An uncapped mode, \texttt{exact\_pumping=True}, is available for targeted validation. It restores exhaustive pumping within the configured circuit and copy-count limits, but can already become impractical for small $N$ when the budget is large. It is therefore used as a diagnostic comparison rather than as the general production setting.
 
-Pumping and ordinary join candidates compete for the same fixed-size frontier. Adding pumping can therefore remove a join-only candidate from a smaller span before that candidate can contribute to an end-to-end frontier. The optional \texttt{enable\_pumping=False} setting reproduces the earlier pumping-free search behaviour. Section~\ref{sec:exp:headline} reports both settings at the nominal configuration because they can produce different top-ranked schedules.
+Pumping and ordinary join candidates compete for the same fixed-size frontier. Adding pumping can therefore remove a join-only candidate from a smaller span before that candidate can contribute to an end-to-end frontier. The optional \texttt{enable\_pumping=False} setting reproduces the earlier pumping-free search behaviour. Section~\ref{sec:exp:headline} reports both settings at the reference configuration because they can produce different top-ranked schedules.
 
 \section{Beam Search}
 \label{sec:alg:beam}
