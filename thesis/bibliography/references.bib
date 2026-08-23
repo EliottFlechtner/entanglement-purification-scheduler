@@ -310,6 +310,23 @@
   keywords = {QAlgos,QPhysics}
 }
 
+@article{Deb2002Fast,
+  title = {A Fast and Elitist Multiobjective Genetic Algorithm: {{NSGA-II}}},
+  shorttitle = {A Fast and Elitist Multiobjective Genetic Algorithm},
+  author = {Deb, K. and Pratap, A. and Agarwal, S. and Meyarivan, T.},
+  date = {2002-04},
+  journaltitle = {IEEE Transactions on Evolutionary Computation},
+  volume = {6},
+  number = {2},
+  pages = {182--197},
+  issn = {1941-0026},
+  doi = {10.1109/4235.996017},
+  url = {https://ieeexplore.ieee.org/document/996017},
+  urldate = {2026-08-23},
+  abstract = {Multi-objective evolutionary algorithms (MOEAs) that use non-dominated sorting and sharing have been criticized mainly for: (1) their O(MN/sup 3/) computational complexity (where M is the number of objectives and N is the population size); (2) their non-elitism approach; and (3) the need to specify a sharing parameter. In this paper, we suggest a non-dominated sorting-based MOEA, called NSGA-II (Non-dominated Sorting Genetic Algorithm II), which alleviates all of the above three difficulties. Specifically, a fast non-dominated sorting approach with O(MN/sup 2/) computational complexity is presented. Also, a selection operator is presented that creates a mating pool by combining the parent and offspring populations and selecting the best N solutions (with respect to fitness and spread). Simulation results on difficult test problems show that NSGA-II is able, for most problems, to find a much better spread of solutions and better convergence near the true Pareto-optimal front compared to the Pareto-archived evolution strategy and the strength-Pareto evolutionary algorithm - two other elitist MOEAs that pay special attention to creating a diverse Pareto-optimal front. Moreover, we modify the definition of dominance in order to solve constrained multi-objective problems efficiently. Simulation results of the constrained NSGA-II on a number of test problems, including a five-objective, seven-constraint nonlinear problem, are compared with another constrained multi-objective optimizer, and the much better performance of NSGA-II is observed.},
+  keywords = {Associate members,Computational complexity,Computational modeling,Constraint optimization,Decision making,Diversity reception,Evolutionary computation,Genetic algorithms,Sorting,Testing}
+}
+
 @article{Deutsch1989Quantum,
   title = {Quantum Computational Networks},
   author = {Deutsch, David Elieser},
@@ -432,10 +449,16 @@
   keywords = {Quantum Physics}
 }
 
-@article{EhrgottMulticriteria,
+@book{Ehrgott2005Multicriteria,
   title = {Multicriteria {{Optimization}}},
   author = {Ehrgott, Matthias},
-  langid = {english}
+  date = {2005},
+  publisher = {Springer},
+  location = {Berlin Heidelberg New York},
+  abstract = {Decision makers in many areas, from industry to engineering and the social sector, face an increasing need to consider multiple, conflicting objectives in their decision processes. In many cases these real world decision problems can be formulated as multicriteria mathematical optimization models. The solution of such models requires appropriate techniques to compute so called efficient, or Pareto optimal, or compromise solutions that - unlike traditional mathematical programming methods - take the contradictory nature of the criteria into account. This book provides the necessary mathematical foundation of multicriteria optimization to solve nonlinear, linear and combinatorial problems with multiple criteria. Motivational examples illustrate the use of multicriteria optimization in practice. Numerous illustrations and exercises as well as an extensive bibliography are provided. In the new edition a chapter on optimality conditions has been added. The linear programming part has been extended and includes new developments. Moreover, motivational examples are now introducing the majority of chapters.},
+  isbn = {978-3-540-21398-7},
+  langid = {english},
+  pagetotal = {336}
 }
 
 @article{EppsteinFinding,
@@ -655,6 +678,22 @@
   keywords = {Quantum Physics}
 }
 
+@article{Khorram2014Numerical,
+  title = {A Numerical Method for Constructing the {{Pareto}} Front of Multi-Objective Optimization Problems},
+  author = {Khorram, E. and Khaledian, K. and Khaledyan, M.},
+  date = {2014-05-01},
+  journaltitle = {Journal of Computational and Applied Mathematics},
+  shortjournal = {Journal of Computational and Applied Mathematics},
+  volume = {261},
+  pages = {158--171},
+  issn = {0377-0427},
+  doi = {10.1016/j.cam.2013.11.007},
+  url = {https://www.sciencedirect.com/science/article/pii/S0377042713006262},
+  urldate = {2026-08-23},
+  abstract = {In this paper, a new numerical method is presented for constructing an approximation of the Pareto front of multi-objective optimization problems. This method is based on the well-known scalarization approach by Pascoletti and Serafini. The proposed method is applied to four test problems that illustrate specific difficulties encountered in multi-objective optimization problems, such as nonconvex, disjoint and local Pareto fronts. The effectiveness of the proposed method is demonstrated by comparing it with the NSGA-II algorithm and the Normal Constraint method.},
+  keywords = {Multi-objective optimization,Nonconvex optimization,Nonlinear optimization,Pareto front,Pascoletti and Serafini scalarization}
+}
+
 @book{Kitaev2002Classical,
   title = {Classical and Quantum Computation},
   author = {Kitaev, Aleksej Ju and Šen, Aleksandr Ch and Vjalyj, Michail N.},
@@ -798,10 +837,28 @@
   keywords = {Quantum Physics}
 }
 
-@article{LowerreHARPY,
-  title = {{{THE HARPY SPEECH RECOGNITION SYSTEM}}},
-  author = {Lowerre, Bruce T},
-  langid = {english}
+@inproceedings{Lowerre1976HARPY,
+  title = {The {{HARPY}} Speech Recognition System},
+  author = {Lowerre, B.},
+  date = {1976},
+  url = {https://www.semanticscholar.org/paper/The-HARPY-speech-recognition-system-Lowerre/bdb3f20fe41bb95f6bc9d162e827de8db3f952d7},
+  urldate = {2026-08-23},
+  abstract = {Abstract : The Harpy connected speech recognition system is the result of an attempt to understand the relative importance of various design choices of two earlier speech recognition systems developed at Carnegie-Mellon University: The Hearsay-1 system and the Dragon system. Knowledge is represented in the Hearsay- 1 system as procedures and in the Dragon system as a Markov network with a- priori transition probabilities between states. Systematic performance analysis of various design choices of these two systems resulted in the HARPY system, in which knowledge is represented as a finite state transition network but without the a-priori transition probabilities. Harpy searches only a few 'best' syntactic (and acoustic) paths in parallel to determine the optimal path, and uses segmentation to effectively reduce the utterance length, thereby reducing the number of state probability updates that must be done. Several new heuristics have been added to the HARPY system to improve its performance and speed: detection of common sub-nets and collapsing them to reduce overall network size and complexity, eliminating the need for doing an acoustic match for all phonemic types at every time sample, and semi-automatic techniques for learning the lexical representations (that are needed for a steady-state system of this type) and the phonemic templates from training data, thus automatically accounting for the commonly occurring intra-word coarticulation and juncture phenomena. Inter-word phenomena are handled by the use of juncture rules which are applied at network generation time, thereby eliminating the need for repetitive and time consuming application of phonological rules during the recognition phase.}
+}
+
+@online{Meister2022BestFirst,
+  title = {Best-{{First Beam Search}}},
+  author = {Meister, Clara and Vieira, Tim and Cotterell, Ryan},
+  date = {2022-11-15},
+  eprint = {2007.03909},
+  eprinttype = {arXiv},
+  eprintclass = {cs.CL},
+  doi = {10.48550/arXiv.2007.03909},
+  url = {http://arxiv.org/abs/2007.03909},
+  urldate = {2026-08-23},
+  abstract = {Decoding for many NLP tasks requires an effective heuristic algorithm for approximating exact search since the problem of searching the full output space is often intractable, or impractical in many settings. The default algorithm for this job is beam search -- a pruned version of breadth-first search. Quite surprisingly, beam search often returns better results than exact inference due to beneficial search bias for NLP tasks. In this work, we show that the standard implementation of beam search can be made up to 10x faster in practice. Our method assumes that the scoring function is monotonic in the sequence length, which allows us to safely prune hypotheses that cannot be in the final set of hypotheses early on. We devise effective monotonic approximations to popular nonmonontic scoring functions, including length normalization and mutual information decoding. Lastly, we propose a memory-reduced variant of Best-First Beam Search, which has a similar beneficial search bias in terms of downstream performance, but runs in a fraction of the time.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Computation and Language,Computer Science - Data Structures and Algorithms}
 }
 
 @article{Meter2007Communication,
@@ -960,6 +1017,20 @@
   urldate = {2026-06-29},
   abstract = {We present a resource-performance tradeoff of an all-optical quantum repeater that uses photon sources, linear optics, photon detectors and classical feedforward at each repeater node, but no quantum memories. We show that the quantum-secure key rate has the form \$R(η) = Dη\textasciicircum s\$ bits per mode, where \$η\$ is the end-to-end channel's transmissivity, and the constants \$D\$ and \$s\$ are functions of various device inefficiencies and the resource constraint, such as the number of available photon sources at each repeater node. Even with lossy devices, we show that it is possible to attain \$s {$<$} 1\$, and in turn outperform the maximum key rate attainable without quantum repeaters, \$R\_\{\textbackslash rm direct\}(η) = -\textbackslash log\_2(1-η) \textbackslash approx (1/\textbackslash ln 2)η\$ bits per mode for \$η\textbackslash ll 1\$, beyond a certain total range \$L\$, where \$η\textbackslash sim e\textasciicircum\{-αL\}\$ in optical fiber. We also propose a suite of modifications to a recently-proposed all-optical repeater protocol that ours builds upon, which lower the number of photon sources required to create photonic clusters at the repeaters so as to outperform \$R\_\{\textbackslash rm direct\}(η)\$, from \$\textbackslash sim 10\textasciicircum\{11\}\$ to \$\textbackslash sim 10\textasciicircum\{6\}\$ photon sources per repeater node. We show that the optimum separation between repeater nodes is independent of the total range \$L\$, and is around \$1.5\$ km for assumptions we make on various device losses.},
   keywords = {Quantum Physics}
+}
+
+@book{Pareto2014Manual,
+  title = {Manual of {{Political Economy}}: {{A Critical}} and {{Variorum Edition}}},
+  shorttitle = {Manual of {{Political Economy}}},
+  author = {Pareto, Vilfredo},
+  editor = {Montesano, Aldo and Zanni, Alberto and Bruni, Luigino and Chipman, John S.},
+  date = {2014},
+  publisher = {Oxford Univ Pr on Demand},
+  location = {Oxford, United Kingdom},
+  abstract = {Vilfredo Pareto's Manual of Political Economy is a 'classic' study in the history of economic thought for many reasons, the most noteworthy of which include the setting of general equilibrium economics within a choice theoretic framework based on the opposition between tastes and obstacles; the definitive formulation of economic efficiency, including the surplus approach to collective welfare; the technically flawed but nonetheless insightful treatment of path dependence in consumer theory; and the introduction of non-competitive market analysis to the general equilibrium economics. In so doing, Pareto's general study of economic equilibrium not only substantially extended the contributions to economic theory made by Léon Walras, his predecessor in the Chair of Political Economy at the University of Lausanne, it did so in a manner that was often contrary to Walras's own thinking on the formalisation of economic theory. . This English language 'critical edition' of Pareto's Manual of Political Economy - a revised and extended translation of the 'Edizione critica' published in Italian in 2006 - is a very significant book for two main reasons. First, it is the only variorum translation of the Italian language Manuale di Economia Politica, originally published in 1906, and the subsequent French language Manuel d'Économie Politique, originally published in 1909. Second, it includes extensive contributions from the editors including annotations, to clarify particular points in Pareto's text; editors' notes, to critically reflect on major themes in Pareto's text and to draw attention to the historical influences that led to their development and their anticipation of, or influence on, subsequent ideas that emerged in economics; and notes to the 1909 mathematical appendix, to highlight the mix of insight and imperfection in Pareto's mathematical economics.},
+  isbn = {978-0-19-960795-2},
+  langid = {english},
+  pagetotal = {664}
 }
 
 @online{Patange2026Realistic,
