@@ -1,31 +1,11 @@
 \begin{abstract}
 
-All-photonic quantum repeaters based on half-repeater graph states (HRGS) allow
-entanglement purification to be applied at any stage of a multi-hop chain:
-during resource generation, after a single link, or at the end nodes. The
-Integrating paper demonstrates this flexibility with one hand-chosen schedule
-and identifies the search for a better one as an open problem. This thesis
-addresses that gap by providing a systematic framework for finding and comparing
-purification schedules under a fixed generation-resource budget.
+[ALTERNATIVE ABSTRACT]
 
-Every fixed, non-adaptive schedule is represented as a directed acyclic graph
-and evaluated by a single bottom-up pass computing fidelity, rate, success
-probability, and resource cost. The evaluator reproduces the source paper's
-three canonical fidelity benchmarks to four significant figures. Three search
-tiers---structured baseline enumeration, a Pareto-multi-objective span-partition
-dynamic program, and bounded beam search---are built on top of this shared
-evaluator, so every returned schedule is a physically validated construction
-rather than a search-time approximation.
+All-photonic quantum repeaters based on half-repeater graph states (HRGS) allow entanglement purification to be applied at any stage of a multi-hop chain: during resource generation, after a single link, or at the end nodes. The Integrating paper demonstrates this flexibility with one hand-chosen schedule and identifies the search for a better one as an open problem. This thesis addresses that gap by providing a systematic framework for finding and comparing purification schedules under a fixed generation-resource budget.
 
-At the source paper's nominal $N=10$ configuration, the matched-cost searched
-schedule improves rate by $2.5\%$ over the hand-designed baseline at identical
-resource cost, and a budget-relaxed schedule achieves $52.8\%$ higher rate while
-using only $60\%$ of that budget. When inner-qubit error is introduced, the
-fixed baseline drops below the $F \ge 0.9$ fidelity floor, whereas a searched
-schedule restores feasibility within the same budget---a qualitative advantage
-that a rate percentage cannot capture. Additional experiments sweep noise level,
-memory decoherence, generation timing, and chain length $N$, and extract five
-named design findings. All results are existence claims within the searched
-schedule families, not proofs of global optimality.
+Every fixed, non-adaptive schedule is represented as a directed acyclic graph and evaluated by a single bottom-up pass computing fidelity, rate, success probability, and resource cost. The evaluator reproduces the source paper's three canonical fidelity benchmarks to four significant figures. Three search tiers---structured baseline enumeration, a Pareto-multi-objective span-partition dynamic program, and bounded beam search---are built on top of this shared evaluator, so every returned schedule is a physically validated construction rather than a search-time approximation.
+
+At the source paper's nominal $N=10$ configuration, the matched-cost searched schedule improves rate by $2.5\%$ over the hand-designed baseline at identical resource cost, and a budget-relaxed schedule achieves $52.8\%$ higher rate while using only $60\%$ of that budget. When inner-qubit error is introduced, the fixed baseline drops below the $F \ge 0.9$ fidelity floor, whereas a searched schedule restores feasibility within the same budget---a qualitative advantage that a rate percentage cannot capture. Additional experiments sweep noise level, memory decoherence, generation timing, and chain length $N$, and extract five named design findings. All results are existence claims within the searched schedule families, not proofs of global optimality.
 
 \end{abstract}
