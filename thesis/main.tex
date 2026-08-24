@@ -49,9 +49,13 @@
 \printbibheading
 {
 \renewcommand*{\bibfont}{\normalfont\footnotesize}
+\begingroup
+\setlength{\emergencystretch}{1em}
+\sloppy
 \begin{multicols}{2}
 \printbibliography[heading=none]
 \end{multicols}
+\endgroup
 }
 
 \appendix

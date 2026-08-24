@@ -1,33 +1,13 @@
 \begin{abstract}
 
-Long-distance quantum networks require repeaters to distribute high-fidelity
-Bell pairs despite photon loss and operational noise. In half-repeater-graph-
-state (HRGS) all-photonic repeaters, entanglement purification can be applied
-during resource generation, after a single hop, or after an end-to-end pair is
-established. Selecting where to purify, how many independent copies to consume,
-and which circuit to apply is therefore a combinatorial scheduling problem.
+\TOFIX{fix}{non-final version}
 
-This thesis formalises every fixed, non-adaptive purification schedule as a
-directed acyclic graph and evaluates it with one bottom-up pass that computes
-fidelity, success probability, latency, rate, and generation-resource cost.
-The evaluator reproduces the source protocol's three canonical fidelity
-benchmarks to four significant figures. On top of this model, the work
-implements structured baseline enumeration, a span-partition dynamic program,
-same-span pumping, and beam search. All returned candidates are structurally
-validated schedules evaluated by the same physical model.
+Long-distance quantum networks require repeaters to distribute high-fidelity Bell pairs despite photon loss and operational noise. In half-repeater-graph- state (HRGS) all-photonic repeaters, entanglement purification can be applied during resource generation, after a single hop, or after an end-to-end pair is established. Selecting where to purify, how many independent copies to consume, and which circuit to apply is therefore a combinatorial scheduling problem.
 
-At the source protocol's nominal configuration, the matched-cost searched
-schedule improves rate by $2.5\%$ over the hand-designed baseline. Allowing the
-search to use less than the reference budget yields a valid schedule at 60\%
-of that budget with a $52.8\%$ higher rate. More importantly, when inner-qubit
-error is introduced, the fixed baseline falls below the required fidelity while
-a searched schedule restores feasibility within the same resource budget.
-Additional experiments characterize noise sensitivity, timing effects, and the
-minimum searched resource budget as the chain grows.
+This thesis formalises every fixed, non-adaptive purification schedule as a directed acyclic graph and evaluates it with one bottom-up pass that computes fidelity, success probability, latency, rate, and generation-resource cost. The evaluator reproduces the source protocol's three canonical fidelity benchmarks to four significant figures. On top of this model, the work implements structured baseline enumeration, a span-partition dynamic program, same-span pumping, and beam search. All returned candidates are structurally validated schedules evaluated by the same physical model.
 
-These results demonstrate the value of systematic schedule selection within
-the implemented model. They do not establish global optimality: default
-pumping and beam search retain bounded frontiers, and a schedule not found is
-only absent from the families explored by the corresponding search.
+At the source protocol's nominal configuration, the matched-cost searched schedule improves rate by $2.5\%$ over the hand-designed baseline. Allowing the search to use less than the reference budget yields a valid schedule at 60\% of that budget with a $52.8\%$ higher rate. More importantly, when inner-qubit error is introduced, the fixed baseline falls below the required fidelity while a searched schedule restores feasibility within the same resource budget. Additional experiments characterize noise sensitivity, timing effects, and the minimum searched resource budget as the chain grows.
+
+These results demonstrate the value of systematic schedule selection within the implemented model. They do not establish global optimality: default pumping and beam search retain bounded frontiers, and a schedule not found is only absent from the families explored by the corresponding search.
 
 \end{abstract}
