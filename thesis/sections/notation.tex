@@ -1,0 +1,115 @@
+% Notation glossary entries (type=notation inside key-value list).
+% Preamble: \input{sections/notation} defines these entries.
+% Body: \glsaddall[types={notation}] + \printglossary[type=notation,...] prints them.
+
+% Network Configuration
+\newglossaryentry{nc-N}{type=notation,
+  name={$N$},
+  description={Number of hops; an $N$-hop chain has $N+1$ stations $0,\dots,N$},
+  sort={aN}}
+\newglossaryentry{nc-calN}{type=notation,
+  name={$\mathcal{N}$, $\mathcal{N}_{\mathrm{ref}}$},
+  description={Network configuration; $\mathcal{N}_{\mathrm{ref}}$ is the reference configuration from the Integrating paper},
+  sort={aNcal}}
+\newglossaryentry{nc-ell}{type=notation,
+  name={$\ell_i$},
+  description={Length (km) of hop $i$},
+  sort={aell}}
+\newglossaryentry{nc-ed}{type=notation,
+  name={$e_d$},
+  description={Outer-qubit depolarizing rate per hop (photon-transmission error)},
+  sort={aed}}
+\newglossaryentry{nc-ki}{type=notation,
+  name={$k_i$},
+  description={Number of redundant BSM arms provisioned at hop $i$},
+  sort={aki}}
+\newglossaryentry{nc-gamma}{type=notation,
+  name={$\gamma$},
+  description={Memory dephasing rate; coherence time $T_2 = 1/\gamma$},
+  sort={agamma}}
+\newglossaryentry{nc-c}{type=notation,
+  name={$c$},
+  description={Signal propagation speed in fiber (m/s)},
+  sort={ac}}
+\newglossaryentry{nc-tau}{type=notation,
+  name={$\tau_{\mathrm{emit}}$},
+  description={Per-qubit emission or gate-cycle time (models branching-depth-dependent latency)},
+  sort={atau}}
+
+% Resource State
+\newglossaryentry{rs-kappa}{type=notation,
+  name={$\kappa$},
+  description={Current stage of a resource: \texttt{RGSS} (local to one station) or $\mathrm{Span}(a,b)$ (edge connecting stations $a$ and $b$)},
+  sort={bkappa}}
+\newglossaryentry{rs-K}{type=notation,
+  name={$\mathcal{K}$},
+  description={Set of all possible stages for a given $N$: $\{\texttt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\}$},
+  sort={bK}}
+\newglossaryentry{rs-span}{type=notation,
+  name={$\mathrm{Span}(a,b)$},
+  description={Entangled resource connecting stations $a$ and $b$ ($a < b$)},
+  sort={bSpan}}
+\newglossaryentry{rs-S}{type=notation,
+  name={$S = (e,\, s,\, t,\, t_{\mathrm{gen}},\, \kappa,\, r,\, h)$},
+  description={Resource state: error vector $e$, side-effect parity $s\in\mathbb{F}_2$, current time $t$, generation time $t_{\mathrm{gen}}$, stage $\kappa$, purification rounds $r$, herald status $h$},
+  sort={bS}}
+
+% Error Representation
+\newglossaryentry{er-e}{type=notation,
+  name={$e = (w,x,y,z)$},
+  description={Error vector: probabilities of $I$, $X$, $Y$, $Z$ Pauli errors on a resource ($w+x+y+z=1$)},
+  sort={ce}}
+\newglossaryentry{er-s}{type=notation,
+  name={$s \in \mathbb{F}_2$},
+  description={Side-effect parity; accumulated $Z$-type Pauli-frame correction, composing by XOR at every merge},
+  sort={cs}}
+
+% Schedule (DAG)
+\newglossaryentry{dag-Sigma}{type=notation,
+  name={$\Sigma = (T, \phi)$},
+  description={Schedule: rooted DAG $T$ with labeling $\phi$ assigning operation type and parameters to each node},
+  sort={dSigma}}
+\newglossaryentry{dag-M}{type=notation,
+  name={$M(\Sigma)$},
+  description={Memory requirement of $\Sigma$: maximum number of concurrently live resources (Sethi--Ullman register allocation)},
+  sort={dM}}
+\newglossaryentry{dag-Mmax}{type=notation,
+  name={$M_{\max}$},
+  description={Maximum allowed concurrent memory; feasibility constraint on $M(\Sigma)$},
+  sort={dMmax}}
+
+% Purification Circuits
+\newglossaryentry{pc-cyy}{type=notation,
+  name={$\mathcal{C}_{\mathrm{YY}}$},
+  description={Two-to-one purification circuit measuring stabilizer $YY$; the only circuit available at \texttt{RGSS} stage},
+  sort={eCYY}}
+\newglossaryentry{pc-czx}{type=notation,
+  name={$\mathcal{C}_{\mathrm{ZX}}$},
+  description={Two-to-one purification circuit measuring stabilizer $ZX$ (detects $Z$ errors on the second input)},
+  sort={eCZX}}
+\newglossaryentry{pc-cxz}{type=notation,
+  name={$\mathcal{C}_{\mathrm{XZ}}$},
+  description={Two-to-one purification circuit measuring stabilizer $XZ$ (detects $X$ errors on the second input)},
+  sort={eCXZ}}
+
+% Optimization Metrics
+\newglossaryentry{om-F}{type=notation,
+  name={$F$, $F_{\min}$},
+  description={Bell-pair fidelity $F = \bra{\Phi^+}\rho\ket{\Phi^+}$; $F_{\min}$ is the minimum acceptable threshold (nominal 0.9)},
+  sort={fF}}
+\newglossaryentry{om-P}{type=notation,
+  name={$P_{\mathrm{success}}$},
+  description={Per-trial success probability (all required BSMs and purification circuits succeed)},
+  sort={fP}}
+\newglossaryentry{om-L}{type=notation,
+  name={$L$},
+  description={Latency: time from generation start to the root \texttt{PauliCorrectNode}},
+  sort={fL}}
+\newglossaryentry{om-R}{type=notation,
+  name={$R = P_{\mathrm{success}} / L$},
+  description={Rate: Bell pairs delivered per unit time under the full-restart model},
+  sort={fR}}
+\newglossaryentry{om-C}{type=notation,
+  name={$C$, $e_{\max}$},
+  description={Resource cost $C$: \texttt{GenNode} count per trial (half-RGS copies consumed); $e_{\max}$ is the maximum budget constraint (nominal 100)},
+  sort={fC}}

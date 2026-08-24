@@ -1,0 +1,18 @@
+# latexmkrc — project-level latexmk configuration
+
+# Register makeglossaries as a custom dependency for every glossary type used.
+# The sub is invoked with the document basename; makeglossaries processes all
+# types in one call, so one sub definition covers all add_cus_dep entries.
+
+add_cus_dep('glo', 'gls', 0, 'run_makeglossaries');  # main glossary
+add_cus_dep('acn', 'acr', 0, 'run_makeglossaries');  # acronym list
+add_cus_dep('ntn', 'not', 0, 'run_makeglossaries');  # notation list (type=notation)
+
+sub run_makeglossaries {
+    my ($base_name, $path) = @_;
+    if ($silent) {
+        system "makeglossaries -q '$base_name'";
+    } else {
+        system "makeglossaries '$base_name'";
+    }
+}
