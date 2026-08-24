@@ -35,7 +35,7 @@ The first tier enumerates four fixed structural families: (1) a single raw end-t
 
 Within each family, purification sequences use the three two-copy circuits $\mathcal C_{\mathrm{YY}}$, $\mathcal C_{\mathrm{ZX}}$, and $\mathcal C_{\mathrm{XZ}}$ (Section~\ref{sec:bg:circuits}). All $3^r$ circuit sequences are enumerated up to a configured round cutoff $r_{\max}$; above that cutoff, the implementation uses a small curated set. Thus, ``brute force'' denotes exhaustive enumeration within these predefined structural families and circuit grid, not enumeration of every legal schedule \Gls{dag}.
 
-These fixed families serve two purposes. First, they provide explicit baselines throughout Chapter~\ref{chap:results}: the raw chain and the source-paper schedule provide reference points, while uniform link-level purification represents a simpleb non-adaptive baseline that does not require any search over schedule structure. Second, their candidates are always added to the candidates produced by the two broader search tiers, so that these known schedule classes cannot be lost solely because of frontier pruning.
+These fixed families serve two purposes. First, they provide explicit baselines throughout Chapter~\ref{chap:results}: the raw chain and the source-paper schedule provide reference points, while uniform link-level purification represents a simple non-adaptive baseline that does not require any search over schedule structure. Second, their candidates are always added to the candidates produced by the two broader search tiers, so that these known schedule classes cannot be lost solely because of frontier pruning.
 
 \section{Span Dynamic Programming}
 \label{sec:alg:dp}
