@@ -25,7 +25,7 @@ Addressing this gap requires a precise object to search over, since neither sour
 \begin{enumerate}
     \item A formal, \Gls{dag}-based model of the schedule space for \Gls{hrgs}-based quantum repeaters (Chapter~\ref{chap:model}) and a bottom-up evaluator that reproduces the source paper's fidelity benchmarks for the raw, heralded, and optimistic canonical schedules to four significant figures (Chapter~\ref{chap:algorithms}).
 
-    \item A three-tier search framework: structured brute-force baselines, an exact span-partition dynamic program, and bounded \TOFIX{weird}{same-span-pumping} and beam-search extensions (Chapter~\ref{chap:algorithms}). Every returned schedule is structurally validated and evaluated using the same physical model. At the paper's reference configuration, the matched-cost result improves rate by $2.5\%$, while a budget-relaxed result reaches \TOFIX{specify what is rate?}{rate $6195.95$} at cost $60$, a $52.8\%$ improvement while only using $60\%$ of the paper baseline's budget (Chapter~\ref{chap:results}).
+    \item A three-tier search framework: structured brute-force baselines, an exact span-partition dynamic program, and bounded same-span pumping and beam-search extensions (Chapter~\ref{chap:algorithms}). Every returned schedule is structurally validated and evaluated using the same physical model. At the paper's reference configuration, the matched-cost result improves rate by $2.5\%$, while a budget-relaxed result reaches a rate of $6195.95$ (the throughput metric $R(\Sigma)$ defines in Chapter~\ref{chap:model}) at cost $60$, a $52.8\%$ improvement while only using $60\%$ of the paper baseline's budget (Chapter~\ref{chap:results}).
 
     \TOFIX{recheck after said chapters are written, results may change}
     {\item An empirical study of when scheduling changes feasibility rather than only quality, varying outer- and inner-qubit noise, the number of \Gls{bsm} arms per hop, hop count, memory decoherence, and generation timing (Chapters~\ref{chap:results}--\ref{chap:discussion}). Its strongest result is a fixed-budget feasibility advantage: under non-ideal inner-qubit error, the paper schedule falls below the $F \ge 0.9$ threshold while a searched schedule at the same budget still clears it.}
@@ -34,7 +34,7 @@ Addressing this gap requires a precise object to search over, since neither sour
 
 \end{enumerate}
 
-\TOFIX{recheck after}{Every result above is an existence claim within the schedule families actually searched, not a proof of global optimality; Section~\ref{sec:disc:scope} returns to this distinction.}
+Every result above is an existence claim within the schedule families actually searched, not a proof of global optimality; Section~\ref{sec:disc:scope} returns to this distinction.
 
 \section{Thesis Outline}
 \label{sec:intro:outline}
