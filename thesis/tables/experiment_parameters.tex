@@ -1,0 +1,21 @@
+\begin{table}[ht]
+\centering
+\caption{Experimental parameters: nominal values and sweep ranges.
+         All other hop-level parameters follow the Integrating paper's reference
+         configuration ($\ell_i=2$~km, branching $(16,14,1)$, $c=2\!\times\!10^5$~km/s).}
+\label{tab:params}
+\small
+\begin{tabular}{p{4.8cm}llp{3.2cm}}
+\toprule
+Parameter & Reference & Sweep range & Where varied \\
+\midrule
+$N$ (hop count) & 10 & 10, 12, 14, 16, 18, 20--24, 26, 28 & Section~\ref{sec:exp:budget} \\
+$e_d$ (depolarizing rate) & 0.01 & $[0,\,0.01]$ & Section~\ref{sec:exp:edsweep} \\
+$e_{\max}$ (resource budget) & 100 & varies & Sections~\ref{sec:exp:headline}--\ref{sec:exp:budget} \\
+$p_X^{\mathrm{in}}, p_Z^{\mathrm{in}}$ (inner-qubit error) & 0 & 0, $3\!\times\!10^{-3}$ & Section~\ref{sec:exp:netgen} \\
+$k_i$ (BSM arm count) & 18 & 6, 18 & Section~\ref{sec:exp:netgen} \\
+$\gamma$ (memory dephasing rate) & 0 & $[0,\,10^5]$ & Section~\ref{sec:exp:timing} \\
+$\tau_{\mathrm{emit}}$ (emission delay) & 0 & $[10^{-4},\,10^0]$ & Section~\ref{sec:exp:timing} \\
+\bottomrule
+\end{tabular}
+\end{table}
