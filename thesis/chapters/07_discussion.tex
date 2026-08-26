@@ -1,75 +1,69 @@
 \chapter{Discussion}
 \label{chap:discussion}
 
-\section{Design Principles}
+% Sources: docs/Design Principles.md, docs/Optimality Scope.md,
+% docs/Justification of Implementation.md §4
+
+Chapter~\ref{chap:results} reported each experiment on its own terms: a headline comparison, a noise sweep, a Pareto frontier, a network-generalization check, a budget-scaling sweep, and a timing sensitivity study. This chapter draws those results together into five named findings that generalize beyond the specific configurations they were measured at (Section~\ref{sec:disc:principles}), states when the scheduling choice matters and when it does not (Sections~\ref{sec:disc:nearoptimal}--\ref{sec:disc:matters}), fixes the precise scope within which every optimality-flavoured claim in this thesis should be read (Section~\ref{sec:disc:scope}), explains the heralded-versus-optimistic trade-off that recurs across several findings (Section~\ref{sec:disc:optimistic}), and closes with the model's limitations (Section~\ref{sec:disc:limitations}).
+
+\section{Five Design Findings}
 \label{sec:disc:principles}
 
-\TODO{Synthesise the five most citable generalizable findings from the
-campaign as named rules (not just numerical observations). See
-\texttt{docs/Design Principles.md} for the full source.
-\textbf{Finding~1} (non-uniform allocation wins): composing hops erodes
-fidelity non-uniformly, so concentrating purification rounds where it
-matters most outperforms a uniform allocation at matched cost --- directly
-observed in the headline comparison and Pareto analysis.
-\textbf{Finding~2} (searched-family budget grows super-linearly): the
-descriptive $N=10$--28 fit is $e_{\max}^{\min} \approx 1.369\cdot
-N^{1.620}$, with a provisional, beam-width-sensitive crossover above
-$10N$ near $N=28$. \textbf{Finding~3} (search restores feasibility under
-changed physics): the paper schedule fails the fidelity floor under the
-tested inner-qubit-error configurations while searched schedules remain
-feasible. \textbf{Finding~4} (objective substitution is free): swapping
-to fidelity maximisation or cost minimisation is a one-line
-\texttt{ObjectiveConfig} change. \textbf{Finding~5} (timing shape controls
-$\gamma$ sensitivity): only schedules with asymmetric-arrival combines
-decohere under $\gamma$; the selected optimistic schedules are invariant
-at the nominal configuration.}
+% Source: docs/Design Principles.md §Summary table
 
-\section{When Simple Schedules Are Near-Optimal}
+The experimental campaign yields five findings that generalize beyond the specific $N=10$ reference configuration.
+
+\textbf{F1: Non-uniform allocation outperforms uniform allocation at equal cost.} The Pareto frontier at $N=10$ shows that the paper's $C=100$ baseline sits strictly inside: searched schedules reach $F=0.9351$ at $C=80$ and $F=0.9355$ at $C=100$ (Section~\ref{sec:exp:pareto}). The matched-cost optimizer wins by concentrating purification rounds on the hops where fidelity erodes fastest, rather than distributing rounds uniformly across the chain. This matches a general property of the model rather than an artefact of the reference configuration: whenever different hops accumulate noise at different rates, whether from differing lengths, differing inner-qubit error rates, or simply position along the chain, a schedule that allocates purification unevenly can reach a given fidelity target at lower cost than one that repeats a single fixed circuit sequence everywhere. The effect is therefore expected to persist at other chain lengths and noise models, not just at the one configuration it was measured at.
+
+\textbf{F2: The minimum feasible budget grows super-linearly with $N$.} Over the tested range $N=10$--28, the descriptive fit is $E_{\max}^{\min} \approx 1.369\, N^{1.620}$. The paper's linear $10N$ formula is first crossed at $N=28$, with the crossover bracketed between $N=26$ and $N=28$ (beam-width-sensitive; see the required caveats in Section~\ref{sec:exp:budget}). A super-linear exponent is consistent with how noise accumulates along the chain: each additional hop is an independent source of depolarizing and inner-qubit error, so sustaining a fixed fidelity floor as $N$ grows requires not merely proportionally more purification, but a growing fraction more per added hop. A resource-budget formula tuned to a chain of one length therefore cannot simply be rescaled to a longer one without checking whether it still clears the same fidelity floor.
+
+\textbf{F3: Searched schedules stay feasible under changed physics; fixed schedules do not.} Under non-zero inner-qubit error, the paper's schedule drops to $F=0.6737$, failing the fidelity floor entirely, while the optimizer, given the same $C=100$ budget, finds a different schedule shape that clears $F \ge 0.9$ in every tested configuration (Section~\ref{sec:exp:netgen}). This is a feasibility advantage, not a rate-percentage advantage, and it is the strongest single argument in this thesis for search over a fixed hand-designed schedule: a schedule tuned to one noise model carries an implicit, easily-violated assumption that the deployed network matches that model, whereas a schedule found by search against the network's actual configuration does not.
+
+\textbf{F4: Objective substitution is free.} Swapping the search objective from maximizing rate to maximizing fidelity or minimizing cost is a one-line change to the stated objective (Section~\ref{sec:model:objectives}) and yields structurally different top schedules without modifying the search algorithm itself (Section~\ref{sec:exp:objectives}). This confirms the separation, built into the search framework from the start, between constructing the candidate frontier and scoring it: the frontier construction of Chapter~\ref{chap:algorithms} never depends on which objective will eventually rank it. The one gotcha found in practice is that minimizing cost without an explicit rate floor can return a valid but low-rate schedule at the minimum cost, since nothing in that objective otherwise favours a higher-rate candidate at the same cost; a user who also cares about rate must add that floor explicitly.
+
+\textbf{F5: Memory decoherence sensitivity is a property of schedule shape.} Only schedules with asymmetric-arrival combine points decohere under memory dephasing $\gamma$: a combine point that always joins branches that became ready at the same simulated time never accumulates the wait-dependent decoherence term, regardless of how large $\gamma$ is. The schedules the optimizer actually selects, which favour optimistic pumping (Section~\ref{sec:disc:optimistic}), are confirmed $\gamma$-invariant at the reference configuration (Section~\ref{sec:exp:timing}) -- not because $\gamma$ is universally harmless, but because the search already avoids the one schedule shape, heralded pumping, that exposes this failure mode. This is a property of the search's own preference at this configuration, not a general guarantee: at a configuration where heralded pumping becomes preferable for some other reason, its $\gamma$-sensitivity would need to be checked explicitly rather than assumed away.
+
+\section{When Optimization Helps Little}
 \label{sec:disc:nearoptimal}
 
-\TODO{Characterise the ``flat floor'' regime (low outer error, small $N$,
-and sufficient budget) where the tested schedules differ little and the
-engineering benefit of optimisation is modest. Anchor the claim to the
-$e_d$ sweep, but do not claim global optimality from a beam-limited
-frontier.}
+% Source: outputs/sweep_ed_n10/README.md, Design Principles.md §Finding 1
 
-\section{When the Scheduling Choice Matters}
+At low outer-qubit error and moderate $N$, the fidelity floor is easy to clear and the minimum required budget is well below the paper's allocation. In this regime, most schedule variants, uniform, hand-picked, or searched, already exceed $F_{\min}$, so the choice between them has little effect on the achievable rate: the constraint that makes scheduling an interesting problem, a fidelity floor that is genuinely hard to reach at the available budget, simply does not bind. The $e_d$ sweep shows the rate advantage over the uniform baseline growing gradually from near zero at $e_d=0$ to 18.2\% at $e_d=0.01$ (Section~\ref{sec:exp:edsweep}). At $N=10$ the minimum budget to clear $F \ge 0.9$ is only $C=60$, 60\% of the paper's $E_{\max}=100$; spending more does not improve rate once the Pareto frontier plateaus near $F \approx 0.9355$ (F1, Section~\ref{sec:disc:principles}). This is the same reason the alternative-objective presets of Section~\ref{sec:exp:objectives} can trade so much cost for so little rate loss: once the floor stops binding, there is genuine slack in the schedule space for a different objective to exploit.
+
+\section{When Optimization Matters}
 \label{sec:disc:matters}
 
-\TODO{Identify the complementary high-benefit regime: tight fidelity
-constraints and physics that invalidates a fixed hand-tuned allocation.
-At the nominal configuration, distinguish the current default cost-60,
-rate-6195.95 result from the pinned historical cost-50, rate-6713.18
-reproduction. Use the inner-qubit-error sensitivity experiment as the
-strongest feasibility comparison, and present the $N=18$ excluded-move
-result only as an existence check outside the primary heuristic search.}
+% Source: Design Principles.md §F3, Optimizer Status.md, Optimality Scope.md
 
-\section{Optimality Scope and the Excluded-Move Gap}
+The scheduling choice becomes consequential in two regimes: when the noise model changes from the one the fixed schedule was tuned for (F3), and when $N$ grows into the range where the linear budget formula becomes insufficient (F2). In the first regime the advantage is qualitative: the paper schedule loses feasibility outright, while a searched schedule adapts to the new noise source and remains feasible at the same cost. In the second regime the advantage is quantitative: at $N=28$ the searched families need $E_{\max}=283$, slightly above the paper's $280$, and the gap between the linear formula and the true requirement only widens for longer chains still. The $N=18$ excluded-move result (Section~\ref{sec:exp:excluded}) illustrates a further complication specific to this second regime: the high-benefit regime, large $N$ near or beyond where the linear formula starts to strain, coincides with the regime where optimality is hardest to certify, since a hand-constructed schedule outside the searched families is feasible at the paper's own budget while the beam search itself reports a higher minimum. Put together, these two regimes are exactly where a practitioner should distrust a fixed, hand-designed schedule the most, and exactly where this thesis's own search tiers are least able to certify that they have found the true optimum.
+
+\section{Optimality Scope}
 \label{sec:disc:scope}
 
-\TODO{State precisely that native DP/beam search includes one same-span
-pumping move, but bounds it by default. Explain that a hand-constructed
-comparison can still outperform the default pumping search, while
-\texttt{exact\_pumping=True} may be impractical even at small useful
-instances. Treat all pumping-enabled results as validated heuristic
-constructions, not global optima. Cite \texttt{docs/Optimality Scope.md}.}
+% Source: docs/Optimality Scope.md, Optimizer Status.md §Known Limits
 
-\section{Optimistic versus Heralded Purification}
+The beam-search tier (Section~\ref{sec:alg:beam}) includes one same-span pumping move, bounded by default. All returned schedules are validated constructions within the searched families, not global optima. Increasing beam width improves coverage but does not prove convergence: a wider beam that finds the same top candidate as a narrower one is evidence of stability, not of exhaustiveness. An uncapped pumping mode is available for targeted validation (Section~\ref{sec:alg:pumping}) and removes the beam cap on same-span pumping specifically, but becomes impractical beyond small instances due to combinatorial blowup, so it is used only as a diagnostic cross-check rather than the default search setting.
+
+The excluded-move result at $N=18$ is the most concrete evidence of this gap: a schedule reachable by a move outside the default families is feasible at the paper's own budget, while the beam search reports a higher minimum. Every result in Chapter~\ref{chap:results} should be read with this scope in mind: existence results, a feasible schedule was found, are solid regardless of how that schedule was found, since any schedule that passes structural validation and is evaluated by the shared physical model is a real object; non-existence claims, no feasible schedule found, are statements about the searched families only, and should never be read as a proof that no legal schedule exists.
+
+\section{Heralded vs.\ Optimistic Execution}
 \label{sec:disc:optimistic}
 
-\TODO{Analyse the trade-off: optimistic (blind) execution saves one
-classical round-trip ($L/c$ vs.\ $2L/c$ memory time) at the cost of
-higher discard probability. Cite the \texttt{end\_optimistic} vs.\
-\texttt{end\_heralded} brute-force comparison at the relevant $N$.}
+% Source: Validated Formal Model Def.md §2.6, sweep_gamma_and_tau_emit/README.md
 
-\section{Limitations and Threats to Validity}
+The Herald-placement formalism of Section~\ref{sec:model:dag} captures a genuine hardware trade-off: an optimistic round saves one $L/c$ classical round-trip compared to a heralded round, at the cost of a higher discard probability if the outcome later turns out to be a failure. At the reference configuration (no inner-qubit error, $\gamma=0$), the optimizer consistently selects optimistic candidates because the round-trip saving outweighs the discard cost. When $\gamma > 0$, heralded pumping degrades further because the sacrificial copy must wait in memory during the round-trip while it decoheres, and the optimistic family is immune to this failure mode by construction, since it never holds a branch idle waiting for a herald. These two effects reinforce each other: the same schedule shape that is preferred for its lower latency also happens to be the one immune to memory decoherence, which is why optimistic execution dominates so consistently in the reference regime rather than the two effects trading off against each other. This alignment is a property of the specific timing and noise parameters tested here, not a structural guarantee; a device with a much shorter fiber length (small $L/c$) or a much longer memory coherence time (small $\gamma$) could shift the balance back toward heralded execution, since both effects that currently favour the optimistic family would shrink.
+
+\section{Limitations}
 \label{sec:disc:limitations}
 
-\TODO{Main modelling assumptions: Pauli channel (i.i.d.\ noise),
-non-adaptive (open-loop) schedules, single-path routing, $M_{\max}$
-not enforced. Discuss the first two carefully --- the Pauli
-assumption is shared with the reference paper, so relative comparisons
-are unaffected; the non-adaptive assumption is the most consequential
-for real hardware. Note the pumping-reproducibility regression as an
-example of how adding a new move can silently shift headline numbers
-(documented, fixed, but a signal to watch for future extensions).}
+% Source: Optimizer Status.md §Known Limits
+
+Four limitations bound the scope of the results.
+
+First, only non-adaptive schedules are evaluated; a real network could condition each purification step on the outcome of the previous one, which would require a policy-based formulation (Section~\ref{sec:model:scope}). Every result in this thesis is therefore a lower bound on what an adaptive scheme could achieve, not an estimate of it.
+
+Second, $M_{\max}$ (concurrent open branches) is computed exactly for any given schedule but is not yet used to prune the search itself (Section~\ref{sec:model:scope}), so resource counting by $C(\Sigma)$ alone is a lower bound on the true hardware memory footprint a schedule would require in practice.
+
+Third, the Pauli-channel noise assumption is shared with the source papers; relative comparisons between schedules under this assumption are internally consistent, but a ranking established here is not automatically guaranteed to transfer to hardware dominated by a different error channel, for instance one where photon loss and gate error interact in ways this model does not capture.
+
+Fourth, the beam search's fixed-width frontier is sensitive to which moves compete for the same slots: adding the same-span pumping move (Section~\ref{sec:alg:pumping}) to the search changed which candidate a fixed beam width returned at the reference configuration, silently replacing a previously-reported result with a different one. Any future extension to the search should include an explicit before-and-after consistency check at fixed settings, rather than assuming a new move can only ever improve on a prior result.
