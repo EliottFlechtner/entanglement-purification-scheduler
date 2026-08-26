@@ -4,18 +4,69 @@
 \section{Validation Figures}
 \label{app:validation}
 
-\TODO{Reproduce the full validation tables: DAG-evaluator output
-vs.\ analytical closed-form for all three canonical schedule types
-across several parameter settings.}
+Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} gives the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:results}, rather than only at that one point.
+
+The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.
+
+\begin{table}[h]
+\centering
+\caption{Evaluator-derived fidelity vs.\ $e_d$ for the three canonical schedules of Section~\ref{sec:bg:decoherence}, at $N=10$. Only $e_d=0.000$ and $e_d=0.010$ have a published reference value to compare against (see text).}
+\label{tab:app:validation}
+\small
+\begin{tabular}{cccc}
+\hline
+$e_d$ & $F_{\text{raw}}$ & $F_{\text{baseline (heralded)}}$ & $F_{\text{flexible (optimistic)}}$ \\
+\hline
+0.000 & 1.0000 & 1.0000 & 1.0000 \\
+0.001 & 0.9803 & 0.9932 & 0.9933 \\
+0.002 & 0.9610 & 0.9861 & 0.9866 \\
+0.003 & 0.9422 & 0.9787 & 0.9799 \\
+0.004 & 0.9239 & 0.9710 & 0.9730 \\
+0.005 & 0.9061 & 0.9629 & 0.9661 \\
+0.006 & 0.8887 & 0.9544 & 0.9591 \\
+0.007 & 0.8717 & 0.9456 & 0.9519 \\
+0.008 & 0.8552 & 0.9364 & 0.9446 \\
+0.009 & 0.8391 & 0.9268 & 0.9372 \\
+0.010 & 0.8234 & 0.9168 & 0.9295 \\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Schedule DAGs of Selected Optima}
 \label{app:dags}
 
-\TODO{Insert \texttt{dot}-rendered DAG figures for key optimal schedules
-(e.g., $N=10$, budget $\le 100$, unconstrained).}
+The schedules found in Chapter~\ref{chap:results}, such as the budget-relaxed optimum at $N=10$ (Section~\ref{sec:exp:headline}), are automatically constructed \Glspl{dag} with 50 to 100 \texttt{GenNode} leaves and several hundred nodes once every backbone and purification step is counted. Rendered at a scale where individual node labels stay legible, such a diagram does not fit within a single printed page: the same rendering tooling used for the worked $N=2$ example of Figure~\ref{fig:model:dag-example} produces images several thousand pixels wide once applied to these larger, automatically-constructed schedules, since node count (not page size) is the limiting factor.
+
+Reproducing one of these diagrams here at a reduced scale would not add information beyond what Chapter~\ref{chap:results}'s tables and the Pareto frontier of Figure~\ref{fig:pareto} already convey, namely each schedule's cost, fidelity, rate, and overall shape family (e.g.\ end-node pumping vs.\ a span-partition structure), while making every individual node illegible. Figure~\ref{fig:model:dag-example} therefore remains the representative illustration of the \Gls{dag} representation itself, at a size deliberately chosen to exercise every node type from Section~\ref{sec:model:dag} while staying legible; the full artifacts for every optimum discussed in this thesis are reproducible directly from the search calls and parameters documented in Chapter~\ref{chap:algorithms} and Table~\ref{tab:params}.
 
 \section{Supplementary Sweep Figures}
 \label{app:sweeps}
 
-\TODO{Additional sweep plots (beam width, edit distance, timing/pumping)
-that support the main-text discussion but would interrupt narrative flow.}
+These figures support the runtime and determinism claims of Section~\ref{sec:exp:runtime} and Table~\ref{tab:runtimes}, without interrupting the main narrative of Chapter~\ref{chap:results}.
+
+Figure~\ref{fig:app:beamwidth} shows why beam width $w_\text{beam}=25$ was chosen as the default used throughout this thesis: at $N=10$, wall-clock search time grows mildly up to a beam width of about 16 and then sharply beyond it, while the best rate found is already flat across the entire tested range, so widening the beam past 25 buys no further quality improvement at this configuration.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/appendix/runtime_and_quality_vs_beam_width.png}
+    \caption{Beam search wall-clock time and best rate found vs.\ beam width, at $N=10$, $e_d=0.01$.}
+    \label{fig:app:beamwidth}
+\end{figure}
+
+Figure~\ref{fig:app:qualitygap} confirms the determinism claim underlying that choice: at $N=6$, where the exact dynamic program (Section~\ref{sec:alg:dp}) remains tractable, the beam search matches the exact optimum exactly at every beam width tested, with a zero gap throughout.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/appendix/quality_gap_vs_beam_width.png}
+    \caption{Beam search's rate gap from the exact dynamic-program optimum vs.\ beam width, at $N=6$, $e_d=0.01$.}
+    \label{fig:app:qualitygap}
+\end{figure}
+
+Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:runtimes} to every tested $N$: both the exact dynamic program and the beam search scale similarly with $N$ once the same-span pumping move (Section~\ref{sec:alg:pumping}) is enabled, with the beam search consistently the faster of the two.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/appendix/runtime_vs_n_pumping.png}
+    \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and the beam search, same-span pumping move enabled throughout.}
+    \label{fig:app:runtimen}
+\end{figure}
