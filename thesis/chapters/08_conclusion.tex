@@ -1,29 +1,31 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
-\section{Summary of Contributions}
+% Sources: outputs/*/README.md, docs/Design Principles.md,
+% docs/Justification of Implementation.md §2
+
+\section{Summary}
 \label{sec:conc:summary}
 
-\TODO{Restate the four contribution groups introduced in Chapter~1.
-Key empirical anchors: (1)~the evaluator reproduces prior fidelity values
-to four significant figures; (2)~matched-cost search improves rate by
-$2.5\%$, while the default and pinned budget-relaxed results are reported
-separately; (3)~the fixed paper schedule can become infeasible under
-tested inner-qubit error despite feasible searched alternatives; and
-(4)~the five scoped design findings, including the descriptive
-$e_{\max}^{\min} \approx 1.369\,N^{1.620}$ fit. Re-state that these are
-validated constructions and searched-family observations, not global
-optimality or asymptotic proofs.}
+This work makes four concrete contributions to the problem of purification schedule optimization for HRGS-based quantum repeaters.
 
-\section{Perspectives and Future Work}
+\begin{itemize}
+      \item \emph{A validated formal model.} A fixed, non-adaptive purification schedule is represented as a single directed acyclic graph $\Sigma = (T,\phi)$, evaluated by one bottom-up pass. Applied to the three canonical schedule types, this evaluator reproduces the source paper's fidelity figures to four significant figures (0.8234/0.9168/0.9295).
+      \item \emph{A three-tier search framework, demonstrated at the paper's own reference configuration.} At matched cost ($C=100$) the optimizer achieves +2.5\% rate over the paper's schedule. The default budget-relaxed search spends $C=60$ for +52.8\% rate; the same search with the same-span pumping move disabled instead reaches $C=50$, $R=6713.18$, the historical headline figure reported before that move was included in the search.
+      \item \emph{A feasibility advantage under non-ideal noise.} Network generalization experiments show that the paper's static schedule fails the $F \ge 0.9$ floor under non-ideal inner-qubit error (dropping as low as $F=0.6737$), while a searched schedule restores feasibility within the same $C=100$ budget. This is the strongest result in the thesis: a \emph{feasibility} advantage, not merely a rate-percentage improvement.
+      \item \emph{Five named design findings, with specific empirical anchors.} In particular, within the searched families the minimum feasible budget over $N=10$--28 follows a descriptive fit of $E_{\max}^{\min} \approx 1.369\,N^{1.620}$, a super-linear trend that places the paper's linear $10N$ formula under pressure near $N=28$.
+\end{itemize}
+
+All results above are validated existence claims within the searched schedule families, not proofs of global optimality (Section~\ref{sec:disc:scope}).
+
+\section{Future Work}
 \label{sec:conc:future}
 
-\TODO{Propose concrete extensions:
+Four directions stand out as natural extensions.
+
 \begin{itemize}
-    \item Adaptive (closed-loop) scheduling using real-time fidelity
-          estimates, potentially via reinforcement learning.
-    \item Online optimisation as network conditions drift.
-    \item Extension to multi-path routing and multiplexed HRGS chains.
-    \item Integration with hardware-level noise characterisation to
-          replace the Pauli-channel assumption.
-\end{itemize}}
+      \item \emph{Adaptive scheduling.} A policy that conditions each purification step on the previous measurement outcome would likely outperform any fixed schedule; reinforcement learning is one natural approach, but the action and state spaces need careful definition.
+      \item \emph{Online optimization.} As network conditions drift (noise, link quality), a schedule that was optimal at commissioning time may no longer be; integrating the search with real-time noise estimation would address this.
+      \item \emph{Multi-path routing.} The current model assumes a single repeater chain; extending the DAG formalism to tree or mesh topologies would require generalizing the span partial order.
+      \item \emph{Beyond the Pauli channel.} Replacing the Pauli-channel assumption with hardware-specific noise characterisation (e.g., from photon-loss-dominated or gate-error-dominated devices) would make the optimizer directly applicable to real hardware targets.
+\end{itemize}
