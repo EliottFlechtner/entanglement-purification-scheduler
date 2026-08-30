@@ -1,6 +1,8 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
+\TODO{bullet points ok?}
+
 % Sources: outputs/*/README.md, docs/Design Principles.md,
 % docs/Justification of Implementation.md §2
 
@@ -9,19 +11,25 @@
 
 This thesis addresses the problem of optimizing entanglement-purification schedules in HRGS-based quantum repeaters. It makes four main contributions.
 
+\glsreset{dag}
+
 \begin{itemize}
 
-      \item \emph{A validated formal model.} A fixed, non-adaptive purification schedule is represented as a directed acyclic graph $\Sigma=(T,\phi)$ and evaluated by a single bottom-up pass. Applied to the three canonical schedule types, the evaluator reproduces the source paper's fidelity results to four significant figures: $0.8234$, $0.9168$, and $0.9295$.
+      \item \emph{A validated formal model.} A non-adaptive (fixed) purification schedule is represented as a \Gls{dag} $\Sigma=(T,\phi)$ and evaluated by a single bottom-up pass. Applied to the three \TOFIX{fix?}{canonical} schedule types, the evaluator reproduces the source paper's fidelity results to four significant figures (Section~\ref{sec:exp:validation})\TOFIX{quote the numbers?}{: $0.8234$, $0.9168$, and $0.9295$.}
 
-      \item \emph{A three-tier search framework evaluated at the source papers' reference configuration.} At matched cost ($C=100$), the optimizer achieves a $2.5\%$ rate improvement over the paper's schedule. Under the default budget-relaxed search, it finds a schedule with $C=60$, achieving a $52.8\%$ higher rate while using $60\%$ of the paper schedule's budget. With the same-span pumping move disabled, the search instead returns $C=50$ and $R=6713.18$; this result predates the pumping extension and is retained as a historical comparison.
+      \item \emph{A three-tier search framework evaluated at the source papers'~\cite{Benchasattabuse2026Bridging,Benchasattabuse2025Integrating} reference configuration.} At matched cost ($C=100$), the optimizer achieves a $2.5\%$ rate improvement over the paper's schedule (Section~\ref{sec:exp:headline}). Under the \TOFIX{what does it mean?}{default} budget-relaxed search, it finds a schedule with $C=60$, achieving a $52.8\%$ higher rate while using $60\%$ of the paper schedule's budget. \TOFIX{to keep?}{With the \TOFIX{don't use "move"}{same-span pumping move} disabled, the search instead returns $C=50$ and $R=6713.18$; this result predates the pumping extension and is retained as a historical comparison.}
 
-      \item \emph{A feasibility advantage under non-ideal noise.} Network generalization experiments show that the paper's fixed schedule can fall below the $F\ge0.9$ threshold under non-zero inner-qubit error, reaching as low as $F=0.6737$, while a searched schedule remains feasible at the same $C=100$ budget. This is the strongest result of the thesis: the benefit of scheduling is demonstrated as a feasibility advantage, not merely as a percentage improvement in rate.
+      \item \emph{A feasibility advantage under non-ideal noise.} {\TOFIX{too long}Network generalization experiments show that the paper's fixed schedule can fall below the $F\ge0.9$ threshold under non-zero inner-qubit error, reaching as low as $F=0.6737$, while a searched schedule remains feasible at the same $C=100$ budget}. This is the strongest result of the thesis: the benefit of scheduling is demonstrated as a feasibility advantage, not merely as a percentage improvement in rate.
 
-      \item \emph{Five design findings supported by the experimental results.} Among the searched schedule families, the minimum feasible budget over $N=10$--28 is described by the empirical fit $E_{\max}^{\min}\approx1.369\,N^{1.620}$. This indicates super-linear growth over the tested range and places the source paper's linear $10N$ budget under pressure near $N=28$.
+      \item \emph{Five design findings supported by the experimental results.} Among the searched schedule families, the minimum feasible budget over $N=10$--28 is described by the \TOFIX{specify again what Emax is?}empirical fit $E_{\max}^{\min}\approx1.369\,N^{1.620}${, where $E_{\max}^{\min}$ denotes the minimum maximum number of entanglement attempts required for feasibility}. This indicates super-linear growth over the tested range and places the source paper's linear $10N$ budget under pressure near $N=28$.
 
 \end{itemize}
 
 The results above establish what can be achieved within the schedule families and search limits considered in this thesis; they do not constitute proofs of global optimality over the full legal schedule space (Section~\ref{sec:disc:scope}).
+
+
+\TOFIX{where to put answer to hypothesis?}{The hypothesis that adaptive and online optimization strategies can improve network performance is supported by the observed benefits of each approach individually. Hybrid approaches that combine these strategies are likely to offer further gains, though empirical validation is needed.}
+
 
 \section{Future Work}
 \label{sec:conc:future}
@@ -34,8 +42,10 @@ Several extensions follow naturally from the present model and its limitations.
 
       \item \emph{Online optimization.} Network conditions can change over time as noise levels and link quality drift. Integrating the search with online estimation of these parameters could allow schedules to be recomputed or adjusted as the operating conditions change rather than relying on a configuration fixed at commissioning.
 
-      \item \emph{Multi-path routing.} The current model assumes a single repeater chain between the end nodes. Extending the DAG formalism to tree or mesh networks would require a more general representation of resource connectivity and a corresponding extension of the current span-based search.
+      \TOFIX{keep? kinda repetitive from 2 previous points}{\item \emph{Hybrid approaches.} Combining adaptive scheduling with online optimization could leverage the strengths of both strategies, potentially leading to more resilient and efficient network performance under dynamic conditions.}
 
-      \item \emph{Beyond the Pauli-channel model.} Replacing the current Pauli-channel approximation with hardware-specific noise models, including more detailed photon-loss and gate-error processes, would allow the optimizer to be evaluated against a broader range of physical implementations and could change the relative ranking of candidate schedules.
+      \item \emph{Multi-path routing.} The current model assumes a single repeater chain between the end nodes. Extending the \Gls{dag} formalism to tree or mesh networks would require a more general representation of resource connectivity and a corresponding extension of the current span-based search.
+
+      \item \TOFIX{maybe not interesting}{\emph{Beyond the Pauli-channel model.} Replacing the current Pauli-channel approximation with hardware-specific noise models, including more detailed photon-loss and gate-error processes, would allow the optimizer to be evaluated against a broader range of physical implementations and could change the relative ranking of candidate schedules.}
 
 \end{itemize}
