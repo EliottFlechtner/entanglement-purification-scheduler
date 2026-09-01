@@ -70,3 +70,52 @@ Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:r
     \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and the beam search, same-span pumping move enabled throughout.}
     \label{fig:app:runtimen}
 \end{figure}
+
+\subsection{Concurrent Branch Budget ($M_{\max}$)}
+\label{app:mmax}
+
+Section~\ref{sec:model:scope} notes that $M_{\max}$, the number of concurrently open branches (Section~\ref{sec:model:budget}), is computed exactly for a given schedule but is not used to prune the search itself. Table~\ref{tab:app:mmax} gives $M(\Sigma)$ for the fixed schedule families and the optimizer's own budget-relaxed best schedule across $N=2$ to $N=18$ at $e_d=0.01$: no family shows $M(\Sigma)$ growing with $N$, since the register-allocation bound (Section~\ref{sec:model:budget}) is governed by \Gls{dag} depth and branching shape rather than hop count. Bisecting $m_{\max}$ downward from the unconstrained optimum at $N=10$, $E_{\max}=100$ shows that the budget-relaxed optimum ($M=4$) remains selectable down to $m_{\max}=4$, but no candidate in the beam-searched frontier clears both the rate objective and $m_{\max}=3$, at which point $M_{\max}$ becomes the actual binding constraint rather than $E_{\max}$ or $F_{\min}$.
+
+\begin{table}[h]
+    \centering
+    \caption{$M(\Sigma)$ vs.\ $N$ for the fixed schedule families and the budget-relaxed optimum, $e_d=0.01$.}
+    \label{tab:app:mmax}
+    \small
+    \begin{tabular}{cccc}
+        \hline
+        $N$ & Raw chain & Heralded end-node pumping & Optimizer (budget-relaxed) \\
+        \hline
+        2  & 3 & 4 & 3 \\
+        4  & 3 & 4 & 4 \\
+        6  & 3 & 4 & 4 \\
+        8  & 3 & 4 & 4 \\
+        10 & 3 & 4 & 4 \\
+        14 & 3 & 4 & 4 \\
+        18 & 3 & 4 & 5 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\section{Alternative Objectives, Full Comparison}
+\label{app:objectives}
+
+Section~\ref{sec:exp:objectives} summarizes the objective-substitution result; Table~\ref{tab:app:objectives} gives the full five-objective comparison it draws from, at $N=10$ and $e_d=0.01$.
+
+\begin{table}[h]
+    \centering
+    \caption{Objective-substitution comparison at $N=10$, $e_d=0.01$: five objective definitions with no change to the search algorithm.}
+    \label{tab:app:objectives}
+    \small
+    \begin{tabular}{lccc}
+        \hline
+        Objective & $C$ & $F$ & Rate \\
+        \hline
+        Maximize rate & 60 & 0.9063 & 6195.95 \\
+        Maximize fidelity, paper-rate floor & 80 & 0.9351 & 4804.58 \\
+        Maximize fidelity, matched-rate floor & 80 & 0.9351 & 4804.58 \\
+        Minimize cost, $F \ge 0.9$ only & 60 & --- & 1239.19 \\
+        Minimize cost, $F \ge 0.9$ and $R \ge 4055.92$ & 60 & --- & 6195.95 \\
+        \hline
+    \end{tabular}
+\end{table}
+
