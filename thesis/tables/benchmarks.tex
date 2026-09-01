@@ -2,14 +2,14 @@
 \centering
 \caption{Wall-clock time (seconds) for the exact dynamic program and the beam search
          at representative chain lengths.
-         Config: paper's $e_{\max}=10N$, $F_{\min}=0.9$, beam width 25, the same-span
+         Config: paper's $E_{\max}=10N$, $F_{\min}=0.9$, beam width 25, the same-span
          pumping move enabled, 300~s per-point timeout, 3~GiB memory cap.
          \textsuperscript{$\dagger$}No feasible schedule found within budget at this $N$.}
 \label{tab:runtimes}
 \small
 \begin{tabular}{rrlll}
 \toprule
-$N$ & $e_{\max}$ & Exact DP (s) & Beam search (s) & Beam search score \\
+$N$ & $E_{\max}$ & Exact DP (s) & Beam search (s) & Beam search score \\
 \midrule
  2 &  20 &   0.10 &   0.10 & 50\,000     \\
  6 &  60 &   3.82 &   3.34 & 15\,392     \\
