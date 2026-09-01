@@ -18,7 +18,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(_PROJECT_ROOT / "validation"))
 
-import sweep_min_budget_vs_n as m
+import experiments.sweeps.sweep_min_budget_vs_n as m
 
 # Reconstructed from the completed log lines for N=10, 12, 14, 16.
 KNOWN_RESULTS = [
