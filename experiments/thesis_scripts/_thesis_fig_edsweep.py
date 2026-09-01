@@ -23,7 +23,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 import matplotlib.pyplot as plt
@@ -35,9 +35,15 @@ FIGSIZE = (4.6, 3.9)
 DPI = 200
 
 STYLE = {
-    "paper_baseline": dict(color="#7f7f7f", marker="s", linestyle="--", label="Paper schedule"),
-    "optimizer_matched_cost": dict(color="#1f77b4", marker="o", linestyle="-", label="Optimizer (matched cost)"),
-    "optimizer_budget_relaxed": dict(color="#d62728", marker="^", linestyle="-", label="Optimizer (budget-relaxed)"),
+    "paper_baseline": dict(
+        color="#7f7f7f", marker="s", linestyle="--", label="Paper schedule"
+    ),
+    "optimizer_matched_cost": dict(
+        color="#1f77b4", marker="o", linestyle="-", label="Optimizer (matched cost)"
+    ),
+    "optimizer_budget_relaxed": dict(
+        color="#d62728", marker="^", linestyle="-", label="Optimizer (budget-relaxed)"
+    ),
 }
 VARIANT_ORDER = ["paper_baseline", "optimizer_matched_cost", "optimizer_budget_relaxed"]
 
@@ -50,7 +56,9 @@ def _read_series() -> dict[str, list[tuple[float, float, float]]]:
             v = row["variant"]
             if v not in STYLE:
                 continue
-            series[v].append((float(row["e_d"]), float(row["fidelity"]), float(row["rate"])))
+            series[v].append(
+                (float(row["e_d"]), float(row["fidelity"]), float(row["rate"]))
+            )
     for v in series:
         series[v].sort(key=lambda t: t[0])
     return series
@@ -61,8 +69,11 @@ def make_rate_plot(series: dict[str, list[tuple[float, float, float]]]) -> None:
     for variant in VARIANT_ORDER:
         pts = series[variant]
         ax.plot(
-            [p[0] for p in pts], [p[2] for p in pts],
-            markersize=5.5, linewidth=1.6, **STYLE[variant],
+            [p[0] for p in pts],
+            [p[2] for p in pts],
+            markersize=5.5,
+            linewidth=1.6,
+            **STYLE[variant],
         )
     ax.set_xlabel("Depolarizing error $e_d$", fontsize=11)
     ax.set_ylabel("Rate $R$", fontsize=11)
@@ -80,17 +91,25 @@ def make_fidelity_plot(series: dict[str, list[tuple[float, float, float]]]) -> N
     for variant in VARIANT_ORDER:
         pts = series[variant]
         ax.plot(
-            [p[0] for p in pts], [p[1] for p in pts],
-            markersize=5.5, linewidth=1.6, **STYLE[variant],
+            [p[0] for p in pts],
+            [p[1] for p in pts],
+            markersize=5.5,
+            linewidth=1.6,
+            **STYLE[variant],
         )
-    ax.axhline(0.9, color="black", linestyle=":", linewidth=1.1, label="$f_{\\min}=0.9$")
+    ax.axhline(
+        0.9, color="black", linestyle=":", linewidth=1.1, label="$f_{\\min}=0.9$"
+    )
     ax.set_xlabel("Depolarizing error $e_d$", fontsize=11)
     ax.set_ylabel("Fidelity $F$", fontsize=11)
     ax.tick_params(labelsize=9.5)
     ax.grid(alpha=0.3)
     ax.legend(
-        fontsize=8.5, ncol=2, loc="upper center",
-        bbox_to_anchor=(0.5, -0.16), frameon=False,
+        fontsize=8.5,
+        ncol=2,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.16),
+        frameon=False,
     )
     fig.tight_layout()
     for fmt in ("png", "svg"):

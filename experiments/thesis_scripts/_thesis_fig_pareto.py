@@ -24,7 +24,7 @@ import csv
 import sys
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 import matplotlib.pyplot as plt
@@ -47,6 +47,25 @@ def _role(row: dict) -> str:
     return row["role"]
 
 
+def _best_link_per_cost(rows: list[dict]) -> list[dict]:
+    """Keep only the highest-fidelity link-level candidate at each cost.
+
+    The raw data includes every circuit-order permutation at a given
+    cost (e.g. all-YY vs. mixed YY/ZX/XZ), many of which are strictly
+    dominated. Plotting all of them makes the link-level baseline look
+    like it declines with cost, which is an artifact of including
+    dominated variants, not a real trend.
+    """
+    best: dict[float, dict] = {}
+    for r in rows:
+        if _role(r) != "link_level_baseline":
+            continue
+        cost = float(r["resource_cost"])
+        if cost not in best or float(r["fidelity"]) > float(best[cost]["fidelity"]):
+            best[cost] = r
+    return list(best.values())
+
+
 def make_fidelity_vs_cost(rows: list[dict]) -> None:
     fig, ax = plt.subplots(figsize=FIGSIZE)
 
@@ -56,7 +75,7 @@ def make_fidelity_vs_cost(rows: list[dict]) -> None:
         key=lambda r: float(r["resource_cost"]),
     )
     paper = [r for r in rows if _role(r) == "paper_baseline"]
-    link = [r for r in rows if _role(r) == "link_level_baseline"]
+    link = _best_link_per_cost(rows)
 
     ax.scatter(
         [float(r["resource_cost"]) for r in others],
@@ -99,6 +118,31 @@ def make_fidelity_vs_cost(rows: list[dict]) -> None:
             zorder=3,
         )
 
+    # Annotate the gap between the paper's schedule and the frontier at
+    # the same cost -- the plateau shape otherwise hides how much
+    # fidelity headroom the paper's own budget leaves on the table.
+    if paper:
+        paper_cost = float(paper[0]["resource_cost"])
+        paper_f = float(paper[0]["fidelity"])
+        same_cost_frontier = [
+            r for r in frontier if float(r["resource_cost"]) == paper_cost
+        ]
+        if same_cost_frontier:
+            frontier_f = float(same_cost_frontier[0]["fidelity"])
+            ax.annotate(
+                "",
+                xy=(paper_cost, frontier_f),
+                xytext=(paper_cost, paper_f),
+                arrowprops=dict(arrowstyle="->", color="#1f77b4", lw=1.6),
+            )
+            ax.annotate(
+                f"+{frontier_f - paper_f:.3f} $F$\navailable at\nsame cost",
+                xy=(paper_cost, (paper_f + frontier_f) / 2),
+                xytext=(paper_cost - 32, (paper_f + frontier_f) / 2 - 0.01),
+                fontsize=8,
+                color="#1f77b4",
+            )
+
     ax.set_xlabel("Resource cost $C$", fontsize=11)
     ax.set_ylabel("Fidelity $F$", fontsize=11)
     ax.tick_params(labelsize=9.5)
@@ -127,7 +171,7 @@ def make_fidelity_vs_rate(rows: list[dict]) -> None:
         key=lambda r: float(r["rate"]),
     )
     paper = [r for r in rows if _role(r) == "paper_baseline"]
-    link = [r for r in rows if _role(r) == "link_level_baseline"]
+    link = _best_link_per_cost(rows)
 
     ax.scatter(
         [float(r["rate"]) for r in others],
