@@ -4,21 +4,23 @@
 % Sources: outputs/*/README.md, experiments/*.py,
 %          docs/Design Principles.md
 
-All experiments use the beam search ($w_{\text{beam}}=25$, Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}, unless stated otherwise. The reference configuration is $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$, matching the source papers' main experimental setting.
+This chapter first validates the physical evaluator against the source paper's fidelity results (Section~\ref{sec:exp:validation}), then compares the paper schedule with schedules found by search (Section~\ref{sec:exp:comparison}): a matched-cost/budget-relaxed check at the reference configuration, followed immediately by the chapter's central result, that under physics the source paper did not consider, the paper's fixed schedule can become infeasible while a re-run search finds a different, non-uniform schedule that still works, and by how that advantage changes with noise. Section~\ref{sec:exp:tradeoffs} then exposes the full cost-quality tradeoff the search has access to and how substituting the optimization objective reshapes it. Section~\ref{sec:exp:scaling} asks the same question along chain length, where the present search also reaches its clearest limits. A final section studies timing effects caused by memory dephasing and generation latency. The main-text figures and tables present the results needed to follow these comparisons; supplementary runtime and beam-width analyses are collected in Appendix~\ref{app:sweeps}.
 
 \section{Setup}
 \label{sec:exp:setup}
 
 % Source: experiments/*.py parameter tables
 
-\subsection{Parameters and Sweeps}
+\paragraph{Parameters and sweeps}
 \label{sec:exp:params}
 
-Table~\ref{tab:params} lists every parameter varied in this chapter, its reference value, and the section in which it is varied. Every experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all other parameters remain fixed.
+Unless stated otherwise, experiments use the beam search with beam width $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}), together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}. The reference configuration is $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$, matching the source papers' main experimental setting. Table~\ref{tab:params} lists every parameter varied in this chapter, its reference value, and the section in which it is varied. Each experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all other parameters remain fixed.
 
 \input{tables/experiment_parameters}
 
-\subsection{Search Method Runtime}
+\clearpage
+
+\paragraph{Search method runtime}
 \label{sec:exp:runtime}
 
 Both the exact dynamic program (Section~\ref{sec:alg:dp}) and the beam search complete within the tested range $N\le18$ without reaching the 300~s per-point timeout.
@@ -27,14 +29,14 @@ Table~\ref{tab:runtimes} reports wall-clock times under the paper's $E_{\max}=10
 
 \input{tables/benchmarks}
 
-\subsection{Baselines}
+\paragraph{Baselines}
 \label{sec:exp:baselines}
 
 Three baselines are used throughout. The \emph{raw chain} applies no purification. The \emph{uniform link-level baseline} applies the same copy count and circuit sequence at every hop, representing a simple fixed strategy that does not adapt purification to the location within the chain. The \emph{paper schedule} is the hand-chosen schedule from the source paper's Fig.\,4 (Section~\ref{sec:alg:bruteforce}), which the authors present as an unoptimised example.
 
 The uniform link-level baseline and the paper schedule are distinct and are labelled separately in the figures and tables. Section~\ref{sec:exp:netgen} shows that they can behave differently under non-ideal inner-qubit noise, with the paper schedule failing the fidelity threshold in configurations where the uniform link-level baseline remains feasible.
 
-\subsection{Metrics}
+\paragraph{Metrics}
 \label{sec:exp:metrics}
 
 Fidelity $F$ is the Bell-pair fidelity after all purification, backbone, and correction operations. Rate is $R=P_{\mathrm{success}}/T_{\mathrm{attempt}}$, where $P_{\mathrm{success}}$ is the probability that a complete schedule attempt succeeds and $T_{\mathrm{attempt}}$ is its deterministic wall-clock duration under the timing model of Section~\ref{sec:model:objectives}. Resource cost $C$ counts the number of \Gls{hrgs} copies consumed per trial. Two comparison modes are used: \emph{matched-cost}, in which the optimizer is constrained to $C=100$, and \emph{budget-relaxed}, in which it may choose any schedule satisfying $C\le E_{\max}$.
@@ -49,13 +51,20 @@ The evaluator described in Section~\ref{sec:alg:evaluator} reproduces the source
 
 Appendix~\ref{app:validation} gives the full evaluator-versus-analytical comparison across several values of $e_d$.
 
-\section{Headline Comparison}
+\section{Optimizer versus the Paper Schedule}
+\label{sec:exp:comparison}
+
+This section compares the paper schedule against schedules found by search, first at the paper's own reference configuration, then under network physics the paper does not model, then across a sweep of outer-photon noise.
+
+\subsection{Headline Comparison}
 \label{sec:exp:headline}
 
 % Source: outputs/headline_experiment_n10/README.md,
 %          outputs/sweep_network_sensitivity/README.md
 
 At $N=10$ and $e_d=0.01$, the paper schedule uses $C=100$ and achieves $F=0.9295$ and $R=4055.92$. At the same cost, the optimizer returns $F=0.9168$ and $R=4158.14$, a $2.5\%$ rate improvement obtained by accepting a lower but still feasible fidelity. The budget-relaxed optimizer, with the same-span pumping move enabled (Section~\ref{sec:alg:pumping}), returns $C=60$, $F=0.9063$, and $R=6195.95$: it uses $60\%$ of the paper schedule's budget while achieving a $52.8\%$ higher rate. With same-span pumping disabled, the search instead returns $C=50$, $F=0.9047$, and $R=6713.18$; this predates the pumping extension and is retained as a historical headline result rather than treated as the current default. All variants are labelled separately in Table~\ref{tab:headline}.
+
+This matched-cost/budget-relaxed comparison is a first check, not the main claim of this chapter: the paper's own Fig.\,4 schedule is explicitly presented by its authors as one unoptimised example, so a systematic search improving on it is close to expected. What it establishes is that the search finds real, structurally valid, non-uniform schedules that behave as the physical model predicts -- the basis for the stronger claims that follow.
 
 \begin{table}[h]
     \centering
@@ -74,7 +83,47 @@ At $N=10$ and $e_d=0.01$, the paper schedule uses $C=100$ and achieves $F=0.9295
     \end{tabular}
 \end{table}
 
-\section{Noise Sensitivity}
+\subsection{Network Generalization}
+\label{sec:exp:netgen}
+
+% Source: outputs/sweep_network_sensitivity/README.md
+
+The headline comparison used the source paper's own idealized error model. Turning on inner-qubit errors, which the source paper does not model, changes which schedule actually works. At the same generation budget, the paper schedule can fall below the $F\ge0.9$ threshold entirely, while the search, re-run against the changed physics, finds a different, non-uniform schedule that still clears it. This is the strongest result in this chapter: not a percentage improvement, but a case where the fixed hand-designed schedule stops working and a schedule found by search does not.
+
+Table~\ref{tab:netgen} and Figure~\ref{fig:netgen} compare the paper baseline with the optimizer under two non-ideal network configurations at $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$; the reference (ideal) configuration was already given in Table~\ref{tab:headline}, where both schedules are feasible.
+
+\begin{table}[h]
+    \centering
+    \caption{Optimizer vs.\ paper baseline under two non-ideal network configurations ($N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$).}
+    \label{tab:netgen}
+    \small
+    \begin{tabular}{llcccc}
+        \hline
+        Config & Schedule & $C$ & $F$ & Rate & Feasible \\
+        \hline
+        Non-ideal inner error, 18 arms & Paper baseline & 100 & 0.6737 & 103.18 & \textbf{no} \\
+        Non-ideal inner error, 18 arms & Optimizer, matched cost & 100 & 0.9004 & 25.31 & yes \\
+        Non-ideal inner error, 18 arms & Optimizer, budget-relaxed & 80 & 0.9018 & 85.30 & yes \\
+        \hline
+        Non-ideal inner error, 6 arms & Paper baseline & 100 & 0.8716 & 871.55 & \textbf{no} \\
+        Non-ideal inner error, 6 arms & Optimizer, matched cost & 100 & 0.9279 & 681.56 & yes \\
+        Non-ideal inner error, 6 arms & Optimizer, budget-relaxed & 60 & 0.9120 & 2096.91 & yes \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/results/fidelity_by_config.png}
+    \caption{Fidelity by network configuration and schedule. Hatched bars fall below the $f_{\min}=0.9$ floor: the paper schedule is infeasible under both non-ideal configurations, while the schedules found by search remain feasible in every configuration tested.}
+    \label{fig:netgen}
+\end{figure}
+
+The main result here is a difference in feasibility rather than a rate improvement: the paper schedule is infeasible in both non-ideal configurations, while the searched schedules remain above the fidelity threshold at the same budget. Comparing the raw rates of the infeasible paper schedule and a feasible optimizer schedule is therefore not an apples-to-apples performance comparison -- the point is that a fixed, hand-designed schedule can silently stop working once the physical assumptions it was built for change, while a schedule constructed by search against the actual physics does not.
+
+Branching factor and hop length are not used as sensitivity axes in this chapter. Within the model of Chapter~\ref{chap:model}, changing the tree branching factors does not affect $F$, $C$, or $R$, while uniformly rescaling every hop length multiplies all schedule latencies by the same factor and therefore leaves relative schedule comparisons unchanged.
+
+\subsection{Noise Sensitivity}
 \label{sec:exp:edsweep}
 
 % Source: outputs/sweep_ed_n10/README.md
@@ -100,7 +149,10 @@ At low noise, the advantage is small because the fidelity floor is easy to satis
     \label{fig:edsweep}
 \end{figure*}
 
-\section{Pareto Frontiers}
+\section{Cost-Quality Tradeoffs}
+\label{sec:exp:tradeoffs}
+
+\subsection{Pareto Frontiers}
 \label{sec:exp:pareto}
 
 % Source: outputs/pareto_frontiers/README.md
@@ -126,69 +178,14 @@ Appendix~\ref{app:dags} discusses the schedule \glspl{dag} corresponding to the 
     \label{fig:pareto}
 \end{figure*}
 
-\subsection{Alternative Objectives}
+\paragraph{Alternative objectives}
 \label{sec:exp:objectives}
+Changing only the optimization objective -- maximizing fidelity subject to a rate floor, or minimizing cost subject to a fidelity floor -- produces structurally different top-ranked schedules without changing the search algorithm itself. At $N=10$, $e_d=0.01$: maximizing fidelity under the paper's own rate floor reaches $F=0.9351$ at $C=80$ (vs.\ $F=0.9063$ at $C=60$ when maximizing rate); minimizing cost under only a fidelity floor returns $C=60$ but a rate as low as $R=1239.19$, since nothing in that objective prefers a higher-rate schedule at the same cost, unless a rate floor is also imposed, which restores $R=6195.95$ at the same $C=60$. Constraints must therefore reflect every performance requirement that matters to the intended use, not only the primary objective. Appendix~\ref{app:objectives} gives the full five-objective comparison.
 
-% Source: outputs/alternative_objectives/README.md
+\section{Scaling with Chain Length}
+\label{sec:exp:scaling}
 
-Changing only the optimization objective, from maximizing rate to maximizing fidelity or minimizing cost, produces structurally different top-ranked schedules without changing the underlying search algorithm. Table~\ref{tab:objectives} reports five objective definitions at $N=10$ and $e_d=0.01$: maximizing rate ($C=60$, $F=0.9063$, $R=6195.95$); maximizing fidelity subject to the paper-rate floor ($C=80$, $F=0.9351$, $R=4804.58$); maximizing fidelity subject to the matched-rate floor ($C=80$, $F=0.9351$, $R=4804.58$); minimizing cost with only $F\ge0.9$ enforced ($C=60$, $R=1239.19$); and minimizing cost with both $F\ge0.9$ and $R\ge4055.92$ enforced ($C=60$, $R=6195.95$).
-
-The fourth objective illustrates why the constraints must reflect all performance requirements that matter to the intended use: minimizing cost subject only to a fidelity floor can return a valid but very low-rate schedule even when a substantially higher-rate schedule with the same cost exists. An application that also requires a minimum rate must therefore impose an explicit $R_{\min}$ constraint, as in the fifth objective.
-
-\begin{table}[h]
-    \centering
-    \caption{Objective-substitution comparison at $N=10$, $e_d=0.01$: five objective definitions with no change to the search algorithm.}
-    \label{tab:objectives}
-    \small
-    \begin{tabular}{lccc}
-        \hline
-        Objective & $C$ & $F$ & Rate \\
-        \hline
-        Maximize rate & 60 & 0.9063 & 6195.95 \\
-        Maximize fidelity, paper-rate floor & 80 & 0.9351 & 4804.58 \\
-        Maximize fidelity, matched-rate floor & 80 & 0.9351 & 4804.58 \\
-        Minimize cost, $F \ge 0.9$ only & 60 & --- & 1239.19 \\
-        Minimize cost, $F \ge 0.9$ and $R \ge 4055.92$ & 60 & --- & 6195.95 \\
-        \hline
-    \end{tabular}
-\end{table}
-
-\section{Network Generalization}
-\label{sec:exp:netgen}
-
-% Source: outputs/sweep_network_sensitivity/README.md
-
-Turning on inner-qubit errors, and therefore moving beyond the source papers' idealized error model, changes the relative performance of the schedules substantially. At the same generation budget, the paper schedule can fall below the $F\ge0.9$ threshold while the optimizer finds a different schedule that remains feasible. Table~\ref{tab:netgen} compares the paper baseline with the optimizer under three network configurations at $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$.
-
-\begin{table}[h]
-    \centering
-    \caption{Optimizer vs.\ paper baseline under three network configurations ($N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$).}
-    \label{tab:netgen}
-    \small
-    \begin{tabular}{llcccc}
-        \hline
-        Config & Schedule & $C$ & $F$ & Rate & Feasible \\
-        \hline
-        Reference (ideal) & Paper baseline & 100 & 0.9295 & 4055.92 & yes \\
-        Reference (ideal) & Optimizer, matched cost & 100 & 0.9168 & 4158.14 & yes \\
-        Reference (ideal) & Optimizer, budget-relaxed & 60 & 0.9063 & 6195.95 & yes \\
-        \hline
-        Non-ideal inner error, 18 arms & Paper baseline & 100 & 0.6737 & 103.18 & \textbf{no} \\
-        Non-ideal inner error, 18 arms & Optimizer, matched cost & 100 & 0.9004 & 25.31 & yes \\
-        Non-ideal inner error, 18 arms & Optimizer, budget-relaxed & 80 & 0.9018 & 85.30 & yes \\
-        \hline
-        Non-ideal inner error, 6 arms & Paper baseline & 100 & 0.8716 & 871.55 & \textbf{no} \\
-        Non-ideal inner error, 6 arms & Optimizer, matched cost & 100 & 0.9279 & 681.56 & yes \\
-        Non-ideal inner error, 6 arms & Optimizer, budget-relaxed & 60 & 0.9120 & 2096.91 & yes \\
-        \hline
-    \end{tabular}
-\end{table}
-
-The main result here is a difference in feasibility rather than a rate improvement: the paper schedule is infeasible in two of the three configurations, while the searched schedules remain above the fidelity threshold at the same budget. For those configurations, comparing the raw rates of the infeasible paper schedule and a feasible optimizer schedule is not an apples-to-apples performance comparison.
-
-Branching factor and hop length are not used as sensitivity axes in this chapter. Within the model of Chapter~\ref{chap:model}, changing the tree branching factors does not affect $F$, $C$, or $R$, while uniformly rescaling every hop length multiplies all schedule latencies by the same factor and therefore leaves relative schedule comparisons unchanged.
-
-\section{Budget Scaling}
+\subsection{Budget Scaling}
 \label{sec:exp:budget}
 
 % Source: outputs/sweep_min_budget_vs_n/README.md
@@ -201,7 +198,7 @@ with an exponent greater than one, indicating that the required budget grows fas
 
 Three qualifications are important. First, the fitted power law is descriptive over 12 measured points and is not an asymptotic result. Second, the location of the crossover depends on the beam width and should therefore be regarded as provisional. Third, the excluded-move result at $N=18$ (Section~\ref{sec:exp:excluded}) shows that a schedule outside the searched families can remain feasible at the paper's own budget. The fitted values therefore describe the minimum budget found within the searched schedule families, not a global lower bound over the full legal schedule space.
 
-Appendix~\ref{app:sweeps} collects supplementary sweeps over beam width, $e_d$, timing, and pumping that support this analysis without interrupting the main discussion.
+Appendix~\ref{app:sweeps} collects supplementary sweeps over beam width, $e_d$, timing, and pumping that support this analysis without interrupting the main discussion. Among these, bisecting the minimum feasible budget over $e_d$ instead of $N$, at fixed $N=10$, shows that the paper's own fixed $E_{\max}=100$ overspends by $2.0$--$4.8\times$ across the tested noise range: the minimum budget needed to clear $F_{\min}=0.9$ ranges from $E_{\max}=21$ at low noise up to $E_{\max}=50$ at $e_d=0.01$. This is a stronger, self-contained claim than the $N$-scaling crossover above: it holds entirely within the paper's own tested configuration ($N=10$) and needs none of that crossover's beam-width caveats.
 
 \begin{figure*}[ht]
     \centering
@@ -209,13 +206,6 @@ Appendix~\ref{app:sweeps} collects supplementary sweeps over beam width, $e_d$, 
     \caption{Minimum feasible $E_{\max}$ required to reach $F_{\min}=0.9$ as a function of $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the descriptive power-law fit $E_{\max}^{\min}\approx1.369\,N^{1.620}$.}
     \label{fig:budget}
 \end{figure*}
-
-\subsection{Noise-Level Dependence}
-\label{sec:exp:budgeted}
-
-% Source: outputs/sweep_min_budget_vs_ed/README.md
-
-Fixing $N=10$ and bisecting over $e_d$ shows that the minimum feasible budget decreases as the noise level decreases. At $e_d=0.01$, the bisected result is $C=60$, exactly matching the minimum-cost result reported in Section~\ref{sec:exp:objectives}; this provides an independent cross-check of the cost-minimization objective.
 
 \subsection{Optimality Bound at $N=18$}
 \label{sec:exp:excluded}
