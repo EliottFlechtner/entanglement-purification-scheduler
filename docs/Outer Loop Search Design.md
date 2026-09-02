@@ -146,7 +146,7 @@ a reused node_id:** reusing a memoized `node_id` to represent "n
 independent copies" of a resource would silently undercount
 `ScheduleDAG`'s resource cost `C(Σ)` (the `nodes` dict has unique keys —
 one `node_id` reused for n copies is invisible to counting). Genuine
-physical duplication (fresh `Gen`/`AbsaBsm`/`Join`/`Purify` node
+physical duplication (fresh `Gen`/`Join`/`Swap`/`Purify` node
 instances) is required wherever independent copies are purified together.
 `_build_link_pumped` gets this right by calling `_build_hop` fresh
 `n_copies` times for the base-case link-level candidates within a single
@@ -157,7 +157,7 @@ hop's span.
 Per the existing evaluator model (see
 [`Fig6 Rate Ratio Non-Reproducibility.md`](Fig6%20Rate%20Ratio%20Non-Reproducibility.md)),
 only `HeraldNode` placement contributes non-zero simulated time — `Gen`,
-`Join`, `AbsaBsm`, and `Purify` all cost zero time in the current model.
+`Join`, `Swap`, and `Purify` all cost zero time in the current model.
 All span-partition candidates built by `frontier()` are therefore
 Herald-free (optimistic) internally, and `dp_search()` wraps each
 finalist with exactly one final `HeraldNode(propagation_time=1.0)` +

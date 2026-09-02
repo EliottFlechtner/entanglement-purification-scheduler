@@ -228,7 +228,7 @@ lists.
   stated 45–65×), because:
   1. In the current DAG-evaluator model, only `HeraldNode`s contribute
      nonzero latency (`propagation_time × L_total/c`); `Join`/
-     `AbsaBsm`/`Purify` all contribute zero added time. So the computed
+     `Swap`/`Purify` all contribute zero added time. So the computed
      ratio is *exactly* the structural Herald-count ratio (9:1 for
      `n_pur=5` baseline: 4 sequential round-trip heralds + 1 final vs.
      flexible's single final herald).
