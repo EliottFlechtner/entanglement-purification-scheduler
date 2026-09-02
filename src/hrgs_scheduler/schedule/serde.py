@@ -28,7 +28,11 @@ structure::
 
 Version history
 ---------------
-  1: initial format (current).
+  1: initial format.
+  2: node-type tags renamed to match the JoinNode/SwapNode class rename
+     (old ``AbsaBsmNode`` -> ``JoinNode``, old ``JoinNode`` -> ``SwapNode``).
+     Version-1 files are rejected by ``load_schedule`` and must be
+     re-exported.
 
 Stability guarantees
 --------------------
@@ -63,18 +67,18 @@ from hrgs_scheduler.models.stage import RGSS, RGSSStage, Span, Stage
 from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
     ScheduleNode,
 )
 
-SERDE_VERSION: int = 1
+SERDE_VERSION: int = 2
 _SCHEMA: str = "hrgs_schedule"
 
 # ---------------------------------------------------------------------------
@@ -114,16 +118,16 @@ def _node_to_dict(node: ScheduleNode) -> dict[str, Any]:
             "gen_time": node.gen_time,
             "side_effect_parity": node.side_effect_parity,
         }
-    if isinstance(node, AbsaBsmNode):
+    if isinstance(node, JoinNode):
         return {
-            "type": "AbsaBsmNode",
+            "type": "JoinNode",
             "node_id": node.node_id,
             "children": list(node.children),
             "hop_index": node.hop_index,
         }
-    if isinstance(node, JoinNode):
+    if isinstance(node, SwapNode):
         return {
-            "type": "JoinNode",
+            "type": "SwapNode",
             "node_id": node.node_id,
             "children": list(node.children),
             "output_stage": _stage_to_dict(node.output_stage),
@@ -171,14 +175,14 @@ def _dict_to_node(d: dict[str, Any]) -> ScheduleNode:
             gen_time=d["gen_time"],
             side_effect_parity=d["side_effect_parity"],
         )
-    if t == "AbsaBsmNode":
-        return AbsaBsmNode(
+    if t == "JoinNode":
+        return JoinNode(
             node_id=nid,
             children=tuple(d["children"]),
             hop_index=d["hop_index"],
         )
-    if t == "JoinNode":
-        return JoinNode(
+    if t == "SwapNode":
+        return SwapNode(
             node_id=nid,
             children=tuple(d["children"]),
             output_stage=_dict_to_stage(d["output_stage"]),

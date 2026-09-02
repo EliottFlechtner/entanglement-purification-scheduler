@@ -11,11 +11,11 @@ end-node purification (optimistic: Herald follows Purify).
 
 Each trial:
 - **Hop 0** (RGSS-level purification): two same-side Gen nodes are
-  purified with a YY circuit at κ=RGSS before the outer-photon BSM.
+  purified with a YY circuit at κ=RGSS before the outer-photon Join.
   The purified anchor is then combined with a raw right-side anchor
   at the ABSA to produce a Span(0,1) edge.
-- **Hop 1** (raw): two Gen nodes combined directly by AbsaBsm → Span(1,2).
-- **Join** of both hop edges → Span(0,2).
+- **Hop 1** (raw): two Gen nodes combined directly by Join → Span(1,2).
+- **Swap** of both hop edges → Span(0,2).
 
 End-node combination:
 - **Purify-XZ**(trial_A, trial_B) at κ=Span(0,2)
@@ -56,9 +56,8 @@ PYTHONPATH=src python3 experiments/worked_example_n2_dag.py
 | Color | Shape | Node type | Role |
 |---|---|---|---|
 | light blue | ellipse | GenNode | leaf; fresh RGSS resource |
-| orange | box | AbsaBsmNode | outer-photon BSM at ABSA |
-| green | box | JoinNode | entanglement swap / stitching |
+| orange | box | JoinNode | outer-photon BSM at ABSA |
+| green | box | SwapNode | entanglement swap / stitching |
 | purple | box | PurifyNode | 2→1 purification circuit |
 | yellow | diamond | HeraldNode | heralding resolution |
 | red | doublecircle | PauliCorrectNode | root; final Pauli correction |
-| gray | ellipse | IdleNode | placeholder for idle time (no operation) |

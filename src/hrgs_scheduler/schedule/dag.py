@@ -49,11 +49,11 @@ from hrgs_scheduler.models.resource_budget import ResourceBudget
 from hrgs_scheduler.models.stage import RGSS, RGSSStage, Span, Stage
 from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
@@ -143,7 +143,7 @@ class ScheduleDAG:
         Idle/Herald pass their child's declared κ through unchanged.
 
         This mirrors the runtime legality already enforced by
-        ``operations.backbone.join``/``purify``/``pauli_correct`` on
+        ``operations.backbone.swap``/``purify``/``pauli_correct`` on
         actual ``State`` objects, but catches structural mistakes (e.g. a
         builder computing the wrong ``output_stage``) before evaluation.
         """
@@ -154,20 +154,20 @@ class ScheduleDAG:
             if isinstance(node, GenNode):
                 declared[nid] = RGSS
 
-            elif isinstance(node, AbsaBsmNode):
+            elif isinstance(node, JoinNode):
                 declared[nid] = Span(node.hop_index, node.hop_index + 1)
 
             elif isinstance(node, (IdleNode, HeraldNode)):
                 (child_id,) = node.children
                 declared[nid] = declared[child_id]
 
-            elif isinstance(node, JoinNode):
+            elif isinstance(node, SwapNode):
                 left_id, right_id = node.children
                 left_stage, right_stage = declared[left_id], declared[right_id]
-                expected = self._join_output_stage(left_stage, right_stage, nid)
+                expected = self._swap_output_stage(left_stage, right_stage, nid)
                 if expected != node.output_stage:
                     raise ValueError(
-                        f"JoinNode {nid}: declared output_stage "
+                        f"SwapNode {nid}: declared output_stage "
                         f"{node.output_stage!r} does not match the stage "
                         f"{expected!r} computed from children {left_stage!r}, "
                         f"{right_stage!r} [§4.1]"
@@ -206,7 +206,7 @@ class ScheduleDAG:
                 )
 
     @staticmethod
-    def _join_output_stage(stage_a: Stage, stage_b: Stage, nid: NodeId) -> Stage:
+    def _swap_output_stage(stage_a: Stage, stage_b: Stage, nid: NodeId) -> Stage:
         """Compute the legal Join/EntSwap output κ from two input κ's.
 
         RGSS + RGSS -> RGSS (pre-transmission pairing); Span(a,b) +
@@ -218,9 +218,9 @@ class ScheduleDAG:
             try:
                 return stage_a.join(stage_b)
             except ValueError as exc:
-                raise ValueError(f"JoinNode {nid}: {exc}") from exc
+                raise ValueError(f"SwapNode {nid}: {exc}") from exc
         raise ValueError(
-            f"JoinNode {nid}: illegal stage combination {stage_a!r}, "
+            f"SwapNode {nid}: illegal stage combination {stage_a!r}, "
             f"{stage_b!r}; both must be RGSS or both must be adjacent "
             "Span instances [§4.1]."
         )
@@ -309,7 +309,7 @@ class ScheduleDAG:
         ---------------------------------------------
         A resource budget ``B = (n_pur, E_max, M_max)`` caps ``M_max``,
         the maximum number of branches (partially-built resources still
-        awaiting their sibling before the next Join/AbsaBsm/Purify) that
+        awaiting their sibling before the next Swap/Join/Purify) that
         may be held open in quantum memory at once. A ``ScheduleDAG``
         only fixes a *topological partial order* on its operations, not a
         concrete real-time execution order, so "how many branches are
@@ -328,7 +328,7 @@ class ScheduleDAG:
             registers(2-input combiner)      = combine(registers(left),
                                                         registers(right))
 
-        where a 2-input combiner is AbsaBsmNode/JoinNode/PurifyNode and
+        where a 2-input combiner is JoinNode/SwapNode/PurifyNode and
         ``combine(L, R) = max(L, R)`` if ``L != R``, else ``L + 1``. Tying
         needs one extra slot to hold the first-finished side's result
         while the second is built; evaluating the higher-register child
@@ -358,7 +358,7 @@ class ScheduleDAG:
             elif isinstance(node, (IdleNode, HeraldNode, PauliCorrectNode)):
                 (child_id,) = node.children
                 registers[nid] = registers[child_id]
-            elif isinstance(node, (AbsaBsmNode, JoinNode, PurifyNode)):
+            elif isinstance(node, (JoinNode, SwapNode, PurifyNode)):
                 left_id, right_id = node.children
                 l_reg, r_reg = registers[left_id], registers[right_id]
                 registers[nid] = l_reg + 1 if l_reg == r_reg else max(l_reg, r_reg)
@@ -415,7 +415,7 @@ class ScheduleDAG:
     ) -> tuple[NodeId, Stage, int]:
         """Build one raw (unpurified) chain spanning *hop_count* hops.
 
-        Mutates *nodes* in place, adding Gen/AbsaBsm/Join nodes for a raw
+        Mutates *nodes* in place, adding Gen/Join/Swap nodes for a raw
         stitched chain covering hops [hop_start, hop_start + hop_count).
 
         Parameters
@@ -446,7 +446,7 @@ class ScheduleDAG:
             nid += 1
             nodes[g_l.node_id] = g_l
             nodes[g_r.node_id] = g_r
-            bsm = AbsaBsmNode(
+            bsm = JoinNode(
                 node_id=nid, children=(g_l.node_id, g_r.node_id), hop_index=hop_i
             )
             nid += 1
@@ -459,7 +459,7 @@ class ScheduleDAG:
             hop_i = hop_start + offset
             right_stage = Span(hop_i, hop_i + 1)
             merged_stage = current_stage.join(right_stage)  # type: ignore[union-attr]
-            jn = JoinNode(
+            jn = SwapNode(
                 node_id=nid,
                 children=(current_id, hop_edge_ids[offset]),
                 output_stage=merged_stage,
@@ -508,8 +508,8 @@ class ScheduleDAG:
         """Build a raw (no purification) N-hop chain schedule.
 
         For each hop i, generates two RGSS resources and combines them
-        via an AbsaBsmNode.  All single-hop edges are then stitched
-        left-to-right via JoinNodes, and the result is wrapped in
+        via a JoinNode.  All single-hop edges are then stitched
+        left-to-right via SwapNodes, and the result is wrapped in
         HeraldNode + PauliCorrectNode.
 
         Structure (N=3):
@@ -517,9 +517,9 @@ class ScheduleDAG:
              \\ /       \\ /       \\ /
             BSM(0)    BSM(1)    BSM(2)
                \\        |        /
-               Join(0,1,2→0,2)  /
+               Swap(0,1,2→0,2)  /
                     \\          /
-                     Join(0,3)
+                     Swap(0,3)
                          |
                        Herald
                          |
@@ -554,7 +554,7 @@ class ScheduleDAG:
 
         This models "Baseline purification at end nodes": all copies are
         distributed raw across the full path, then purified only after
-        full end-to-end BSMs/joins -- i.e. purification happens entirely
+        full end-to-end BSMs/swaps -- i.e. purification happens entirely
         at κ = Span(0, N).
 
         Heralding structure [Integrating, §III-B, §VI]: entanglement
@@ -748,10 +748,10 @@ class ScheduleDAG:
         """Build a schedule with link-level purification followed by path stitching.
 
         For each hop *i*, generates *n_copies* independent single-hop raw
-        edges (each from a separate pair of Gen + AbsaBsm), then pumps them
+        edges (each from a separate pair of Gen + Join), then pumps them
         down to one purified link edge at κ = Span(i, i+1) using the
         supplied circuit sequence.  The resulting N purified link edges are
-        then stitched left-to-right via JoinNodes into a single end-to-end
+        then stitched left-to-right via SwapNodes into a single end-to-end
         resource, which is wrapped in the standard Herald + PauliCorrect.
 
         This corresponds to the kind of purification applied to Pair A in
@@ -827,7 +827,7 @@ class ScheduleDAG:
         for hop_i in range(1, N):
             right_stage = Span(hop_i, hop_i + 1)
             merged_stage = current_stage.join(right_stage)  # type: ignore[union-attr]
-            jn = JoinNode(
+            jn = SwapNode(
                 node_id=nid,
                 children=(current_id, hop_purified_ids[hop_i]),
                 output_stage=merged_stage,
@@ -902,7 +902,7 @@ class ScheduleDAG:
         for hop_i in range(1, N):
             right_stage = Span(hop_i, hop_i + 1)
             merged_stage = current_stage.join(right_stage)  # type: ignore[union-attr]
-            jn = JoinNode(
+            jn = SwapNode(
                 node_id=nid,
                 children=(current_id, purified_hop_ids[hop_i]),
                 output_stage=merged_stage,
@@ -935,7 +935,7 @@ class ScheduleDAG:
         left_stage = Span(0, half)
         right_stage = Span(half, N)
         merged_stage = left_stage.join(right_stage)
-        jn = JoinNode(
+        jn = SwapNode(
             node_id=nid,
             children=(segment_ids[0], segment_ids[1]),
             output_stage=merged_stage,
@@ -1011,7 +1011,7 @@ class ScheduleDAG:
             nid += 1
             nodes[g_l.node_id] = g_l
             nodes[g_r.node_id] = g_r
-            bsm = AbsaBsmNode(
+            bsm = JoinNode(
                 node_id=nid,
                 children=(g_l.node_id, g_r.node_id),
                 hop_index=hop_i,

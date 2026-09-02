@@ -297,12 +297,12 @@ export const diagrams: DiagramSpec[] =
         +float gen_time
         +int side_effect_parity
       }
-      class AbsaBsmNode {
+      class JoinNode {
         +NodeId node_id
         +tuple children
         +int hop_index
       }
-      class JoinNode {
+      class SwapNode {
         +NodeId node_id
         +tuple children
         +Stage output_stage
@@ -342,8 +342,8 @@ export const diagrams: DiagramSpec[] =
       ScheduleDAG "1" *-- "1..*" ScheduleNode : owns
       ScheduleNode "0..*" --> "0..*" ScheduleNode : children
       ScheduleNode <|-- GenNode
-      ScheduleNode <|-- AbsaBsmNode
       ScheduleNode <|-- JoinNode
+      ScheduleNode <|-- SwapNode
       ScheduleNode <|-- PurifyNode
       ScheduleNode <|-- IdleNode
       ScheduleNode <|-- HeraldNode
@@ -416,8 +416,8 @@ export const diagrams: DiagramSpec[] =
             guarantee: 'Has no children and always produces the RGSS stage.',
           },
           {
-            match: 'AbsaBsmNode',
-            title: 'AbsaBsmNode',
+            match: 'JoinNode',
+            title: 'JoinNode',
             type: 'Two-input link operation',
             body:
                 'Consumes the two RGSS resources identified by children at hop_index. The evaluator uses that hop and NetworkConfig.e_d to produce Span(hop_index, hop_index + 1).',
@@ -487,13 +487,13 @@ export const diagrams: DiagramSpec[] =
       alt memoized span exists
         Span-->>Span: return memo[(a, b)]
       else single hop
-        Span->>Physics: gen × 2, absa_bsm
+        Span->>Physics: gen × 2, join
         Span->>Physics: optional link purify sequences
       else wider span
         loop every split m in (a, b)
           Span->>Span: frontier(a, m)
           Span->>Span: frontier(m, b)
-          Span->>Physics: join(left, right) for each pair
+          Span->>Physics: swap(left, right) for each pair
         end
       end
       Span-->>Span: Pareto prune base candidates
@@ -593,7 +593,7 @@ export const diagrams: DiagramSpec[] =
         [*] --> LeafOrWide
         LeafOrWide --> Leaf: b - a = 1
         LeafOrWide --> Wide: b - a > 1
-        Leaf --> RawHop: Gen × 2 + AbsaBsm
+        Leaf --> RawHop: Gen × 2 + Join
         Leaf --> LinkVariants: n copies + circuit sequences
         Wide --> SplitLoop: every m in (a, b)
         SplitLoop --> ChildFrontiers: frontier(a,m), frontier(m,b)

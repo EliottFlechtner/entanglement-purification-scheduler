@@ -10,8 +10,8 @@ These implement the physical operations of the HRGS protocol that are
 Catalog [Validated Formal Model Def, §2.5]
 ------------------------------------------
 Gen:          half-RGS generation.  Produces an RGSS-local State.
-join:         Join/EntSwap.  Composes two States via BSM composition rule.
-absa_bsm:     Outer-photon BSM at the ABSA.  Same math as join; creates a
+swap:         Join/EntSwap.  Composes two States via BSM composition rule.
+join:         Outer-photon BSM at the ABSA.  Same math as swap; creates a
               single-hop edge from two RGSS-local States.
 idle:         Apply decoherence to a State over Δt.
 herald:       Resolve the heralding status of a State.
@@ -20,8 +20,9 @@ pauli_correct: Terminal; verify legality and return the final edge.
 Notes
 -----
 * Join/EntSwap and BSM both use the identical bilinear error-vector
-  composition rule and are unified as ``join``.  The physical difference
-  (ABSA vs. anchor CZ+XX) is captured by the stage labels, not the math.
+  composition rule and are unified under this same math; ``swap`` and
+  ``join`` differ only in stage labels (RGSS-local pairing vs. ABSA hop
+  creation), not in the underlying composition.
 * Side-effect parities XOR at every merge [Validated Formal Model Def, §2.3].
 * ``pauli_correct`` does NOT apply a physical gate here; it is a legality
   check and marker that the classical Z^s correction has been tracked.
@@ -61,7 +62,7 @@ def gen(
 
     The outer photon has not yet been transmitted at Gen time, so the
     outer-qubit depolarizing (e_d) is NOT applied here; it is applied
-    inside ``absa_bsm`` when the photon travels to the ABSA.
+    inside ``join`` when the photon travels to the ABSA.
 
     The RGSS-local error vector therefore reflects only inner-qubit errors,
     applied as an independent Z-type channel on the ANCHOR only; the outer
@@ -106,12 +107,12 @@ def gen(
 
 
 # ---------------------------------------------------------------------------
-# Join / EntSwap and ABSA BSM
+# Join / EntSwap (Swap) and ABSA BSM (Join)
 # ---------------------------------------------------------------------------
 
 
-def join(state_a: State, state_b: State) -> State:
-    """Join two States via the BSM error-vector composition rule.
+def swap(state_a: State, state_b: State) -> State:
+    """Swap two States via the BSM error-vector composition rule.
 
     Implements the unified Join/EntSwap operation from
     [Validated Formal Model Def, §2.5]:  CZ + XX-measurement on the anchor-
@@ -140,9 +141,9 @@ def join(state_a: State, state_b: State) -> State:
     Raises
     ------
     ValueError
-        If the stage combination is not a legal Join target.
+        If the stage combination is not a legal Swap target.
     """
-    out_stage = _join_stage(state_a.stage, state_b.stage)
+    out_stage = _swap_stage(state_a.stage, state_b.stage)
     ev_out = state_a.error_vector.bsm_compose(state_b.error_vector)
     return State(
         error_vector=ev_out,
@@ -152,11 +153,11 @@ def join(state_a: State, state_b: State) -> State:
         generation_time=min(state_a.generation_time, state_b.generation_time),
         stage=out_stage,
         purification_rounds=state_a.purification_rounds + state_b.purification_rounds,
-        herald_status=_join_herald(state_a.herald_status, state_b.herald_status),
+        herald_status=_swap_herald(state_a.herald_status, state_b.herald_status),
     )
 
 
-def absa_bsm(
+def join(
     state_a: State,
     state_b: State,
     hop_index: int,
@@ -221,7 +222,7 @@ def absa_bsm(
         state_b.stage, RGSSStage
     ):
         raise ValueError(
-            "absa_bsm requires both inputs at κ=RGSS, "
+            "join requires both inputs at κ=RGSS, "
             f"got {state_a.stage!r} and {state_b.stage!r}"
         )
 
@@ -395,7 +396,7 @@ def pauli_correct(state: State, N: int) -> State:
 # ---------------------------------------------------------------------------
 
 
-def _join_stage(stage_a: Stage, stage_b: Stage) -> Stage:
+def _swap_stage(stage_a: Stage, stage_b: Stage) -> Stage:
     """Compute the output stage for a Join/EntSwap from the two input stages."""
     # RGSS + RGSS → RGSS  (pre-transmission RGSS-level join)
     if isinstance(stage_a, RGSSStage) and isinstance(stage_b, RGSSStage):
@@ -409,7 +410,7 @@ def _join_stage(stage_a: Stage, stage_b: Stage) -> Stage:
     )
 
 
-def _join_herald(h_a: HeraldStatus, h_b: HeraldStatus) -> HeraldStatus:
+def _swap_herald(h_a: HeraldStatus, h_b: HeraldStatus) -> HeraldStatus:
     """Herald status of a joined state: RESOLVED only if both inputs are resolved."""
     if h_a is HeraldStatus.RESOLVED and h_b is HeraldStatus.RESOLVED:
         return HeraldStatus.RESOLVED

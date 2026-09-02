@@ -16,12 +16,12 @@ Two independent trials (trial_A, trial_B), each built the same way:
   Hop 0 — RGSS-level purification on the left side:
     Gen(hop=0) ×2 → Purify-YY [κ=RGSS] → purified left-side anchor
     Gen(hop=0)    → raw right-side anchor
-    AbsaBsm(purified_left, raw_right, hop=0) → edge [κ=(0,1)]
+    Join(purified_left, raw_right, hop=0) → edge [κ=(0,1)]
 
   Hop 1 — raw (no purification):
-    Gen(hop=1) ×2 → AbsaBsm(hop=1) → edge [κ=(1,2)]
+    Gen(hop=1) ×2 → Join(hop=1) → edge [κ=(1,2)]
 
-  Join(hop0_edge, hop1_edge) → trial [κ=(0,2)]
+  Swap(hop0_edge, hop1_edge) → trial [κ=(0,2)]
 
 End-node purification (optimistic — Herald comes after Purify):
   Purify-XZ(trial_A, trial_B) → merged [κ=(0,2)]
@@ -50,7 +50,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 from hrgs_scheduler.models.network_config import NetworkConfig
@@ -59,14 +59,14 @@ from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.evaluator import Evaluator
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
-    JoinNode,
+    SwapNode,
 )
 from hrgs_scheduler.schedule.visualize import render, save_dot
 
@@ -76,8 +76,8 @@ from hrgs_scheduler.schedule.visualize import render, save_dot
 
 _THESIS_NODE_STYLE: dict = {
     GenNode: ("#AED6F1", "ellipse", "filled"),
-    AbsaBsmNode: ("#F5B041", "box", "filled"),
-    JoinNode: ("#82E0AA", "box", "filled"),
+    JoinNode: ("#F5B041", "box", "filled"),
+    SwapNode: ("#82E0AA", "box", "filled"),
     PurifyNode: ("#C39BD3", "box", "filled"),
     IdleNode: ("#D5D8DC", "box", "filled,dashed"),
     HeraldNode: ("#F7DC6F", "diamond", "filled"),
@@ -89,14 +89,14 @@ def _thesis_label(node: object) -> str:
     """Simplified node label: no ID, no redundant timing fields."""
     if isinstance(node, GenNode):
         return f"Gen\\nhop {node.hop_index}"
-    if isinstance(node, AbsaBsmNode):
-        s = node.output_stage
-        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
-        return f"BSM\\nhop {node.hop_index}\\n\u03ba={stage}"
     if isinstance(node, JoinNode):
         s = node.output_stage
         stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
-        return f"Join\\n\u03ba={stage}"
+        return f"Join\\nhop {node.hop_index}\\nκ={stage}"
+    if isinstance(node, SwapNode):
+        s = node.output_stage
+        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
+        return f"Swap\\nκ={stage}"
     if isinstance(node, PurifyNode):
         s = node.output_stage
         stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
@@ -168,12 +168,12 @@ def _build_trial(
     Hop 0: RGSS-level purification (3 Gen nodes)
       Gen(hop=0) ×2 → Purify-YY [κ=RGSS]
       Gen(hop=0)    → raw right
-      AbsaBsm(purified, raw_right, hop=0) → Span(0,1)
+      Join(purified, raw_right, hop=0) → Span(0,1)
 
     Hop 1: raw (2 Gen nodes)
-      Gen(hop=1) ×2 [→ optional IdleNode] → AbsaBsm(hop=1) → Span(1,2)
+      Gen(hop=1) ×2 [→ optional IdleNode] → Join(hop=1) → Span(1,2)
 
-    Join(hop0_edge, hop1_edge) → Span(0,2)
+    Swap(hop0_edge, hop1_edge) → Span(0,2)
 
     If idle_until > 0, the right-side hop-1 Gen is wrapped in an IdleNode
     modelling a synchronization wait (e.g. waiting for the left side to arrive).
@@ -199,7 +199,7 @@ def _build_trial(
     nid += 1
     nodes[g0c.node_id] = g0c
 
-    bsm0 = AbsaBsmNode(
+    bsm0 = JoinNode(
         node_id=nid,
         children=(pur_rgss.node_id, g0c.node_id),
         hop_index=0,
@@ -228,7 +228,7 @@ def _build_trial(
     else:
         g1b_feed = g1b.node_id
 
-    bsm1 = AbsaBsmNode(
+    bsm1 = JoinNode(
         node_id=nid,
         children=(g1a.node_id, g1b_feed),
         hop_index=1,
@@ -236,16 +236,16 @@ def _build_trial(
     nid += 1
     nodes[bsm1.node_id] = bsm1
 
-    # --- Join the two hop edges ---
-    join = JoinNode(
+    # --- Swap the two hop edges ---
+    swap_node = SwapNode(
         node_id=nid,
         children=(bsm0.node_id, bsm1.node_id),
         output_stage=Span(0, 2),
     )
     nid += 1
-    nodes[join.node_id] = join
+    nodes[swap_node.node_id] = swap_node
 
-    return join.node_id, nid
+    return swap_node.node_id, nid
 
 
 def build_n2_worked_example() -> ScheduleDAG:
@@ -307,11 +307,11 @@ def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
         "",
         "Each trial:",
         "- **Hop 0** (RGSS-level purification): two same-side Gen nodes are",
-        "  purified with a YY circuit at κ=RGSS before the outer-photon BSM.",
+        "  purified with a YY circuit at κ=RGSS before the outer-photon Join.",
         "  The purified anchor is then combined with a raw right-side anchor",
         "  at the ABSA to produce a Span(0,1) edge.",
-        "- **Hop 1** (raw): two Gen nodes combined directly by AbsaBsm → Span(1,2).",
-        "- **Join** of both hop edges → Span(0,2).",
+        "- **Hop 1** (raw): two Gen nodes combined directly by Join → Span(1,2).",
+        "- **Swap** of both hop edges → Span(0,2).",
         "",
         "End-node combination:",
         "- **Purify-XZ**(trial_A, trial_B) at κ=Span(0,2)",
@@ -352,8 +352,8 @@ def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
         "| Color | Shape | Node type | Role |",
         "|---|---|---|---|",
         "| light blue | ellipse | GenNode | leaf; fresh RGSS resource |",
-        "| orange | box | AbsaBsmNode | outer-photon BSM at ABSA |",
-        "| green | box | JoinNode | entanglement swap / stitching |",
+        "| orange | box | JoinNode | outer-photon BSM at ABSA |",
+        "| green | box | SwapNode | entanglement swap / stitching |",
         "| purple | box | PurifyNode | 2→1 purification circuit |",
         "| yellow | diamond | HeraldNode | heralding resolution |",
         "| red | doublecircle | PauliCorrectNode | root; final Pauli correction |",

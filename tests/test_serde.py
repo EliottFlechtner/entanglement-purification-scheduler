@@ -14,11 +14,11 @@ from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.evaluator import Evaluator
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     PauliCorrectNode,
     PurifyNode,
 )
@@ -148,19 +148,19 @@ class TestNodeRoundTrip:
         assert d["type"] == "GenNode"
         assert d["side_effect_parity"] == 1
 
-    def test_absa_bsm_node(self):
-        node = AbsaBsmNode(node_id=2, children=(0, 1), hop_index=1)
+    def test_join_node(self):
+        node = JoinNode(node_id=2, children=(0, 1), hop_index=1)
         d = self._rt(node)
-        assert d["type"] == "AbsaBsmNode"
+        assert d["type"] == "JoinNode"
         assert d["children"] == [0, 1]
 
-    def test_join_node_span_stage(self):
-        node = JoinNode(node_id=5, children=(3, 4), output_stage=Span(0, 2))
+    def test_swap_node_span_stage(self):
+        node = SwapNode(node_id=5, children=(3, 4), output_stage=Span(0, 2))
         d = self._rt(node)
         assert d["output_stage"] == {"type": "Span", "a": 0, "b": 2}
 
-    def test_join_node_rgss_stage(self):
-        node = JoinNode(node_id=5, children=(3, 4), output_stage=RGSS)
+    def test_swap_node_rgss_stage(self):
+        node = SwapNode(node_id=5, children=(3, 4), output_stage=RGSS)
         self._rt(node)
 
     def test_purify_node_yy(self):

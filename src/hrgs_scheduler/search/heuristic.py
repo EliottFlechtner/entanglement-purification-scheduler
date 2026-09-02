@@ -105,7 +105,7 @@ def beam_search(
         `search.dp` module docstring), restoring the pre-pumping
         beam-search behaviour. Also avoids the beam-crowding
         interaction where pump candidates compete with pre-existing
-        join-only candidates for the same fixed `beam_width` slots,
+        swap-only candidates for the same fixed `beam_width` slots,
         which can make pumping-enabled results *worse* than
         pumping-disabled ones at matching settings (see docs/Design
         Principles.md). Default True, matching this function's

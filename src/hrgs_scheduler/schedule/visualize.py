@@ -4,7 +4,7 @@ hrgs_scheduler.schedule.visualize
 Graphical export/visualization of a ScheduleDAG (Σ = (T, φ)).
 
 Produces Graphviz DOT source with node color/shape coded by node type,
-so the structure of a schedule (Gen/Join/AbsaBsm/Purify/Idle/Herald/
+so the structure of a schedule (Gen/Swap/Join/Purify/Idle/Herald/
 PauliCorrect, §2.5/§3.2/§3.3 of [Validated Formal Model Def]) can be
 inspected visually.
 
@@ -16,8 +16,8 @@ present on PATH, and raises a clear error otherwise.
 Node style legend
 ------------------
     GenNode            light blue  ellipse   (leaf)
-    AbsaBsmNode        orange      box
-    JoinNode           green       box
+    JoinNode           orange      box
+    SwapNode           green       box
     PurifyNode         purple      box        (label includes circuit)
     IdleNode           gray        box, dashed
     HeraldNode         yellow      diamond
@@ -70,11 +70,11 @@ from typing import TYPE_CHECKING, Optional
 
 from hrgs_scheduler.models.stage import RGSSStage, Span
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
@@ -92,8 +92,8 @@ if TYPE_CHECKING:
 
 _NODE_STYLE: dict[type, tuple[str, str, str]] = {
     GenNode: ("#AED6F1", "ellipse", "filled"),
-    AbsaBsmNode: ("#F5B041", "box", "filled"),
-    JoinNode: ("#82E0AA", "box", "filled"),
+    JoinNode: ("#F5B041", "box", "filled"),
+    SwapNode: ("#82E0AA", "box", "filled"),
     PurifyNode: ("#C39BD3", "box", "filled"),
     IdleNode: ("#D5D8DC", "box", "filled,dashed"),
     HeraldNode: ("#F7DC6F", "diamond", "filled"),
@@ -121,10 +121,10 @@ def _node_label(node: ScheduleNode, nid: NodeId) -> str:
     if isinstance(node, GenNode):
         lines.append(f"hop={node.hop_index}  t={node.gen_time:g}")
         lines.append(f"s_gen={node.side_effect_parity}")
-    elif isinstance(node, AbsaBsmNode):
+    elif isinstance(node, JoinNode):
         lines.append(f"hop={node.hop_index}")
         lines.append(f"\u03ba={_stage_label(node.output_stage)}")
-    elif isinstance(node, JoinNode):
+    elif isinstance(node, SwapNode):
         lines.append(f"\u03ba={_stage_label(node.output_stage)}")
     elif isinstance(node, PurifyNode):
         lines.append(f"circuit={node.circuit.name}")

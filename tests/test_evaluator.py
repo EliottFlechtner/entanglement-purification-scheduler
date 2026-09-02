@@ -57,7 +57,7 @@ def test_flexible_beats_raw_and_baseline_in_fidelity():
 
 def test_latency_only_accrues_from_herald_nodes():
     # raw_chain has a single final one-way Herald (propagation_time=1.0);
-    # latency should equal exactly L_total/c since Gen/Join/AbsaBsm add
+    # latency should equal exactly L_total/c since Gen/Swap/Join add
     # zero latency in the current model.
     net = ideal_network(N=4, e_d=0.0)
     dag = ScheduleDAG.raw_chain(N=4)

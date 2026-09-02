@@ -16,8 +16,8 @@ Every node carries:
 Node types mirror the operation catalog [Validated Formal Model Def, §2.5 + §3.2]:
 
     GenNode:            leaf; produces an RGSS-local resource
-    JoinNode:           Join/EntSwap; 2 inputs
-    AbsaBsmNode:        outer-photon BSM at ABSA; 2 RGSS inputs → single-hop edge
+    JoinNode:           outer-photon BSM at ABSA; 2 RGSS inputs → single-hop edge
+    SwapNode:           Join/EntSwap; 2 inputs
     IdleNode:           decoherence wait; 1 input
     HeraldNode:         heralding resolution; 1 input
     PurifyNode:         2-to-1 purification; 2 inputs, same κ
@@ -78,7 +78,7 @@ class GenNode:
 
 
 @dataclass(frozen=True)
-class AbsaBsmNode:
+class JoinNode:
     """Outer-photon BSM at the ABSA: creates a single-hop edge.
 
     Consumes two RGSS-local resources (one from each side of a hop) and
@@ -103,7 +103,7 @@ class AbsaBsmNode:
 
 
 @dataclass(frozen=True)
-class JoinNode:
+class SwapNode:
     """Join / EntSwap: entanglement swap between two adjacent resources.
 
     Inputs may be:
@@ -220,8 +220,8 @@ class PauliCorrectNode:
 
 ScheduleNode = Union[
     GenNode,
-    AbsaBsmNode,
     JoinNode,
+    SwapNode,
     PurifyNode,
     IdleNode,
     HeraldNode,

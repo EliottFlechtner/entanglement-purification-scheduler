@@ -7,10 +7,10 @@ from hrgs_scheduler.models.stage import RGSS, Span
 from hrgs_scheduler.operations.purification import PurificationCircuit
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
-    JoinNode,
+    SwapNode,
     PauliCorrectNode,
     PurifyNode,
 )
@@ -55,7 +55,7 @@ def test_raw_chain_topological_order_root_last():
 
 
 def test_max_concurrent_branches_single_hop_needs_two():
-    # One AbsaBsm combining two fresh Gen leaves: both must be held at once.
+    # One Join combining two fresh Gen leaves: both must be held at once.
     dag = ScheduleDAG.raw_chain(N=1)
     assert dag.max_concurrent_branches() == 2
 
@@ -87,7 +87,7 @@ def test_max_concurrent_branches_idle_and_herald_are_pass_through():
     g_l = GenNode(node_id=0, hop_index=0)
     g_r = GenNode(node_id=1, hop_index=0)
     nodes[0], nodes[1] = g_l, g_r
-    bsm = AbsaBsmNode(node_id=2, children=(0, 1), hop_index=0)
+    bsm = JoinNode(node_id=2, children=(0, 1), hop_index=0)
     nodes[2] = bsm
     herald = HeraldNode(node_id=3, children=(2,))
     nodes[3] = herald
@@ -241,18 +241,18 @@ def test_validate_rejects_unreachable_node():
 
 
 def test_validate_rejects_non_adjacent_span_join():
-    # Deliberately build a JoinNode combining two non-adjacent spans.
+    # Deliberately build a SwapNode combining two non-adjacent spans.
     nodes = {}
     g0l = GenNode(node_id=0, hop_index=0, gen_time=0.0)
     g0r = GenNode(node_id=1, hop_index=0, gen_time=0.0)
     g2l = GenNode(node_id=2, hop_index=2, gen_time=0.0)
     g2r = GenNode(node_id=3, hop_index=2, gen_time=0.0)
     nodes[0], nodes[1], nodes[2], nodes[3] = g0l, g0r, g2l, g2r
-    bsm0 = AbsaBsmNode(node_id=4, children=(0, 1), hop_index=0)
-    bsm2 = AbsaBsmNode(node_id=5, children=(2, 3), hop_index=2)
+    bsm0 = JoinNode(node_id=4, children=(0, 1), hop_index=0)
+    bsm2 = JoinNode(node_id=5, children=(2, 3), hop_index=2)
     nodes[4], nodes[5] = bsm0, bsm2
     # Illegally join Span(0,1) with Span(2,3) -- not adjacent.
-    bad_join = JoinNode(node_id=6, children=(4, 5), output_stage=Span(0, 3))
+    bad_join = SwapNode(node_id=6, children=(4, 5), output_stage=Span(0, 3))
     nodes[6] = bad_join
     herald_node = HeraldNode(node_id=7, children=(6,), propagation_time=1.0)
     nodes[7] = herald_node
@@ -269,7 +269,7 @@ def test_validate_rejects_purify_with_mismatched_stages():
     g_rgss = GenNode(node_id=0, hop_index=0, gen_time=0.0)
     g_rgss2 = GenNode(node_id=1, hop_index=0, gen_time=0.0)
     nodes[0], nodes[1] = g_rgss, g_rgss2
-    bsm = AbsaBsmNode(node_id=2, children=(0, 1), hop_index=0)
+    bsm = JoinNode(node_id=2, children=(0, 1), hop_index=0)
     nodes[2] = bsm
     g_extra = GenNode(node_id=3, hop_index=0, gen_time=0.0)
     nodes[3] = g_extra

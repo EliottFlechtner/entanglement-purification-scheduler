@@ -41,7 +41,7 @@ Multi-objective (Pareto) DP, not a single-objective Bellman recursion
 A schedule's FINAL score depends on fidelity, success probability
 (→ rate), AND resource cost jointly, and combining two branches multiplies
 success probabilities and sums costs, so a single scalar "value" per
-state would not compose correctly across joins.  Instead, each state
+state would not compose correctly across swaps.  Instead, each state
 (a, b) stores a *Pareto frontier*: the set of (cost, fidelity,
 success_prob) triples not dominated by any other candidate at that span.
 This is standard multi-criteria DP and is exact given the enumerated
@@ -49,15 +49,15 @@ circuit grid.
 
 Latency and Herald placement are handled outside this recursion (see
 `dp_search` below) because, in the current evaluator model, only
-HeraldNode placement contributes non-zero latency [repo notes: Gen/Join/
-AbsaBsm/Purify all cost zero simulated time].  All span-partition
+HeraldNode placement contributes non-zero latency [repo notes: Gen/Swap/
+Join/Purify all cost zero simulated time].  All span-partition
 candidates built here are Herald-free (optimistic) until wrapped by
 `dp_search`, matching `link_level_pumped_chain`'s "single final herald"
 structure.
 
 Pumping: two independent copies of the same span, purified together
 ---------------------------------------------------------------------
-In addition to "split at m and join the two halves", `frontier(a, b)`
+In addition to "split at m and swap the two halves", `frontier(a, b)`
 also considers "pump": take two candidates already known for THIS SAME
 span (a, b), drawn from this span's own pre-pump frontier, i.e. before
     any pumping is applied, and purify them together with each of the three
@@ -70,10 +70,10 @@ excluded_move_at_scale.py`) before it is purified against the first.
 Two things keep this tractable and non-recursive-without-bound:
 
   * Pump inputs are drawn only from this span's PRE-pump frontier (the
-    ordinary leaf/join candidates), never from pump candidates already
+    ordinary leaf/swap candidates), never from pump candidates already
     produced for this same span, so a span pumps at most once. Its
     children may still be pump results from narrower spans (pumping
-    composes across spans via ordinary joins), but a single span never
+    composes across spans via ordinary swaps), but a single span never
     pumps its own pumped output.
   * Both the pairing pool (the inputs to pumping) and pumping's own
     contribution to the final frontier (its output) are beam-limited to
@@ -82,14 +82,14 @@ Two things keep this tractable and non-recursive-without-bound:
     no beam width of its own), never the full exact Pareto set. Both
     caps are needed: capping only the pairing pool still lets pump's
     O(pool^2) output balloon the *stored* per-span frontier, which then
-    compounds combinatorially at every join built on top of it
+    compounds combinatorially at every swap built on top of it
     (confirmed empirically: even N=4 failed to finish in 20s with only
     the pairing pool capped). Capping pump's contribution keeps its
     per-span cost and the frontier size it feeds forward, bounded by
     a constant, regardless of recursion depth. This makes `dp_search`'s
     *pumping* move a bounded heuristic rather than exact, same tradeoff
     `beam_search` already makes for its whole frontier; `dp_search`'s
-    pre-existing join-only enumeration is otherwise left exact/uncapped,
+    pre-existing swap-only enumeration is otherwise left exact/uncapped,
     unchanged from before this feature existed.
 
 Two copies only (no n>2 pumping) is a deliberate first-version scope
@@ -104,7 +104,7 @@ that some `beam_search` configuration happens to keep, so `dp_search`'s
 default output is NOT a guaranteed upper bound on every `beam_search`
 result once both use pumping (confirmed empirically at N=4: default
 `dp_search` occasionally scores *below* `beam_search`). `dp_search`
-remains exact ONLY for the pre-existing pumping-free split/join
+remains exact ONLY for the pre-existing pumping-free split/swap
 enumeration (`enable_pumping=False`, not exposed publicly, or any
 schedule that happens not to involve a pump move).
 
@@ -163,15 +163,15 @@ from hrgs_scheduler.cost_functions import ObjectiveConfig
 from hrgs_scheduler.models.network_config import NetworkConfig
 from hrgs_scheduler.models.stage import Span
 from hrgs_scheduler.models.state import State
-from hrgs_scheduler.operations.backbone import absa_bsm, gen, join
+from hrgs_scheduler.operations.backbone import join, gen, swap
 from hrgs_scheduler.operations.purification import PurificationCircuit, purify
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.evaluator import Evaluator
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
-    JoinNode,
+    SwapNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
@@ -363,7 +363,7 @@ class _SpanPartitionSearch:
         return next(self._counter)
 
     def _build_hop(self, hop_index: int) -> tuple[NodeId, State]:
-        """Build one fresh raw single-hop edge (Gen×2 + AbsaBsm)."""
+        """Build one fresh raw single-hop edge (Gen×2 + Join)."""
         hop_cfg = self._network.hop(hop_index)
         g_l = GenNode(node_id=self.next_id(), hop_index=hop_index)
         g_r = GenNode(node_id=self.next_id(), hop_index=hop_index)
@@ -371,13 +371,13 @@ class _SpanPartitionSearch:
         self.nodes[g_r.node_id] = g_r
         state_l = gen(hop_cfg)
         state_r = gen(hop_cfg)
-        bsm = AbsaBsmNode(
+        bsm = JoinNode(
             node_id=self.next_id(),
             children=(g_l.node_id, g_r.node_id),
             hop_index=hop_index,
         )
         self.nodes[bsm.node_id] = bsm
-        state = absa_bsm(state_l, state_r, hop_index=hop_index, e_d=self._network.e_d)
+        state = join(state_l, state_r, hop_index=hop_index, e_d=self._network.e_d)
         return bsm.node_id, state
 
     def _build_link_pumped(
@@ -434,7 +434,7 @@ class _SpanPartitionSearch:
         """Pump: purify two independent copies drawn from *base_pool*.
 
         *base_pool* is this span's own pre-pump frontier (leaf or
-        split/join candidates), so pumping is applied at most once per
+        split/swap candidates), so pumping is applied at most once per
         span; see module docstring. The pool is always capped to a
         beam-limited width before pairing (never exhaustive, even under
         exact `dp_search`) since pairing is O(pool^2) per span. Unordered
@@ -531,13 +531,13 @@ class _SpanPartitionSearch:
                         cost = L.cost + R.cost
                         if cost > self._budget_cap:
                             continue
-                        jn = JoinNode(
+                        jn = SwapNode(
                             node_id=self.next_id(),
                             children=(L.node_id, R.node_id),
                             output_stage=Span(a, b),
                         )
                         self.nodes[jn.node_id] = jn
-                        state = join(L.state, R.state)
+                        state = swap(L.state, R.state)
                         candidates.append(
                             _SpanCandidate(
                                 jn.node_id,
@@ -572,7 +572,7 @@ class _SpanPartitionSearch:
         pruned = _prune_pareto(base_pruned + pump_candidates)
         frontier_width = self._pump_width() if self._enable_pumping else None
         if frontier_width is not None and len(pruned) > frontier_width:
-            # Pumping's outputs feed forward into every wider span's joins
+            # Pumping's outputs feed forward into every wider span's swaps
             # AND its own pump-pairing pool, so leaving a span's *stored*
             # frontier exact/unbounded lets pumping's growth compound
             # multiplicatively across recursion depth (confirmed
@@ -700,7 +700,7 @@ def dp_search(
 
     Exactness: **exact only for pumping-free schedules; a bounded
     heuristic once pumping is involved, unless `exact_pumping=True`.**
-    See module docstring's "Exactness modes" section; the split/join
+    See module docstring's "Exactness modes" section; the split/swap
     dimension explored here has always been exact, but pumping's
     pairing step is O(pool^2) and compounds multiplicatively across the
     span recursion, so by default (`exact_pumping=False`) it is capped
@@ -729,9 +729,9 @@ def dp_search(
     enable_pumping : bool
         When False, disables the "pump" move entirely (see module
         docstring), restoring `dp_search`'s pre-pumping exact behaviour
-        for the split/join dimension. Also avoids the beam-crowding
+        for the split/swap dimension. Also avoids the beam-crowding
         interaction where pump candidates compete with pre-existing
-        join-only candidates for the same fixed frontier slots, which can
+        swap-only candidates for the same fixed frontier slots, which can
         make pumping-enabled results *worse* than pumping-disabled ones
         at matching settings (see docs/Design Principles.md). Default
         True, matching this function's existing default behaviour.

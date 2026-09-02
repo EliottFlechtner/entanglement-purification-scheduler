@@ -5,11 +5,11 @@ Backbone and purification operation functions.
 """
 
 from hrgs_scheduler.operations.backbone import (
-    absa_bsm,
+    join,
     gen,
     herald,
     idle,
-    join,
+    swap,
     pauli_correct,
 )
 from hrgs_scheduler.operations.purification import (
@@ -22,8 +22,8 @@ from hrgs_scheduler.operations.purification import (
 __all__ = [
     # Backbone
     "gen",
+    "swap",
     "join",
-    "absa_bsm",
     "idle",
     "herald",
     "pauli_correct",

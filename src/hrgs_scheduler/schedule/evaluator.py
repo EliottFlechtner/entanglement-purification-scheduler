@@ -55,21 +55,21 @@ from hrgs_scheduler.models.network_config import NetworkConfig
 from hrgs_scheduler.models.stage import RGSS, Span
 from hrgs_scheduler.models.state import HeraldStatus, State
 from hrgs_scheduler.operations.backbone import (
-    absa_bsm,
+    join,
     gen,
     herald,
     idle,
-    join,
+    swap,
     pauli_correct,
 )
 from hrgs_scheduler.operations.purification import purify
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
@@ -166,19 +166,19 @@ class Evaluator:
             if isinstance(node, GenNode):
                 state = self._eval_gen(node)
 
-            elif isinstance(node, AbsaBsmNode):
-                child_l, child_r = node.children
-                state_l, state_r = self._sync_to_common_time(
-                    node_states[child_l], node_states[child_r]
-                )
-                state = self._eval_absa_bsm(node, state_l, state_r)
-
             elif isinstance(node, JoinNode):
                 child_l, child_r = node.children
                 state_l, state_r = self._sync_to_common_time(
                     node_states[child_l], node_states[child_r]
                 )
-                state = join(state_l, state_r)
+                state = self._eval_join(node, state_l, state_r)
+
+            elif isinstance(node, SwapNode):
+                child_l, child_r = node.children
+                state_l, state_r = self._sync_to_common_time(
+                    node_states[child_l], node_states[child_r]
+                )
+                state = swap(state_l, state_r)
 
             elif isinstance(node, PurifyNode):
                 child_p, child_a = node.children
@@ -301,11 +301,9 @@ class Evaluator:
             side_effect_parity=node.side_effect_parity,
         )
 
-    def _eval_absa_bsm(
-        self, node: AbsaBsmNode, state_l: State, state_r: State
-    ) -> State:
-        """Evaluate an AbsaBsmNode using the network's e_d parameter."""
-        return absa_bsm(
+    def _eval_join(self, node: JoinNode, state_l: State, state_r: State) -> State:
+        """Evaluate a JoinNode using the network's e_d parameter."""
+        return join(
             state_a=state_l,
             state_b=state_r,
             hop_index=node.hop_index,

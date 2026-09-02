@@ -36,7 +36,7 @@ Traced through `operations/backbone.py` and `schedule/evaluator.py`
 before choosing these axes:
 
   * `HopConfig.branching` (the tree-encoding vector) is stored on every
-    hop but is **never read** by `gen()`, `absa_bsm()`, `join()`, or the
+    hop but is **never read** by `gen()`, `join()`, `swap()`, or the
     Evaluator -- it has zero effect on F, C, R, or L in the current
     implementation. Varying it would silently test nothing.
   * `HopConfig.length` (and `eta`/`attenuation_db_per_km`) is only read

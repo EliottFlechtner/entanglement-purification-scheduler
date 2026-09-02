@@ -54,11 +54,11 @@ from hrgs_scheduler.schedule.evaluator import Evaluator
 from hrgs_scheduler.schedule.serde import load_schedule
 from hrgs_scheduler.schedule.visualize import render, save_dot, to_dot
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     PauliCorrectNode,
     PurifyNode,
 )
@@ -105,8 +105,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 _NODE_TYPE_NAMES = {
     GenNode: "GenNode",
-    AbsaBsmNode: "AbsaBsmNode",
     JoinNode: "JoinNode",
+    SwapNode: "SwapNode",
     PurifyNode: "PurifyNode",
     IdleNode: "IdleNode",
     HeraldNode: "HeraldNode",

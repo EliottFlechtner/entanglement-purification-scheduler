@@ -5,11 +5,11 @@ Schedule DAG representation: node types and the ScheduleDAG container.
 """
 
 from hrgs_scheduler.schedule.node import (
-    AbsaBsmNode,
+    JoinNode,
     GenNode,
     HeraldNode,
     IdleNode,
-    JoinNode,
+    SwapNode,
     NodeId,
     PauliCorrectNode,
     PurifyNode,
@@ -36,8 +36,8 @@ from hrgs_scheduler.schedule.serde import (
 
 __all__ = [
     "GenNode",
-    "AbsaBsmNode",
     "JoinNode",
+    "SwapNode",
     "PurifyNode",
     "IdleNode",
     "HeraldNode",

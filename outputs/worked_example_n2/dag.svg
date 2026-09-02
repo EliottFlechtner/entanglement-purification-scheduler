@@ -48,8 +48,8 @@
 <!-- n4 -->
 <g id="node5" class="node">
 <title>n4</title>
-<polygon fill="#f5b041" stroke="black" points="290.36,-228.97 185.36,-228.97 185.36,-187.97 290.36,-187.97 290.36,-228.97"/>
-<text text-anchor="start" x="193.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#4 AbsaBsmNode</text>
+<polygon fill="#f5b041" stroke="black" points="276.36,-228.97 199.36,-228.97 199.36,-187.97 276.36,-187.97 276.36,-228.97"/>
+<text text-anchor="start" x="207.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#4 JoinNode</text>
 <text text-anchor="start" x="221.36" y="-205.97" font-family="Helvetica,sans-Serif" font-size="10.00">hop=0</text>
 <text text-anchor="start" x="219.36" y="-194.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,1)</text>
 </g>
@@ -76,15 +76,15 @@
 <!-- n8 -->
 <g id="node9" class="node">
 <title>n8</title>
-<polygon fill="#82e0aa" stroke="black" points="471.36,-300.97 394.36,-300.97 394.36,-264.97 471.36,-264.97 471.36,-300.97"/>
-<text text-anchor="start" x="402.36" y="-285.97" font-family="Helvetica,sans-Serif" font-size="10.00">#8 JoinNode</text>
-<text text-anchor="start" x="414.36" y="-274.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2)</text>
+<polygon fill="#82e0aa" stroke="black" points="472.86,-300.97 386.86,-300.97 386.86,-264.97 472.86,-264.97 472.86,-300.97"/>
+<text text-anchor="start" x="394.86" y="-285.97" font-family="Helvetica,sans-Serif" font-size="10.00">#8 SwapNode</text>
+<text text-anchor="start" x="411.36" y="-274.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2)</text>
 </g>
 <!-- n4&#45;&gt;n8 -->
 <g id="edge7" class="edge">
 <title>n4&#45;&gt;n8</title>
-<path fill="none" stroke="#555555" d="M290.37,-228.99C319.77,-239.92 356.14,-253.44 384.78,-264.09"/>
-<polygon fill="#555555" stroke="#555555" points="383.59,-267.38 394.18,-267.58 386.02,-260.82 383.59,-267.38"/>
+<path fill="none" stroke="#555555" d="M276.72,-224.14C305.61,-235.05 345.37,-250.06 377.14,-262.06"/>
+<polygon fill="#555555" stroke="#555555" points="376.13,-265.42 386.72,-265.67 378.6,-258.87 376.13,-265.42"/>
 </g>
 <!-- n5 -->
 <g id="node6" class="node">
@@ -97,16 +97,16 @@
 <!-- n7 -->
 <g id="node8" class="node">
 <title>n7</title>
-<polygon fill="#f5b041" stroke="black" points="485.36,-228.97 380.36,-228.97 380.36,-187.97 485.36,-187.97 485.36,-228.97"/>
-<text text-anchor="start" x="388.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#7 AbsaBsmNode</text>
-<text text-anchor="start" x="416.36" y="-205.97" font-family="Helvetica,sans-Serif" font-size="10.00">hop=1</text>
-<text text-anchor="start" x="414.36" y="-194.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(1,2)</text>
+<polygon fill="#f5b041" stroke="black" points="468.36,-228.97 391.36,-228.97 391.36,-187.97 468.36,-187.97 468.36,-228.97"/>
+<text text-anchor="start" x="399.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#7 JoinNode</text>
+<text text-anchor="start" x="413.36" y="-205.97" font-family="Helvetica,sans-Serif" font-size="10.00">hop=1</text>
+<text text-anchor="start" x="411.36" y="-194.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(1,2)</text>
 </g>
 <!-- n5&#45;&gt;n7 -->
 <g id="edge5" class="edge">
 <title>n5&#45;&gt;n7</title>
-<path fill="none" stroke="#555555" d="M388.43,-150.39C395.73,-159.78 403.98,-170.36 411.36,-179.85"/>
-<polygon fill="#555555" stroke="#555555" points="408.68,-182.1 417.58,-187.84 414.2,-177.8 408.68,-182.1"/>
+<path fill="none" stroke="#555555" d="M387.48,-150.39C394.38,-159.68 402.15,-170.15 409.14,-179.56"/>
+<polygon fill="#555555" stroke="#555555" points="406.51,-181.9 415.29,-187.84 412.13,-177.72 406.51,-181.9"/>
 </g>
 <!-- n6 -->
 <g id="node7" class="node">
@@ -119,28 +119,28 @@
 <!-- n6&#45;&gt;n7 -->
 <g id="edge6" class="edge">
 <title>n6&#45;&gt;n7</title>
-<path fill="none" stroke="#555555" d="M477.3,-150.39C469.99,-159.78 461.75,-170.36 454.36,-179.85"/>
-<polygon fill="#555555" stroke="#555555" points="451.52,-177.8 448.14,-187.84 457.05,-182.1 451.52,-177.8"/>
+<path fill="none" stroke="#555555" d="M476.72,-149.93C468.92,-159.51 460.07,-170.38 452.17,-180.08"/>
+<polygon fill="#555555" stroke="#555555" points="449.41,-177.93 445.8,-187.89 454.83,-182.35 449.41,-177.93"/>
 </g>
 <!-- n7&#45;&gt;n8 -->
 <g id="edge8" class="edge">
 <title>n7&#45;&gt;n8</title>
-<path fill="none" stroke="#555555" d="M432.86,-229.28C432.86,-237.06 432.86,-246.12 432.86,-254.52"/>
-<polygon fill="#555555" stroke="#555555" points="429.36,-254.65 432.86,-264.65 436.36,-254.65 429.36,-254.65"/>
+<path fill="none" stroke="#555555" d="M429.86,-229.28C429.86,-237.06 429.86,-246.12 429.86,-254.52"/>
+<polygon fill="#555555" stroke="#555555" points="426.36,-254.65 429.86,-264.65 433.36,-254.65 426.36,-254.65"/>
 </g>
 <!-- n19 -->
 <g id="node20" class="node">
 <title>n19</title>
-<polygon fill="#c39bd3" stroke="black" points="604.36,-377.97 511.36,-377.97 511.36,-336.97 604.36,-336.97 604.36,-377.97"/>
-<text text-anchor="start" x="519.36" y="-365.97" font-family="Helvetica,sans-Serif" font-size="10.00">#19 PurifyNode</text>
-<text text-anchor="start" x="531.86" y="-354.97" font-family="Helvetica,sans-Serif" font-size="10.00">circuit=XZ</text>
-<text text-anchor="start" x="539.36" y="-343.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2)</text>
+<polygon fill="#c39bd3" stroke="black" points="601.36,-377.97 508.36,-377.97 508.36,-336.97 601.36,-336.97 601.36,-377.97"/>
+<text text-anchor="start" x="516.36" y="-365.97" font-family="Helvetica,sans-Serif" font-size="10.00">#19 PurifyNode</text>
+<text text-anchor="start" x="528.86" y="-354.97" font-family="Helvetica,sans-Serif" font-size="10.00">circuit=XZ</text>
+<text text-anchor="start" x="536.36" y="-343.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2)</text>
 </g>
 <!-- n8&#45;&gt;n19 -->
 <g id="edge18" class="edge">
 <title>n8&#45;&gt;n19</title>
-<path fill="none" stroke="#555555" d="M462.48,-301.15C478.22,-310.28 497.85,-321.66 515.2,-331.72"/>
-<polygon fill="#555555" stroke="#555555" points="513.63,-334.86 524.03,-336.85 517.14,-328.8 513.63,-334.86"/>
+<path fill="none" stroke="#555555" d="M459.48,-301.15C475.22,-310.28 494.85,-321.66 512.2,-331.72"/>
+<polygon fill="#555555" stroke="#555555" points="510.63,-334.86 521.03,-336.85 514.14,-328.8 510.63,-334.86"/>
 </g>
 <!-- n9 -->
 <g id="node10" class="node">
@@ -181,8 +181,8 @@
 <!-- n13 -->
 <g id="node14" class="node">
 <title>n13</title>
-<polygon fill="#f5b041" stroke="black" points="735.36,-228.97 624.36,-228.97 624.36,-187.97 735.36,-187.97 735.36,-228.97"/>
-<text text-anchor="start" x="632.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#13 AbsaBsmNode</text>
+<polygon fill="#f5b041" stroke="black" points="721.36,-228.97 638.36,-228.97 638.36,-187.97 721.36,-187.97 721.36,-228.97"/>
+<text text-anchor="start" x="646.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#13 JoinNode</text>
 <text text-anchor="start" x="663.36" y="-205.97" font-family="Helvetica,sans-Serif" font-size="10.00">hop=0</text>
 <text text-anchor="start" x="661.36" y="-194.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,1)</text>
 </g>
@@ -209,8 +209,8 @@
 <!-- n18 -->
 <g id="node19" class="node">
 <title>n18</title>
-<polygon fill="#82e0aa" stroke="black" points="721.36,-300.97 638.36,-300.97 638.36,-264.97 721.36,-264.97 721.36,-300.97"/>
-<text text-anchor="start" x="646.36" y="-285.97" font-family="Helvetica,sans-Serif" font-size="10.00">#18 JoinNode</text>
+<polygon fill="#82e0aa" stroke="black" points="725.86,-300.97 633.86,-300.97 633.86,-264.97 725.86,-264.97 725.86,-300.97"/>
+<text text-anchor="start" x="641.86" y="-285.97" font-family="Helvetica,sans-Serif" font-size="10.00">#18 SwapNode</text>
 <text text-anchor="start" x="661.36" y="-274.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2)</text>
 </g>
 <!-- n13&#45;&gt;n18 -->
@@ -230,8 +230,8 @@
 <!-- n17 -->
 <g id="node18" class="node">
 <title>n17</title>
-<polygon fill="#f5b041" stroke="black" points="936.36,-228.97 825.36,-228.97 825.36,-187.97 936.36,-187.97 936.36,-228.97"/>
-<text text-anchor="start" x="833.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#17 AbsaBsmNode</text>
+<polygon fill="#f5b041" stroke="black" points="922.36,-228.97 839.36,-228.97 839.36,-187.97 922.36,-187.97 922.36,-228.97"/>
+<text text-anchor="start" x="847.36" y="-216.97" font-family="Helvetica,sans-Serif" font-size="10.00">#17 JoinNode</text>
 <text text-anchor="start" x="864.36" y="-205.97" font-family="Helvetica,sans-Serif" font-size="10.00">hop=1</text>
 <text text-anchor="start" x="862.36" y="-194.97" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(1,2)</text>
 </g>
@@ -271,41 +271,41 @@
 <!-- n17&#45;&gt;n18 -->
 <g id="edge17" class="edge">
 <title>n17&#45;&gt;n18</title>
-<path fill="none" stroke="#555555" d="M826.73,-228.99C797.06,-239.69 760.49,-252.88 731.26,-263.43"/>
-<polygon fill="#555555" stroke="#555555" points="729.87,-260.21 721.65,-266.89 732.25,-266.79 729.87,-260.21"/>
+<path fill="none" stroke="#555555" d="M839.21,-224.49C809.18,-235.32 768.31,-250.06 735.48,-261.9"/>
+<polygon fill="#555555" stroke="#555555" points="734.24,-258.63 726.02,-265.32 736.61,-265.22 734.24,-258.63"/>
 </g>
 <!-- n18&#45;&gt;n19 -->
 <g id="edge19" class="edge">
 <title>n18&#45;&gt;n19</title>
-<path fill="none" stroke="#555555" d="M650.95,-301.15C635.59,-310.28 616.43,-321.66 599.5,-331.72"/>
-<polygon fill="#555555" stroke="#555555" points="597.68,-328.73 590.88,-336.85 601.26,-334.75 597.68,-328.73"/>
+<path fill="none" stroke="#555555" d="M650.24,-301.15C634.5,-310.28 614.87,-321.66 597.52,-331.72"/>
+<polygon fill="#555555" stroke="#555555" points="595.58,-328.8 588.69,-336.85 599.09,-334.86 595.58,-328.8"/>
 </g>
 <!-- n20 -->
 <g id="node21" class="node">
 <title>n20</title>
-<polygon fill="#f7dc6f" stroke="black" points="557.86,-473.97 459.86,-443.97 557.86,-413.97 655.86,-443.97 557.86,-473.97"/>
-<text text-anchor="start" x="516.86" y="-446.97" font-family="Helvetica,sans-Serif" font-size="10.00">#20 HeraldNode</text>
-<text text-anchor="start" x="520.36" y="-435.97" font-family="Helvetica,sans-Serif" font-size="10.00">prop_t=1×(L/c)</text>
+<polygon fill="#f7dc6f" stroke="black" points="554.86,-473.97 456.86,-443.97 554.86,-413.97 652.86,-443.97 554.86,-473.97"/>
+<text text-anchor="start" x="513.86" y="-446.97" font-family="Helvetica,sans-Serif" font-size="10.00">#20 HeraldNode</text>
+<text text-anchor="start" x="517.36" y="-435.97" font-family="Helvetica,sans-Serif" font-size="10.00">prop_t=1×(L/c)</text>
 </g>
 <!-- n19&#45;&gt;n20 -->
 <g id="edge20" class="edge">
 <title>n19&#45;&gt;n20</title>
-<path fill="none" stroke="#555555" d="M557.86,-378.06C557.86,-385.7 557.86,-394.74 557.86,-403.62"/>
-<polygon fill="#555555" stroke="#555555" points="554.36,-403.86 557.86,-413.86 561.36,-403.86 554.36,-403.86"/>
+<path fill="none" stroke="#555555" d="M554.86,-378.06C554.86,-385.7 554.86,-394.74 554.86,-403.62"/>
+<polygon fill="#555555" stroke="#555555" points="551.36,-403.86 554.86,-413.86 558.36,-403.86 551.36,-403.86"/>
 </g>
 <!-- n21 -->
 <g id="node22" class="node">
 <title>n21</title>
-<ellipse fill="#f1948a" stroke="black" stroke-width="3" cx="557.86" cy="-601.65" rx="87.85" ry="87.85"/>
-<ellipse fill="none" stroke="black" stroke-width="3" cx="557.86" cy="-601.65" rx="91.86" ry="91.86"/>
-<text text-anchor="start" x="503.86" y="-604.65" font-family="Helvetica,sans-Serif" font-size="10.00">#21 PauliCorrectNode</text>
-<text text-anchor="start" x="522.86" y="-593.65" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2) &#160;[root]</text>
+<ellipse fill="#f1948a" stroke="black" stroke-width="3" cx="554.86" cy="-601.65" rx="87.85" ry="87.85"/>
+<ellipse fill="none" stroke="black" stroke-width="3" cx="554.86" cy="-601.65" rx="91.86" ry="91.86"/>
+<text text-anchor="start" x="500.86" y="-604.65" font-family="Helvetica,sans-Serif" font-size="10.00">#21 PauliCorrectNode</text>
+<text text-anchor="start" x="519.86" y="-593.65" font-family="Helvetica,sans-Serif" font-size="10.00">κ=(0,2) &#160;[root]</text>
 </g>
 <!-- n20&#45;&gt;n21 -->
 <g id="edge21" class="edge">
 <title>n20&#45;&gt;n21</title>
-<path fill="none" stroke="#555555" d="M557.86,-474.25C557.86,-481.88 557.86,-490.55 557.86,-499.69"/>
-<polygon fill="#555555" stroke="#555555" points="554.36,-499.76 557.86,-509.76 561.36,-499.76 554.36,-499.76"/>
+<path fill="none" stroke="#555555" d="M554.86,-474.25C554.86,-481.88 554.86,-490.55 554.86,-499.69"/>
+<polygon fill="#555555" stroke="#555555" points="551.36,-499.76 554.86,-509.76 558.36,-499.76 551.36,-499.76"/>
 </g>
 </g>
 </svg>

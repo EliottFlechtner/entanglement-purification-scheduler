@@ -9,11 +9,11 @@ from hrgs_scheduler.models.network_config import HopConfig
 from hrgs_scheduler.models.stage import RGSS, Span
 from hrgs_scheduler.models.state import HeraldStatus, State
 from hrgs_scheduler.operations.backbone import (
-    absa_bsm,
+    join,
     gen,
     herald,
     idle,
-    join,
+    swap,
     pauli_correct,
 )
 
@@ -64,19 +64,19 @@ def test_gen_side_effect_parity_passthrough():
 
 
 # ---------------------------------------------------------------------------
-# join()
+# swap()
 # ---------------------------------------------------------------------------
 
 
-def test_join_two_rgss_states_stays_at_rgss():
+def test_swap_two_rgss_states_stays_at_rgss():
     hop = ideal_hop()
     a = gen(hop, t=0.0)
     b = gen(hop, t=0.0)
-    out = join(a, b)
+    out = swap(a, b)
     assert out.stage is RGSS
 
 
-def test_join_adjacent_spans_merges_correctly():
+def test_swap_adjacent_spans_merges_correctly():
     a = State(
         error_vector=ErrorVector.ideal(),
         side_effect_parity=0,
@@ -91,13 +91,13 @@ def test_join_adjacent_spans_merges_correctly():
         generation_time=0.5,
         stage=Span(1, 2),
     )
-    out = join(a, b)
+    out = swap(a, b)
     assert out.stage == Span(0, 2)
     assert out.current_time == 2.0  # max
     assert out.generation_time == 0.0  # min
 
 
-def test_join_non_adjacent_spans_raises():
+def test_swap_non_adjacent_spans_raises():
     a = State(
         error_vector=ErrorVector.ideal(),
         side_effect_parity=0,
@@ -113,41 +113,41 @@ def test_join_non_adjacent_spans_raises():
         stage=Span(2, 3),
     )
     with pytest.raises(ValueError):
-        join(a, b)
+        swap(a, b)
 
 
-def test_join_xors_side_effect_parity():
+def test_swap_xors_side_effect_parity():
     hop = ideal_hop()
     a = gen(hop, t=0.0, side_effect_parity=1)
     b = gen(hop, t=0.0, side_effect_parity=1)
-    out = join(a, b)
+    out = swap(a, b)
     assert out.side_effect_parity == 0
 
     c = gen(hop, t=0.0, side_effect_parity=1)
     d = gen(hop, t=0.0, side_effect_parity=0)
-    out2 = join(c, d)
+    out2 = swap(c, d)
     assert out2.side_effect_parity == 1
 
 
-def test_join_herald_status_resolved_only_if_both_resolved():
+def test_swap_herald_status_resolved_only_if_both_resolved():
     hop = ideal_hop()
     a = gen(hop, t=0.0).with_herald_resolved()
     b = gen(hop, t=0.0).with_herald_resolved()
-    out = join(a, b)
+    out = swap(a, b)
     assert out.herald_status is HeraldStatus.RESOLVED
 
     c = gen(hop, t=0.0).with_herald_resolved()
     d = gen(hop, t=0.0)  # still PENDING
-    out2 = join(c, d)
+    out2 = swap(c, d)
     assert out2.herald_status is HeraldStatus.PENDING
 
 
 # ---------------------------------------------------------------------------
-# absa_bsm()
+# join()
 # ---------------------------------------------------------------------------
 
 
-def test_absa_bsm_requires_rgss_inputs():
+def test_join_requires_rgss_inputs():
     a = State(
         error_vector=ErrorVector.ideal(),
         side_effect_parity=0,
@@ -163,36 +163,36 @@ def test_absa_bsm_requires_rgss_inputs():
         stage=RGSS,
     )
     with pytest.raises(ValueError):
-        absa_bsm(a, b, hop_index=0, e_d=0.0)
+        join(a, b, hop_index=0, e_d=0.0)
 
 
-def test_absa_bsm_output_stage_is_single_hop_span():
+def test_join_output_stage_is_single_hop_span():
     hop = ideal_hop()
     a = gen(hop, t=0.0)
     b = gen(hop, t=0.0)
-    out = absa_bsm(a, b, hop_index=3, e_d=0.0)
+    out = join(a, b, hop_index=3, e_d=0.0)
     assert out.stage == Span(3, 4)
 
 
-def test_absa_bsm_zero_e_d_and_ideal_hop_gives_ideal_fidelity():
+def test_join_zero_e_d_and_ideal_hop_gives_ideal_fidelity():
     hop = ideal_hop()
     a = gen(hop, t=0.0)
     b = gen(hop, t=0.0)
-    out = absa_bsm(a, b, hop_index=0, e_d=0.0)
+    out = join(a, b, hop_index=0, e_d=0.0)
     assert out.error_vector.w == pytest.approx(1.0)
 
 
-def test_absa_bsm_depolarizing_noise_reduces_fidelity_symmetrically():
+def test_join_depolarizing_noise_reduces_fidelity_symmetrically():
     hop = ideal_hop()
     a = gen(hop, t=0.0)
     b = gen(hop, t=0.0)
-    out_noisy = absa_bsm(a, b, hop_index=0, e_d=0.05)
-    out_ideal = absa_bsm(a, b, hop_index=0, e_d=0.0)
+    out_noisy = join(a, b, hop_index=0, e_d=0.05)
+    out_ideal = join(a, b, hop_index=0, e_d=0.0)
     assert out_noisy.error_vector.w < out_ideal.error_vector.w
     assert out_noisy.error_vector.is_normalised
 
 
-def test_absa_bsm_depolarizing_channel_is_full_single_qubit_channel():
+def test_join_depolarizing_channel_is_full_single_qubit_channel():
     # Regression test: e_d must be modeled as a full depolarizing channel
     # [1-e_d, e_d/3, e_d/3, e_d/3] composed via bsm_compose, not independent
     # Z-flips. With ideal inputs, single-side noisy vector should match
@@ -203,7 +203,7 @@ def test_absa_bsm_depolarizing_channel_is_full_single_qubit_channel():
     e_d = 0.09
     depol = ErrorVector(w=1 - e_d, x=e_d / 3, y=e_d / 3, z=e_d / 3)
     expected = depol.bsm_compose(depol)
-    out = absa_bsm(a, b, hop_index=0, e_d=e_d)
+    out = join(a, b, hop_index=0, e_d=e_d)
     assert out.error_vector.w == pytest.approx(expected.w)
     assert out.error_vector.x == pytest.approx(expected.x)
     assert out.error_vector.y == pytest.approx(expected.y)
