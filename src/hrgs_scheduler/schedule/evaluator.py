@@ -254,7 +254,7 @@ class Evaluator:
     ) -> tuple[State, State]:
         """Idle whichever of *state_a*/*state_b* is earlier up to the other's time.
 
-        Combining operations (Join/EntSwap, AbsaBsm, Purify) take two
+        Combining operations (Join, Swap/EntSwap, Purify) take two
         resources that may have become ready at different simulation
         times -- e.g. a freshly generated sacrificial copy waiting for a
         heralded pumping round's round-trip confirmation
