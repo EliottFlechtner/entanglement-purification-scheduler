@@ -66,7 +66,7 @@ a bug, and is explained in detail below and in its own doc.
 
 A **schedule** `Σ = (T, φ)` is a rooted DAG: leaves are `Gen` nodes
 (half-RGS generation), internal nodes are backbone operations
-(`Join`/`EntSwap`, `AbsaBsm`, `Idle`) or scheduling-layer operations
+(`Join`/`EntSwap`, `BSM`, `Idle`) or scheduling-layer operations
 (`Purify`, `Herald`), and the root is a single `PauliCorrect` node at
 `κ = Span(0, N)`. Every node produces a `State = (e, s, t, t_gen, κ, r,
 h)`: a Bell-diagonal error vector `e = [w,x,y,z]`, an `𝔽₂` side-effect
@@ -107,7 +107,7 @@ representation (rather than a fixed formula) is the right abstraction.
 
 | File | Contents | Verification status |
 |---|---|---|
-| `backbone.py` | `gen`, `join`, `absa_bsm`, `idle`, `herald`, `pauli_correct` | **Verified, with two fixed bugs** (see below). Every function's docstring cites the exact paper equation/section it implements — read these docstrings first, they are detailed and accurate. |
+| `backbone.py` | `gen`, `swap`, `join`, `idle`, `herald`, `pauli_correct` | **Verified, with two fixed bugs** (see below). Every function's docstring cites the exact paper equation/section it implements — read these docstrings first, they are detailed and accurate. |
 | `purification.py` | `purify()` for `YY`/`ZX`/`XZ` circuits; `success_prob()` | **Verified, with one fixed bug** (`_output_vector_zx`/`_output_vector_xz` formula bodies were swapped — found via a unit test asserting output vectors sum to 1; fixed by swapping them back). All three circuits' success-probability and post-purification-vector formulas now match [Integrating eqs. 8–13] exactly. |
 
 **Bugs found and fixed in this layer (all confirmed via direct equation
@@ -127,7 +127,7 @@ numbers were unaffected or improved, never regressed):**
 **Physically important design decisions worth knowing (not bugs, but
 non-obvious interpretive choices):**
 
-- `absa_bsm()`'s outer-photon depolarizing noise is modeled as a *full*
+- `join()`'s outer-photon depolarizing noise is modeled as a *full*
   single-qubit depolarizing channel (`[1-e_d, e_d/3, e_d/3, e_d/3]`)
   mapped via graph-state Pauli-equivalence to the two-qubit error-vector
   formalism, composed via the *same* bilinear `bsm_compose` rule used for
@@ -136,7 +136,7 @@ non-obvious interpretive choices):**
   channels across two states). This was a deliberate physics
   interpretation, not directly copy-pasted from a single equation in the
   paper — flagged here in case a future re-derivation disagrees.
-- Since `absa_bsm` composes the depolarizing channel via `bsm_compose`
+- Since `join()` composes the depolarizing channel via `bsm_compose`
   (not `from_independent_z_flips`), it *does* introduce `ZZ` error from
   the outer photon (correctly — the inner-qubit-only exclusion is
   specific to inner-qubit measurements, not outer photons).
@@ -145,8 +145,8 @@ non-obvious interpretive choices):**
 
 | File | Contents | Verification status |
 |---|---|---|
-| `node.py` | 7 frozen dataclasses: `GenNode`, `AbsaBsmNode`, `JoinNode`, `PurifyNode`, `IdleNode`, `HeraldNode`, `PauliCorrectNode` | Matches §2.5/§3.2/§3.3's operation catalog 1:1. |
-| `dag.py` | `ScheduleDAG`: topological sort, `validate()` (root check, reachability, **and** full structural stage-consistency checking — `_check_stage_consistency` walks the DAG bottom-up and cross-checks every node's *declared* output stage against what's structurally legal per §4.1), plus 5 canonical builders (`raw_chain`, `baseline_end_node_pumping`, `generic_end_node_pumping`, `link_level_pumped_chain`, `flexible_paper_schedule`, `single_hop_yy_purified`) | **Verified.** `flexible_paper_schedule(N=10)` is a hand-built exact reproduction of [Integrating, Fig. 4]'s structure (Pair A: 10 link-level YY-purified hops joined; Pair B: two N/2-hop segments, each from 2 raw sub-chains YY-purified then joined; Pair C: 1 raw N-hop chain; combined via `ZX`-purify(A,B) then `YY`-purify(result,C)). A deliberately-broken non-adjacent-span `Join` DAG is correctly rejected by `validate()` — confirms the stage-consistency check is load-bearing, not decorative. |
+| `node.py` | 7 frozen dataclasses: `GenNode`, `JoinNode`, `SwapNode`, `PurifyNode`, `IdleNode`, `HeraldNode`, `PauliCorrectNode` | Matches §2.5/§3.2/§3.3's operation catalog 1:1. |
+| `dag.py` | `ScheduleDAG`: topological sort, `validate()` (root check, reachability, **and** full structural stage-consistency checking — `_check_stage_consistency` walks the DAG bottom-up and cross-checks every node's *declared* output stage against what's structurally legal per §4.1), plus 5 canonical builders (`raw_chain`, `baseline_end_node_pumping`, `generic_end_node_pumping`, `link_level_pumped_chain`, `flexible_paper_schedule`, `single_hop_yy_purified`) | **Verified.** `flexible_paper_schedule(N=10)` is a hand-built exact reproduction of [Integrating, Fig. 4]'s structure (Pair A: 10 link-level YY-purified hops joined; Pair B: two N/2-hop segments, each from 2 raw sub-chains YY-purified then joined; Pair C: 1 raw N-hop chain; combined via `ZX`-purify(A,B) then `YY`-purify(result,C)). A deliberately-broken non-adjacent-span `Swap` DAG is correctly rejected by `validate()` — confirms the stage-consistency check is load-bearing, not decorative. |
 | `evaluator.py` | `Evaluator.evaluate(dag) -> EvaluationResult(fidelity, rate, resource_cost, latency, success_prob, node_states)` | **Verified for fidelity; latency/rate has a known, documented, unavoidable limitation** — see §4 below. |
 | `serde.py` | JSON de/serialization for `ScheduleDAG` + `NetworkConfig` (`save_schedule`/`load_schedule`) | Round-trip tested. |
 | `visualize.py` | `to_dot`/`save_dot`/`render` — pure-stdlib Graphviz DOT export, color/shape-coded per node type, optional `EvaluationResult` annotation; `render()` shells out to the `dot` CLI | Verified working end-to-end (rendered and visually inspected multiple DAGs this session, including the headline-experiment comparison in `outputs/headline_experiment_n10/`). |
@@ -362,7 +362,7 @@ src/hrgs_scheduler/
     network_config.py        HopConfig, NetworkConfig, integrating_paper_config()
     resource_budget.py       ResourceBudget(n_pur, e_max, m_max)  [m_max enforced, merged to main]
   operations/
-    backbone.py               gen, join, absa_bsm, idle, herald, pauli_correct
+    backbone.py               gen, swap, join, idle, herald, pauli_correct
     purification.py           purify(YY/ZX/XZ), success_prob
   schedule/
     node.py                    7 DAG node dataclasses
