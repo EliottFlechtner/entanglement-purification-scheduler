@@ -22,7 +22,7 @@ Tracing `Evaluator.evaluate()`'s bottom-up pass:
 | Node type | Contribution to `current_time` |
 |---|---|
 | `GenNode` | fixed `gen_time`; optionally `τ_emit × Σ log₂(b_j)` if `NetworkConfig.tau_emit` is set (default off) |
-| `AbsaBsmNode`, `JoinNode`, `PurifyNode` | `max(t_left, t_right)`; `_sync_to_common_time` decoheres the earlier branch via `gamma`, but `current_time` itself is still `max(t_left, t_right)`, so no latency is added |
+| `JoinNode`, `SwapNode`, `PurifyNode` | `max(t_left, t_right)`; `_sync_to_common_time` decoheres the earlier branch via `gamma`, but `current_time` itself is still `max(t_left, t_right)`, so no latency is added |
 | `IdleNode` | advances to `until`, decoheres error vector |
 | `HeraldNode` | adds `propagation_time × L_total/c` — the only node that contributes nonzero latency on its own |
 | `PauliCorrectNode` | inherits child's time |

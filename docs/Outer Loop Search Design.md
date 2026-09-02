@@ -124,10 +124,10 @@ circuit-combination grid (same caveat as brute force's
 
 Rather than a separate abstract "recipe, then materialize" two-pass
 design, `_SpanPartitionSearch` builds actual `ScheduleNode` objects
-(`GenNode`, `AbsaBsmNode`, `PurifyNode`, `JoinNode`) directly during the
+(`GenNode`, `JoinNode`, `PurifyNode`, `SwapNode`) directly during the
 recursive search, into one shared `nodes: dict[NodeId, ScheduleNode]`
 pool with a monotonically increasing `itertools.count()` id counter. It
-calls the *same* `gen`/`absa_bsm`/`join`/`purify` functions from
+calls the *same* `gen`/`join`/`swap`/`purify` functions from
 `operations/backbone.py` and `operations/purification.py` that the final
 `Evaluator` walk uses. This eliminates an entire class of potential bugs
 where search-time scoring could silently diverge from the final
