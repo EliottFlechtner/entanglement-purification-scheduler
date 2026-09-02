@@ -123,6 +123,55 @@ The main result here is a difference in feasibility rather than a rate improveme
 
 Branching factor and hop length are not used as sensitivity axes in this chapter. Within the model of Chapter~\ref{chap:model}, changing the tree branching factors does not affect $F$, $C$, or $R$, while uniformly rescaling every hop length multiplies all schedule latencies by the same factor and therefore leaves relative schedule comparisons unchanged.
 
+\subsection{Per-Hop Heterogeneous Networks}
+\label{sec:exp:heterogeneous}
+
+% Source: outputs/random_network_adaptation/{30 seeds,100 seeds}/README.md,
+%         src/hrgs_scheduler/models/random_network.py
+
+Section~\ref{sec:exp:netgen} changed the noise \emph{model} but kept it uniform across hops: every hop in a given configuration still shares the same inner-qubit error rate and arm count. A real deployment would instead have station spacing and hardware quality that vary hop to hop. This section tests that case directly, using \texttt{random\_network\_config} to draw each hop's length, inner-qubit error rates, and arm count independently, and asks whether a schedule found by search still adapts to a network it was never specifically designed for, without any in-flight or closed-loop mechanism: the schedule remains fixed in advance for the whole configuration (Section~\ref{sec:model:scope}), and only which fixed schedule the search selects depends on the given network.
+
+\paragraph{A designed contrast}
+A five-hop network is built with one hop set to a substantially higher inner-qubit error rate than the rest ($p^X_{\mathrm{in}}=p^Z_{\mathrm{in}}=0.015$ at hop 2, versus $0.001$ at every other hop, $e_d=0.01$, 18 arms and $2\,\mathrm{km}$ length at every hop), giving that hop an end-to-end inner-qubit error rate roughly $12\times$ higher than its neighbours ($0.211$ versus $0.018$). At $E_{\max}=50$, $F_{\min}=0.9$, no uniform link-level candidate (the same purification circuit sequence applied identically at every hop, Section~\ref{sec:exp:baselines}) clears the fidelity floor at any enumerated cost; the best one reaches only $F=0.8821$ at $C=40$. The schedule found by beam search clears the floor at $F=0.9007$, using \emph{fewer} generation nodes ($C=38$) and a higher rate (Table~\ref{tab:weaklink}). A uniform convention is not merely suboptimal on this network; it is infeasible at every cost this search considered, while a schedule shaped differently at each hop restores feasibility at lower cost.
+
+\begin{table}[h]
+    \centering
+    \caption{Designed weak-link contrast: one hop at $12\times$ the inner-qubit error rate of its neighbours ($N=5$, $e_d=0.01$, $E_{\max}=50$, $F_{\min}=0.9$).}
+    \label{tab:weaklink}
+    \small
+    \begin{tabular}{lcccc}
+        \hline
+        Schedule & $C$ & $F$ & Feasible & Rate \\
+        \hline
+        Best uniform link-level recipe & 40 & 0.8821 & \textbf{no} & 1738.32 \\
+        Optimizer's schedule & 38 & 0.9007 & yes & 1798.57 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Figure~\ref{fig:weaklink} shows the generation-node count the winning schedule spends at each hop. The uniform recipe spends the same count everywhere by construction; the optimizer's schedule is free to spend unevenly and does so, without being told which hop is worse.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/results/weak_link_allocation.png}
+    \caption{Per-hop generation-node allocation for the weak-link contrast. The uniform recipe (grey) spends identically at every hop by construction; the optimizer's schedule (red) spends unevenly across hops.}
+    \label{fig:weaklink}
+\end{figure}
+
+\paragraph{A randomized sweep}
+A single designed example does not establish that this behaviour is typical, so the same comparison is repeated over 100 independently random $N=6$ networks (\texttt{random\_network\_config}, seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$). For every network with a feasible uniform link-level candidate, the optimizer's best feasible schedule improves rate by a mean of $20.37\%$ and a median of $23.01\%$ over that candidate, with a range of $0.00\%$ to $47.81\%$ across the sample; 80 of the 100 networks show a strictly positive improvement, and none show a negative one. Unlike the designed contrast above, no network in this particular random sample produced a case where the uniform recipe was infeasible outright: bounding the sampled ranges (Table~\ref{tab:params}) keeps most draws inside the uniform baseline's reach, and the designed contrast's larger, adversarially-placed noise gap is what pushes that example into outright infeasibility.
+
+Figure~\ref{fig:hetsweep} plots each network's rate improvement against a coefficient-of-variation summary of its per-hop noise heterogeneity. The two are only weakly related (Pearson correlation $0.020$): the sign of the benefit is consistent throughout the sample, but its size does not track this particular heterogeneity measure. This is a genuine null result rather than a gap in the analysis: a simple summary statistic of "how uneven is this network" is not sufficient to predict how much a per-hop-aware schedule gains over a uniform one, at least at this sample size and network scale.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/results/random_sweep_improvement_vs_heterogeneity.png}
+    \caption{Optimizer rate improvement over the uniform link-level baseline against per-hop noise heterogeneity, across 100 random $N=6$ networks. The scatter shows no clear trend with this heterogeneity measure.}
+    \label{fig:hetsweep}
+\end{figure}
+
+Taken together, these two results extend Section~\ref{sec:exp:netgen}'s feasibility finding from a small number of hand-chosen alternate configurations to a genuinely random, per-hop heterogeneous sample: the advantage of letting a schedule vary across hops is not an artefact of the two specific non-ideal configurations tested earlier, and can on occasion be the difference between a feasible and an infeasible schedule at the same budget, though this sample did not by itself produce that outcome.
+
 \subsection{Noise Sensitivity}
 \label{sec:exp:edsweep}
 
