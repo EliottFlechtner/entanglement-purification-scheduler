@@ -2,6 +2,8 @@
 
 \TOFIX{fix}{non-final version}
 
+\TODO{clarify what is budget-relaxed because budget is a tuple not only a single scalar ; meant cost in gennodes}
+
 Long-distance quantum networks require repeaters to distribute high-fidelity Bell pairs despite photon loss and operational noise. In half-repeater-graph- state (HRGS) all-photonic repeaters, entanglement purification can be applied during resource generation, after a single hop, or after an end-to-end pair is established. Selecting where to purify, how many independent copies to consume, and which circuit to apply is therefore a combinatorial scheduling problem.
 
 This thesis formalises every fixed, non-adaptive purification schedule as a directed acyclic graph and evaluates it with one bottom-up pass that computes fidelity, success probability, latency, rate, and generation-resource cost. The evaluator reproduces the source protocol's three canonical fidelity benchmarks to four significant figures. On top of this model, the work implements structured baseline enumeration, a span-partition dynamic program, same-span pumping, and beam search. All returned candidates are structurally validated schedules evaluated by the same physical model.
