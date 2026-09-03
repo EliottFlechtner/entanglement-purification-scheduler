@@ -1,5 +1,7 @@
 \begin{abstract}
 
+\TODO{check for e\_max occurences in figures or text; should be capital E}
+
 Long-distance quantum networks need repeaters that distribute high-fidelity Bell pairs despite photon loss and operational noise. In all-photonic repeaters built from half-repeater graph states (HRGS), entanglement purification can be applied during resource generation, after a single hop, or after the end-to-end pair is established, and the copy count and circuit used may differ at each stage. Choosing where to purify, how many copies to consume, and which circuit to apply is therefore a combinatorial scheduling problem that the source protocol demonstrates by a single hand-picked example but does not solve.
 
 This thesis represents every fixed, non-adaptive purification schedule as a directed acyclic graph and evaluates it with a single bottom-up pass computing fidelity, success probability, latency, rate, and generation cost. The evaluator reproduces the source protocol's three canonical fidelity benchmarks to four significant figures. On top of this model, three search tiers, structured baseline enumeration, an exact span-partition dynamic program, and a beam search with an added same-span pumping operation, construct and compare candidate schedules under a shared generation-cost budget $E_{\max}$; every returned candidate is a structurally validated schedule evaluated by the same physical model, not a separate approximation.
