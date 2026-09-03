@@ -196,10 +196,12 @@ Three qualifications are important. First, the fitted power law is descriptive o
 
 Appendix~\ref{app:sweeps} collects supplementary sweeps over beam width, $e_d$, timing, and pumping that support this analysis without interrupting the main discussion. Among these, bisecting the minimum feasible budget over $e_d$ instead of $N$, at fixed $N=10$, shows that the paper's own fixed $E_{\max}=100$ overspends by $2.0$--$4.8\times$ across the tested noise range: the minimum budget needed to clear $F_{\min}=0.9$ ranges from $E_{\max}=21$ at low noise up to $E_{\max}=50$ at $e_d=0.01$. This is a stronger, self-contained claim than the $N$-scaling crossover above: it holds entirely within the paper's own tested configuration ($N=10$) and needs none of that crossover's beam-width caveats.
 
+Figure~\ref{fig:budget} plots the 12 measured points together with the paper's linear formula and the fitted power law, extended out to $N=40$ to make the divergence easier to read; only the solid portion of the fit ($N=10$--$28$) is measured, the dotted portion is the same fit curve evaluated outside that range, not additional data.
+
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/min_budget_vs_n.png}
-    \caption{Minimum feasible $E_{\max}$ required to reach $F_{\min}=0.9$ as a function of $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the descriptive power-law fit $E_{\max}^{\min}\approx1.369\,N^{1.620}$.}
+    \caption{Minimum feasible $E_{\max}$ required to reach $F_{\min}=0.9$ as a function of $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the descriptive power-law fit $E_{\max}^{\min}\approx1.369\,N^{1.620}$. Solid markers and the solid portion of the fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range, shown to make the long-run divergence easier to read, not additional measured data.}
     \label{fig:budget}
 \end{figure*}
 
@@ -218,7 +220,7 @@ This is an optimality-scope result rather than a scalability result: it demonstr
 
 % Source: outputs/sweep_gamma_and_tau_emit/README.md
 
-Both axes studied here, memory dephasing and generation latency, affect a schedule according to its timing structure (where its \texttt{HeraldNode}s and \texttt{IdleNode}s sit, Section~\ref{sec:model:dag}), not according to its fidelity or resource cost.
+Both axes studied here, memory dephasing and generation latency, affect a schedule according to its timing structure (where its \texttt{HeraldNode}s and \texttt{IdleNode}s sit, Section~\ref{sec:model:dag}), not according to its fidelity or resource cost. Figure~\ref{fig:timing} plots both sweeps.
 
 \paragraph{Memory dephasing ($\gamma$)}
 
