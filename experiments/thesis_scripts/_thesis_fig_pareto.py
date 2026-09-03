@@ -121,6 +121,9 @@ def make_fidelity_vs_cost(rows: list[dict]) -> None:
     # Annotate the gap between the paper's schedule and the frontier at
     # the same cost -- the plateau shape otherwise hides how much
     # fidelity headroom the paper's own budget leaves on the table.
+    # Placed above the plateau (rather than on top of it) with a white
+    # background box so it stays legible once shrunk to half the
+    # thesis text width.
     if paper:
         paper_cost = float(paper[0]["resource_cost"])
         paper_f = float(paper[0]["fidelity"])
@@ -136,12 +139,20 @@ def make_fidelity_vs_cost(rows: list[dict]) -> None:
                 arrowprops=dict(arrowstyle="->", color="#1f77b4", lw=1.6),
             )
             ax.annotate(
-                f"+{frontier_f - paper_f:.3f} $F$\navailable at\nsame cost",
-                xy=(paper_cost, (paper_f + frontier_f) / 2),
-                xytext=(paper_cost - 32, (paper_f + frontier_f) / 2 - 0.01),
-                fontsize=8,
+                f"+{frontier_f - paper_f:.3f} $F$ available\nat the same cost",
+                xy=(paper_cost, frontier_f),
+                xytext=(paper_cost - 8, frontier_f + 0.028),
+                fontsize=9.5,
                 color="#1f77b4",
+                ha="center",
+                bbox=dict(
+                    boxstyle="round,pad=0.25",
+                    facecolor="white",
+                    edgecolor="none",
+                    alpha=0.85,
+                ),
             )
+            ax.set_ylim(top=frontier_f + 0.05)
 
     ax.set_xlabel("Resource cost $C$", fontsize=11)
     ax.set_ylabel("Fidelity $F$", fontsize=11)
