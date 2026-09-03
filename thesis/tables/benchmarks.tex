@@ -1,10 +1,17 @@
 \begin{table}[ht]
 \centering
-\caption{Wall-clock time (seconds) for the exact dynamic program and the beam search
-         at representative chain lengths.
-         Config: paper's $E_{\max}=10N$, $F_{\min}=0.9$, beam width 25, the same-span
-         pumping move enabled, 300~s per-point timeout, 3~GiB memory cap.
-         \textsuperscript{$\dagger$}No feasible schedule found within budget at this $N$.}
+\caption{Wall-clock search time at representative chain lengths $N$, under the
+         paper's $E_{\max}=10N$ generation-cost budget, $F_{\min}=0.9$, beam
+         width $w_{\text{beam}}=25$, same-span pumping enabled
+         (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a
+         3~GiB memory cap. ``Beam search score'' is the returned candidate's
+         rate $R(\Sigma)$, the quantity the default objective maximizes
+         (Section~\ref{sec:model:objectives}).
+         \textsuperscript{$\dagger$}At $N=18$ the exact dynamic program, with
+         its own pumping move enabled, completes within the timeout but finds
+         no candidate clearing the fidelity floor; the beam search does,
+         since its bounded frontier is not a strict subset of the exact
+         program's once pumping is enabled (Section~\ref{sec:alg:pumping}).}
 \label{tab:runtimes}
 \small
 \begin{tabular}{rrlll}
@@ -19,6 +26,3 @@ $N$ & $E_{\max}$ & Exact DP (s) & Beam search (s) & Beam search score \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\TODO{fix caption to clarify what "Beam search score" represents?}
-\TODO{rewrite caption, feels too drafty rn}

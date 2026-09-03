@@ -1,0 +1,19 @@
+\begin{table}[h]
+    \centering
+    \caption{Optimizer vs.\ paper schedule under two non-ideal network configurations ($N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$). \textbf{no} marks a schedule that falls below $F_{\min}=0.9$.}
+    \label{tab:netgen}
+    \small
+    \begin{tabular}{llcccc}
+        \hline
+        Config & Schedule & $C$ & $F$ & Rate & Feasible \\
+        \hline
+        Non-ideal inner error, 18 arms & Paper schedule & 100 & 0.67 & 103.18 & \textbf{no} \\
+        Non-ideal inner error, 18 arms & Matched-cost & 100 & 0.90 & 25.31 & yes \\
+        Non-ideal inner error, 18 arms & Budget-relaxed & 80 & 0.90 & 85.30 & yes \\
+        \hline
+        Non-ideal inner error, 6 arms & Paper schedule & 100 & 0.87 & 871.55 & \textbf{no} \\
+        Non-ideal inner error, 6 arms & Matched-cost & 100 & 0.93 & 681.56 & yes \\
+        Non-ideal inner error, 6 arms & Budget-relaxed & 60 & 0.91 & 2096.91 & yes \\
+        \hline
+    \end{tabular}
+\end{table}
