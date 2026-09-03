@@ -3,6 +3,11 @@
 
 \TODO{rework this entire chapter. the goal is to better synthesize the findings from Chapter~\ref{chap:results} and highlight the key takeaways rather than restating individual experiments. I don't need 5 different findings that kinda overlap or restate basically the same thing that chapter 6 does. Make sure that chapter 6 is specifically describing the results and chapter 7 discusses them into more depth \& overall generalized insights on purification strategies that the formal model \& the optimizer managed to find.}
 
+\TODO{i don't like the structure of chatper 7, sections "When Optimization Helps Little" and the one after have wierd titles and seem to restate stuff said in the findings enunciated above}
+
+
+\TODO{as said before, section 7 needs to be coherent with section 6, not restate everything and instead focus on synthesizing the results into broader insights and design principles the results gave. Keep in mind the page limit there too}
+
 % Sources: docs/Design Principles.md, docs/Optimality Scope.md,
 %          docs/Justification of Implementation.md §4
 
@@ -24,6 +29,7 @@ The experimental results support five findings that extend beyond the specific $
 \textbf{F4: Objective substitution does not require a new search procedure.} Replacing the objective, maximizing rate, maximizing fidelity, or minimizing cost, produces structurally different top-ranked schedules without changing the search algorithm (Section~\ref{sec:exp:objectives}), because candidate construction and candidate evaluation are separate: the search generates and retains candidates, and the objective only ranks them. One caveat: minimizing cost with only a fidelity floor can return a valid but low-rate schedule even when a higher-rate schedule exists at the same cost, so applications with an independent throughput requirement must impose an explicit rate floor.
 
 \textbf{F5: Memory decoherence sensitivity depends on schedule shape.} Memory dephasing affects a schedule only when one branch must idle while another becomes ready for a later operation; a combine point whose inputs arrive at the same simulated time introduces no such term. At the reference configuration, the schedules selected by the optimizer stay insensitive to $\gamma$ across the tested range because the search favours optimistic schedules that defer heralding and so avoid the waiting pattern that collapses heralded pumping (Section~\ref{sec:exp:timing}). This is not a general immunity to memory decoherence; it follows from which schedules the search happens to prefer under the timing and noise parameters studied here.
+
 
 \section{When Optimization Helps Little}
 \label{sec:disc:nearoptimal}
