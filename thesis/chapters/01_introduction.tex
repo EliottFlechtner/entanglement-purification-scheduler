@@ -23,7 +23,7 @@ The Integrating paper demonstrates this flexibility with a single chosen schedul
 Addressing this gap requires a precise object to search over, since neither source paper formalises the schedule space, as well as search algorithms capable of exploring that exponentially large space. This thesis makes four concrete contributions toward that end.
 
 \begin{enumerate}
-    \item A formal, \Gls{dag}-based model of the schedule space for \Gls{hrgs}-based quantum repeaters (Chapter~\ref{chap:model}) and a bottom-up evaluator that reproduces the source paper's fidelity benchmarks for the raw, heralded, and optimistic canonical schedules to four significant figures (Chapter~\ref{chap:algorithms}).
+    \item A formal, \Gls{dag}-based model of the schedule space for \Gls{hrgs}-based quantum repeaters (Chapter~\ref{chap:model}) and a bottom-up evaluator that reproduces the source paper's fidelity benchmarks for the \TOFIX{what is canonical? defined earlier? raw heralded optimistic defined earlier too?}{raw, heralded, and optimistic canonical} schedules to four significant figures (Chapter~\ref{chap:algorithms}).
 
     \item A three-tier search framework: structured brute-force baselines, an exact span-partition dynamic program, and bounded same-span pumping and beam-search extensions (Chapter~\ref{chap:algorithms}). Every returned schedule is structurally validated and evaluated using the same physical model. At the paper's reference configuration, the matched-cost result improves rate by $2.5\%$, while a budget-relaxed result reaches a rate of $6195.95$ (the throughput metric $R(\Sigma)$ defines in Chapter~\ref{chap:model}) at cost $60$, a $52.8\%$ improvement while only using $60\%$ of the paper baseline's budget (Chapter~\ref{chap:results}).
 

@@ -1,6 +1,8 @@
 \chapter{Search Methods}
 \label{chap:algorithms}
 
+\TODO{decide on a name to give to the software to be referred in the thesis i.e. not a preoper name but decide if its going to be called "optimizer" or something similar accross the thesis.}
+
 % Sources: src/hrgs_scheduler/search/, docs/Optimizer Status.md,
 % docs/Justification of Implementation.md §4
 
@@ -31,6 +33,8 @@ Section~\ref{sec:exp:validation} shows that this pass reproduces the source pape
 \section{Fixed Schedule Families}
 \label{sec:alg:bruteforce}
 
+\TOFIX{fix?}{finally introduces meaning of raw, heralded, and optimistic canonical schedules, repeated in 6.1 later?}
+
 The first tier enumerates four fixed structural families: (1) a single raw end-to-end chain, with no purification; (2) end-node pumping, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds; (3) the optimistic counterpart, which defers classical heralding until the end; and (4) uniform link-level purification, applying the same copy count and circuit sequence at every hop. For even $N$ within budget, the Integrating paper's hand-chosen schedule~\cite{Benchasattabuse2025Integrating} is included as a fifth fixed comparison point.
 
 Within each family, purification sequences use the three two-copy circuits $\mathcal C_{\mathrm{YY}}$, $\mathcal C_{\mathrm{ZX}}$, and $\mathcal C_{\mathrm{XZ}}$ (Section~\ref{sec:bg:circuits}). All $3^r$ circuit sequences are enumerated up to a configured round cutoff $r_{\max}$; above that cutoff, the implementation uses a small curated set. Thus, ``brute force'' denotes exhaustive enumeration within these predefined structural families and circuit grid, not enumeration of every legal schedule \Gls{dag}.
@@ -42,7 +46,7 @@ These fixed families serve two purposes. First, they provide explicit baselines 
 
 For every span $\mathrm{Span}(a,b)$, the second tier memoizes a Pareto frontier~\cite{Pareto2014Manual} of ways to create one resource over that span. A single-hop frontier ($b=a+1$) contains the raw link and link-level purification choices. For a wider span, the recurrence tries every split point $a<m<b$ and combines each retained candidate from $\mathrm{Span}(a,m)$ with each retained candidate from $\mathrm{Span}(m,b)$ using a Swap operation (Section~\ref{sec:bg:hrgs}). Each sub-span is computed once and reused wherever it appears in a wider construction. This reuse, rather than repeatedly constructing and evaluating complete end-to-end schedules, is the main computational advantage of the dynamic program.
 
-The frontier retained at each span is multi-objective over $(C,F,P_{\mathrm{success}})$ (Pareto dominance, Section~\ref{sec:alg:prelims}). Only non-dominated candidates are retained, following the standard Pareto-pruning rule used in multi-criteria optimisation~\cite{Ehrgott2005Multicriteria}. This pruning is exact with respect to the three quantities tracked by the frontier, but it does not imply that the resulting search is globally exhaustive once additional caps or heuristic retention rules are introduced.
+The frontier retained at each span is multi-objective over $(C,F,P_{\mathrm{success}})$ (Pareto dominance, Section~\ref{sec:alg:prelims}). Only non-dominated candidates are retained, following the standard Pareto-pruning rule used in multi-criteria optimisation~\cite{Ehrgott2005Multicriteria}. This pruning is exact with respect to the three quantities tracked by the frontier, but it does not imply that the \TOFIX{weird phrasing}{resulting search is globally exhaustive once additional caps or heuristic retention rules are introduced.}
 
 \section{Same-Span Entanglement Pumping}
 \label{sec:alg:pumping}
@@ -55,6 +59,8 @@ Pumping and ordinary Swap candidates compete for the same fixed-size frontier. A
 
 \section{Beam Search}
 \label{sec:alg:beam}
+
+\TODO{beam search score not introduced / explained, mentioned in table 6.2 later but not defined in the preliminaries section, to fix?}
 
 The third tier, beam search, reuses the same span recursion, node construction, and evaluator as Section~\ref{sec:alg:dp}. It caps every retained span frontier at a beam width $w_\text{beam}$, with $w_\text{beam}=25$ by default. This bounds runtime and memory at the network sizes studied in Chapter~\ref{chap:results} (up to $N=28$ hops), but a candidate that a wider beam would retain can be pruned before it reaches the end-to-end span. The cap is necessary in practice: an uncapped width-7 frontier already contains roughly $1{,}200$ candidates, making an uncapped search through the paper's $N=10$ chain impractical. The same $w_\text{beam}$ also caps the same-span pumping pool, so pumping and ordinary swap candidates share the available slots at each span.
 
