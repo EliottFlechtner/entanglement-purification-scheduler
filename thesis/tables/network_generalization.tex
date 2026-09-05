@@ -1,3 +1,5 @@
+\TODO{same remark, don't rewrod the main text, let the table's caption explain itself so as not to confuse the reader \& feel repetitive. Also consider whether to define "non-ideal" explicitly here or rely on the main text for that explanation, probably here. If defined or mentionned in the caption, no need to write "Non-ideal inner error" in every left cell; instead levave the arm count as the distinguishing feature.}
+
 \begin{table}[h]
     \centering
     \caption{Optimizer vs.\ paper schedule under two non-ideal network configurations ($N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$). \textbf{no} marks a schedule that falls below $F_{\min}=0.9$.}
@@ -7,13 +9,13 @@
         \hline
         Config & Schedule & $C$ & $F$ & Rate & Feasible \\
         \hline
-        Non-ideal inner error, 18 arms & Paper schedule & 100 & 0.67 & 103.18 & \textbf{no} \\
-        Non-ideal inner error, 18 arms & Matched-cost & 100 & 0.90 & 25.31 & yes \\
-        Non-ideal inner error, 18 arms & Budget-relaxed & 80 & 0.90 & 85.30 & yes \\
+        18 arms & Paper schedule & 100 & 0.67 & 103.18 & \textbf{no} \\
+        18 arms & Matched-cost & 100 & 0.90 & 25.31 & yes \\
+        18 arms & Budget-relaxed & 80 & 0.90 & 85.30 & yes \\
         \hline
-        Non-ideal inner error, 6 arms & Paper schedule & 100 & 0.87 & 871.55 & \textbf{no} \\
-        Non-ideal inner error, 6 arms & Matched-cost & 100 & 0.93 & 681.56 & yes \\
-        Non-ideal inner error, 6 arms & Budget-relaxed & 60 & 0.91 & 2096.91 & yes \\
+        6 arms & Paper schedule & 100 & 0.87 & 871.55 & \textbf{no} \\
+        6 arms & Matched-cost & 100 & 0.93 & 681.56 & yes \\
+        6 arms & Budget-relaxed & 60 & 0.91 & 2096.91 & yes \\
         \hline
     \end{tabular}
 \end{table}

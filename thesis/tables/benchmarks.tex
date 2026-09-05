@@ -1,17 +1,8 @@
+\TODO{is this table interesting? where is the exact dp score? why only the beam score? N=18 feels like a small chain length to draw conclusions from and if this table just serves to show the time each search takes then maybe it should be moved to an appendix or supplementary material...}
+
 \begin{table}[ht]
 \centering
-\caption{Wall-clock search time at representative chain lengths $N$, under the
-         paper's $E_{\max}=10N$ generation-cost budget, $F_{\min}=0.9$, beam
-         width $w_{\text{beam}}=25$, same-span pumping enabled
-         (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a
-         3~GiB memory cap. ``Beam search score'' is the returned candidate's
-         rate $R(\Sigma)$, the quantity the default objective maximizes
-         (Section~\ref{sec:model:objectives}).
-         \textsuperscript{$\dagger$}At $N=18$ the exact dynamic program, with
-         its own pumping move enabled, completes within the timeout but finds
-         no candidate clearing the fidelity floor; the beam search does,
-         since its bounded frontier is not a strict subset of the exact
-         program's once pumping is enabled (Section~\ref{sec:alg:pumping}).}
+\caption{\TOFIX{to review; seems wordy enoguh but maybe to humanize}{Wall-clock search time at representative chain lengths $N$, under the paper's $E_{\max}=10N$ generation-cost budget, $F_{\min}=0.9$, beam width $w_{\text{beam}}=25$, same-span pumping enabled (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a 3~GiB memory cap. \TOFIX{point to the correct paragraph being the third one in this section "sec:alg:beam" + don't quote the column title directy}{``Beam search score'' is the returned candidate's rate $R(\Sigma)$, the quantity the default objective maximizes (Section~\ref{sec:model:objectives}).} \textsuperscript{$\dagger$}At $N=18$ the exact dynamic program, with its own pumping move enabled, completes within the timeout but finds no candidate clearing the fidelity floor; the beam search does, since its bounded frontier is not a strict subset of the exact program's once pumping is enabled (Section~\ref{sec:alg:pumping}).}}
 \label{tab:runtimes}
 \small
 \begin{tabular}{rrlll}

@@ -1,15 +1,18 @@
 \begin{table}[ht]
 \centering
-\caption{Experimental parameters: nominal values and sweep ranges.
-         All other hop-level parameters follow the Integrating paper's reference
-         configuration ($\ell_i=2$~km, branching $(16,14,1)$, $c=2\!\times\!10^5$~km/s).}
+\caption{Experimental parameters: nominal values and sweep ranges. All other hop-level parameters follow the Integrating paper's~\cite{Benchasattabuse2025Integrating} reference configuration $\mathcal{N}_\text{ref}$ (Section~\ref{sec:model:network}).}
 \label{tab:params}
 \small
 \begin{tabular}{p{4.8cm}llp{3.2cm}}
 \toprule
 Parameter & Reference & Sweep range & Where varied \\
 \midrule
-$N$ (hop count) & 10 & 10, 12, 14, 16, 18, 20--24, 26, 28 & Section~\ref{sec:exp:budget} \\
+% integrate as rows: ($\ell_i=2$~km, branching $(16,14,1)$, $c=2\!\times\!10^5$~km/s)
+
+$N$ (hop count) & 10 & \TOFIX{maybe change to 5-40 somehow}{10, 12, 14, 16, 18, 20--24, 26, 28} & Section~\ref{sec:exp:budget} \\
+$\ell_i$ (hop length) & 2~km & 1, 2, 3, 4~km & Section~\ref{sec:exp:heterogeneous} \\
+$c$ (speed of light in fiber) & $2\!\times\!10^5$~km/s & $2\!\times\!10^5$~km/s & Section~\ref{sec:exp:timing} \\
+branching (tree structure) & (16,14,1) & (16,14,1) & Section~\ref{sec:exp:netgen} \\
 $e_d$ (depolarizing rate) & 0.01 & $[0,\,0.01]$ & Section~\ref{sec:exp:edsweep} \\
 $E_{\max}$ (resource budget) & 100 & varies & Sections~\ref{sec:exp:headline}--\ref{sec:exp:budget} \\
 $p_X^{\mathrm{in}}, p_Z^{\mathrm{in}}$ (inner-qubit error) & 0 & 0, $3\!\times\!10^{-3}$ & Section~\ref{sec:exp:netgen} \\
