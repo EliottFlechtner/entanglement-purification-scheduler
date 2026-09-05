@@ -1,19 +1,21 @@
-\TODO{is this table interesting? where is the exact dp score? why only the beam score? N=18 feels like a small chain length to draw conclusions from and if this table just serves to show the time each search takes then maybe it should be moved to an appendix or supplementary material...}
+% Kept in the main text (rather than an appendix) because it backs the
+% no-timeout claim of Section~\ref{sec:exp:runtime} and, with the exact
+% DP score column below, the pumping caveat of Section~\ref{sec:alg:pumping}.
 
 \begin{table}[ht]
 \centering
-\caption{\TOFIX{to review; seems wordy enoguh but maybe to humanize}{Wall-clock search time at representative chain lengths $N$, under the paper's $E_{\max}=10N$ generation-cost budget, $F_{\min}=0.9$, beam width $w_{\text{beam}}=25$, same-span pumping enabled (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a 3~GiB memory cap. \TOFIX{point to the correct paragraph being the third one in this section "sec:alg:beam" + don't quote the column title directy}{``Beam search score'' is the returned candidate's rate $R(\Sigma)$, the quantity the default objective maximizes (Section~\ref{sec:model:objectives}).} \textsuperscript{$\dagger$}At $N=18$ the exact dynamic program, with its own pumping move enabled, completes within the timeout but finds no candidate clearing the fidelity floor; the beam search does, since its bounded frontier is not a strict subset of the exact program's once pumping is enabled (Section~\ref{sec:alg:pumping}).}}
+\caption{Wall-clock search time and score at representative chain lengths $N$, under the paper's $E_{\max}=10N$ generation-cost budget, $F_{\min}=0.9$, beam width $w_{\text{beam}}=25$, same-span pumping enabled (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a 3~GiB memory cap. Score is the returned candidate's value of whichever quantity the active objective maximizes (Section~\ref{sec:alg:beam}, Section~\ref{sec:model:objectives}); under the default rate-maximizing objective used here, this is the candidate's rate $R(\Sigma)$. \textsuperscript{$\dagger$}At $N=18$ the exact dynamic program completes within the timeout but finds no candidate clearing the fidelity floor (score $-\infty$), while the beam search does; \textsuperscript{$\ddagger$}at $N=6$ the exact program's own best score is lower than the beam search's. Both cases occur because the exact program's own same-span pumping move is itself beam-limited by default (Section~\ref{sec:alg:pumping}), so it is not a guaranteed upper bound on the beam search once pumping is enabled.}
 \label{tab:runtimes}
 \small
-\begin{tabular}{rrlll}
+\begin{tabular}{rrllrr}
 \toprule
-$N$ & $E_{\max}$ & Exact DP (s) & Beam search (s) & Beam search score \\
+$N$ & $E_{\max}$ & Exact DP (s) & Beam search (s) & Exact DP score & Beam search score \\
 \midrule
- 2 &  20 &   0.10 &   0.10 & 50\,000     \\
- 6 &  60 &   3.82 &   3.34 & 15\,392     \\
-10 & 100 &  20.43 &  16.50 &  6\,196     \\
-14 & 140 &  85.37 &  66.93 &  3\,394     \\
-18 & 180 & 203.68\textsuperscript{$\dagger$} & 153.52 &  1\,214     \\
+ 2 &  20 &   0.10 &   0.10 & 50\,000 & 50\,000     \\
+ 6 &  60 &   3.82 &   3.34 & 14\,372\textsuperscript{$\ddagger$} & 15\,391     \\
+10 & 100 &  20.43 &  16.50 &  6\,196 &  6\,196     \\
+14 & 140 &  85.37 &  66.93 &  3\,394 &  3\,394     \\
+18 & 180 & 203.68\textsuperscript{$\dagger$} & 153.52 & $-\infty$ &  1\,214     \\
 \bottomrule
 \end{tabular}
 \end{table}

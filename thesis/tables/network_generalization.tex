@@ -1,8 +1,6 @@
-\TODO{same remark, don't rewrod the main text, let the table's caption explain itself so as not to confuse the reader \& feel repetitive. Also consider whether to define "non-ideal" explicitly here or rely on the main text for that explanation, probably here. If defined or mentionned in the caption, no need to write "Non-ideal inner error" in every left cell; instead levave the arm count as the distinguishing feature.}
-
 \begin{table}[h]
     \centering
-    \caption{Optimizer vs.\ paper schedule under two non-ideal network configurations ($N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$). \textbf{no} marks a schedule that falls below $F_{\min}=0.9$.}
+    \caption{Optimizer vs.\ paper schedule under two non-idealized network configurations (non-zero inner-qubit error $p_X^{\mathrm{in}}=p_Z^{\mathrm{in}}=3\times10^{-3}$, unlike the source paper's own noiseless assumption), distinguished by \Gls{bsm} arm count, at $N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$. \textbf{no} marks a schedule that falls below $F_{\min}=0.9$.}
     \label{tab:netgen}
     \small
     \begin{tabular}{llcccc}
