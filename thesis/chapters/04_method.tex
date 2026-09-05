@@ -23,6 +23,8 @@ A network configuration fixes the physical parameters that a schedule cannot cha
 \]
 where, for each hop $i$, $\ell_i$ is its length; $\vec{b}^{(i)}$ is the list of tree-encoding branching factors at successive levels; $k_i$ is its number of redundant \Gls{bsm} arms; $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$ are its inner-qubit measurement error rates; and $\eta_i$ is its photon survival probability. The remaining parameters are shared across the chain: $e_d$ is the outer-photon depolarizing rate, $\gamma$ is the memory dephasing rate, $c$ is the signal propagation speed in the fiber, and $\tau_{\mathrm{emit}}$ is an optional per-photon emission time used to model branching-dependent generation latency. Conditional on photon arrival, the per-arm \Gls{bsm} success probability is capped at 50\%~\cite{Ewert20143,Benchasattabuse2026Bridging}. The factor $\eta_i$ accounts separately for transmission loss, while $k_i$ supplies redundancy against the measurement ceiling.
 
+\TODO{maybe add a quick definition here of what is an idealized network configuration, e.g., one with noiseless inner-qubit measurements and identical hop parameters to reference later in the experiments (look for marker MARKER\_IDEAL).}
+
 Unless stated otherwise, experiments start from the Integrating paper configuration, written $\mathcal{N}_{\mathrm{ref}}$. It has identically configured hops:
 \[
 \begin{gathered}

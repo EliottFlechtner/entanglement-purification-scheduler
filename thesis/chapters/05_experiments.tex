@@ -31,7 +31,7 @@ Section~\ref{sec:exp:validation} shows that this pass reproduces the source pape
 \section{Fixed Schedule Families}
 \label{sec:alg:bruteforce}
 
-The first tier enumerates four fixed structural families: (1) a single raw end-to-end chain, with no purification; (2) end-node pumping, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds (\emph{heralded} end-node pumping); (3) the optimistic counterpart, which defers classical heralding until the end (\emph{optimistic} end-node pumping); and (4) uniform link-level purification, applying the same copy count and circuit sequence at every hop. For even $N$ within budget, the Integrating paper's hand-chosen schedule~\cite{Benchasattabuse2025Integrating} is included as a fifth fixed comparison point.
+\TOFIX{bullet points here or not?}{The first tier enumerates four fixed structural families: (1) a single raw end-to-end chain, with no purification; (2) end-node pumping, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds (\emph{heralded} end-node pumping); (3) the optimistic counterpart, which defers classical heralding until the end (\emph{optimistic} end-node pumping); and (4) uniform link-level purification, applying the same copy count and circuit sequence at every hop. For even $N$ within budget, the Integrating paper's hand-chosen schedule~\cite{Benchasattabuse2025Integrating} is included as a fifth fixed comparison point.}
 
 Three of these families, the raw chain, heralded end-node pumping, and optimistic end-node pumping, are referred to throughout this thesis as the \emph{canonical schedules}: they are the schedules whose fidelity is checked directly against the source paper's published Fig.\,5 benchmarks (Section~\ref{sec:exp:validation}).
 
@@ -57,6 +57,8 @@ Pumping and ordinary Swap candidates compete for the same fixed-size frontier. A
 
 \section{Beam Search}
 \label{sec:alg:beam}
+
+\TODO{the explanation for why a beam width is needed is there but not why $w_\text{beam} = 25$ specifically, maybe add a small sentence?}
 
 The third tier, beam search, reuses the same span recursion, node construction, and evaluator as Section~\ref{sec:alg:dp}. It caps every retained span frontier at a beam width $w_\text{beam}$, with $w_\text{beam}=25$ by default. This bounds runtime and memory at the network sizes studied in Chapter~\ref{chap:results} (up to $N=28$ hops), but a candidate that a wider beam would retain can be pruned before it reaches the end-to-end span. The cap is necessary in practice: an uncapped width-7 frontier already contains roughly $1{,}200$ candidates, making an uncapped search through the paper's $N=10$ chain impractical. The same $w_\text{beam}$ also caps the same-span pumping pool, so pumping and ordinary swap candidates share the available slots at each span.
 
