@@ -80,7 +80,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 from hrgs_scheduler.cost_functions import ObjectiveConfig
