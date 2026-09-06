@@ -51,7 +51,7 @@ Four limitations bound the scope of the results.
 
 First, only non-adaptive schedules are evaluated: the schedule is fixed before execution and cannot condition a later purification step on an intermediate outcome (Section~\ref{sec:model:scope}). A fully adaptive strategy would need a different formulation; the results here characterize the non-adaptive schedule space and do not bound what an adaptive strategy could achieve.
 
-\TOFIX{unclear}{Second, $M_{\max}$, the number of concurrently open branches, is computed exactly per schedule but is not used to prune the search itself (Section~\ref{sec:model:scope}; quantified in Appendix~\ref{app:mmax}). A schedule that satisfies the generation budget may still need a larger intermediate memory footprint under a strict concurrency constraint.}
+Second, the search does not prune on memory footprint. $M_{\max}$, the number of branches that must be held in memory at once to evaluate a schedule, is computed exactly for every candidate (Section~\ref{sec:model:scope}; quantified in Appendix~\ref{app:mmax}), but only the generation-cost budget $E_{\max}$ constrains which candidates the search keeps. A schedule reported here as feasible under $E_{\max}$ can therefore still require more simultaneously-held branches than a deployment with a strict memory limit could support.
 
 Third, the fidelity model assumes Pauli-channel noise, consistent with the source papers. Comparisons between schedules are internally consistent under that model, but a ranking obtained here need not carry over to hardware dominated by a different error process, particularly one coupling loss, gate errors, and memory effects not represented here.
 
