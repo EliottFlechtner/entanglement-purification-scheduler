@@ -4,11 +4,9 @@
 % Sources: outputs/*/README.md, experiments/*.py,
 %          docs/Design Principles.md
 
-% Every result in this chapter concerns the Integrating paper~\cite{Benchasattabuse2025Integrating}: unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, every mention of ``the source paper'' below refers to the Integrating paper, the source of both the Fig.\,4 hand-picked schedule (Section~\ref{sec:exp:baselines}) and the Fig.\,5 fidelity benchmarks (Section~\ref{sec:exp:validation}) this chapter's comparisons are built around. This chapter uses \emph{the paper schedule} for that Fig.\,4 example throughout, to avoid ambiguity with the schedule \Gls{dag} formalism of Chapter~\ref{chap:model}.
+% Every result in this chapter concerns the Integrating paper~\cite{Benchasattabuse2025Integrating}: unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' refers to the Integrating paper, whose Fig.\,4 hand-picked schedule (Section~\ref{sec:exp:baselines}) and Fig.\,5 fidelity benchmarks (Section~\ref{sec:exp:validation}) provide the main comparison points used throughout this chapter. The term \emph{paper schedule} refers specifically to the Fig.\,4 example, avoiding ambiguity with the schedule \Gls{dag} formalism of Chapter~\ref{chap:model}.
 
-\TOFIX{repeating the paramters and sweeps part? fix oth paragraphs}{All experiments use the beam search ($w_{\text{beam}}=25$, Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}, unless stated otherwise. The reference configuration is $\mathcal{N}_{\mathrm{ref}}$ with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$, matching the source paper's main experimental setting. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' in this chapter refers to the Integrating paper~\cite{Benchasattabuse2025Integrating}, whose Fig.\,4 schedule and Fig.\,5 fidelity results provide the main comparison points.}
-
-This chapter first establishes that the evaluator reproduces the source paper's physical results, then compares the paper schedule with schedules found by search. It next examines how those results change under non-ideal and heterogeneous network conditions, followed by cost-quality tradeoffs and scaling with chain length. The chapter closes with timing sensitivity; additional runtime, beam-width, and sweep results are collected in Appendix~\ref{app:sweeps}.
+This chapter first validates the evaluator against the source paper's fidelity results. It then compares the paper schedule with schedules found by search at the reference configuration and under changed network conditions, followed by cost-quality tradeoffs and scaling with chain length. The final section examines timing sensitivity. Additional runtime, beam-width, and supplementary sweep results are given in Appendix~\ref{app:sweeps}.
 
 \section{Experimental Setup}
 \label{sec:exp:setup}
@@ -18,7 +16,7 @@ This chapter first establishes that the evaluator reproduces the source paper's 
 \paragraph{Parameters and sweeps}
 \label{sec:exp:params}
 
-Unless stated otherwise, every experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all other parameters remain fixed. Table~\ref{tab:params} lists the parameters varied in this chapter.
+Unless stated otherwise, every experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all remaining parameters are held fixed. The search configuration, including the beam width and enabled search moves, is described in Section~\ref{sec:exp:runtime}. Table~\ref{tab:params} lists the parameters varied in this chapter.
 
 \input{tables/experiment_parameters}
 
