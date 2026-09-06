@@ -6,28 +6,20 @@
 
 % Every result in this chapter concerns the Integrating paper~\cite{Benchasattabuse2025Integrating}: unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' refers to the Integrating paper, whose Fig.\,4 hand-picked schedule (Section~\ref{sec:exp:baselines}) and Fig.\,5 fidelity benchmarks (Section~\ref{sec:exp:validation}) provide the main comparison points used throughout this chapter. The term \emph{paper schedule} refers specifically to the Fig.\,4 example, avoiding ambiguity with the schedule \Gls{dag} formalism of Chapter~\ref{chap:model}.
 
-All experiments use the beam search ($w_{\text{beam}}=25$, Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}, unless stated otherwise. The reference configuration is $\mathcal{N}_{\mathrm{ref}}$ with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$, matching the source paper's main experimental setting. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' in this chapter refers to the Integrating paper~\cite{Benchasattabuse2025Integrating}.
-
-This chapter first validates the evaluator against the source paper's fidelity results. It then compares the paper schedule with schedules found by search at the reference configuration and under changed network conditions, followed by cost-quality tradeoffs and scaling with chain length. The final section examines timing sensitivity. Additional runtime, beam-width, and supplementary sweep results are given in Appendix~\ref{app:sweeps}.
+This chapter validates the evaluator against the Integrating paper's~\cite{Benchasattabuse2025Integrating} fidelity results, compares the paper schedule with schedules found by search under several network conditions, and evaluates cost-quality tradeoffs, chain-length scaling, and timing sensitivity. Additional runtime, beam-width, and supplementary sweep results are reported in Appendix~\ref{app:sweeps}. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' in this chapter refers to the Integrating paper.
 
 \section{Experimental Setup}
 \label{sec:exp:setup}
 
-% Source: experiments/*.py parameter tables
-
 \paragraph{Parameters and sweeps}
 \label{sec:exp:params}
 
-Unless stated otherwise, every experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all remaining parameters are held fixed. The search configuration, including the beam width and enabled search moves, is described below. Table~\ref{tab:params} lists the parameters varied in this chapter.
-
-\input{tables/experiment_parameters}
+Unless stated otherwise, all experiments use the beam search with $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}. They start from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}), with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$. Each experiment changes only the parameters specified for that experiment; all remaining parameters are held fixed. A complete summary of the experimental parameters and sweep ranges is provided in Table~\ref{tab:params} in Appendix~\ref{app:sweeps}.
 
 \paragraph{Search method runtime}
 \label{sec:exp:runtime}
 
-Both the exact dynamic program (Section~\ref{sec:alg:dp}) and the beam search, using beam width 25 and with the same-span pumping move enabled (Section~\ref{sec:alg:pumping}), complete within the tested range $N\le18$ without reaching the 300~s timeout imposed on each configuration. Table~\ref{tab:runtimes} reports the corresponding wall-clock times under the paper's $E_{\max}=10N$ budget.
-
-\input{tables/benchmarks}
+Both the exact dynamic program (Section~\ref{sec:alg:dp}) and the beam search, using beam width 25 and with the same-span pumping move enabled (Section~\ref{sec:alg:pumping}), complete within the tested range $N\le18$ without reaching the 300~s timeout imposed on each configuration. Detailed wall-clock times and returned scores for representative chain lengths under the paper's $E_{\max}=10N$ budget are reported in Table~\ref{tab:benchmarks} in Appendix~\ref{app:sweeps}.
 
 \paragraph{Baselines}
 \label{sec:exp:baselines}
@@ -58,7 +50,7 @@ This section first compares the search results with the source paper's schedule 
 % Source: outputs/headline_experiment_n10/README.md,
 %          outputs/sweep_network_sensitivity/README.md
 
-At the reference configuration, the optimizer improves on the paper schedule both when constrained to the same cost and when given the full resource budget. The matched-cost search trades some fidelity margin for a higher rate, while the budget-relaxed search achieves a substantially higher rate with a lower resource cost. The search result obtained without the same-span pumping move is also retained as a separate comparison because the added move changes the beam-limited search space. The numerical results are reported in Table~\ref{tab:headline}.
+At the reference configuration, the optimizer improves on the paper schedule both at the same cost and under the full resource budget. The matched-cost search achieves a higher rate, while the budget-relaxed search reaches a substantially higher rate at lower cost. The result obtained without the same-span pumping move is retained as a separate comparison. Detailed numerical results are reported in Table~\ref{tab:headline} below.
 
 \input{tables/headline_comparison}
 
@@ -67,7 +59,7 @@ At the reference configuration, the optimizer improves on the paper schedule bot
 
 % Source: outputs/sweep_network_sensitivity/README.md
 
-The headline comparison uses the source paper's idealized network configuration. Introducing non-zero inner-qubit error changes which schedules remain feasible. At the same generation budget, the paper schedule falls below the fidelity threshold in both non-ideal configurations tested, while the search rerun under the changed physical parameters finds feasible schedules. Table~\ref{tab:netgen} and Figure~\ref{fig:netgen} give the corresponding results for the two \Gls{bsm} arm counts.
+The optimizer was also evaluated under non-ideal inner-qubit errors and different numbers of redundant \Gls{bsm} arms. The headline comparison uses the source paper's idealized network configuration, while the non-ideal configurations introduce physical constraints that can change which schedules remain feasible. At the same generation budget, the paper's schedule falls below the fidelity threshold in both non-ideal configurations tested, whereas rerunning the search under the corresponding physical parameters identifies feasible schedules. Table~\ref{tab:netgen} and Figure~\ref{fig:netgen} summarize the resulting comparisons for the two \Gls{bsm} arm counts.
 
 \input{tables/network_generalization}
 
@@ -80,7 +72,7 @@ The headline comparison uses the source paper's idealized network configuration.
 
 The main result is a difference in feasibility rather than a rate improvement: the paper schedule is infeasible in both non-ideal configurations, while the searched schedules remain feasible at the same budget. Rate values for an infeasible schedule are therefore not directly comparable to those of a feasible one.
 
-The tree branching factor is not used as a sensitivity axis in this chapter because it does not affect $F$, $C$, or $R$ in the model of Chapter~\ref{chap:model}. Hop length is considered separately below; uniformly rescaling every hop length would multiply all schedule latencies by the same factor and leave relative schedule comparisons unchanged, whereas the heterogeneous hop lengths tested in Section~\ref{sec:exp:heterogeneous} change the relative physical conditions between hops.
+\TOFIX{here or in the experimental setup?}{The tree branching factor is not used as a sensitivity axis in this chapter because it does not affect $F$, $C$, or $R$ in the model of Chapter~\ref{chap:model}. Hop length is considered separately below; uniformly rescaling every hop length would multiply all schedule latencies by the same factor and leave relative schedule comparisons unchanged, whereas the heterogeneous hop lengths tested in Section~\ref{sec:exp:heterogeneous} change the relative physical conditions between hops.}
 
 \subsection{Per-Hop Heterogeneous Networks}
 \label{sec:exp:heterogeneous}
@@ -90,9 +82,10 @@ The tree branching factor is not used as a sensitivity axis in this chapter beca
 
 Section~\ref{sec:exp:netgen} changes the noise model while keeping it uniform across hops. A real-world deployment, by contrast, can have different link lengths, hardware quality, and error rates from one hop to another. This section tests that setting by assigning each hop's length, inner-qubit error rates, and arm count independently at random. The search remains non-adaptive: the schedule is fixed once selected, and only the network configuration supplied to the search changes.
 
-A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example. At $E_{\max}=50$ and $F_{\min}=0.9$, the best uniform link-level strategy is infeasible, while the optimizer finds a feasible schedule at lower cost. Table~\ref{tab:weaklink} reports the detailed comparison.
+% OLD PART OF PARAGRAPH (removed because contained too much commenting on the table itself)
+% At $E_{\max}=50$ and $F_{\min}=0.9$, the best uniform link-level strategy is infeasible, while the optimizer finds a feasible schedule at lower cost. Table~\ref{tab:weaklink} reports the detailed comparison.
 
-\input{tables/weak_link_contrast.tex}
+A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example. A designed weak-link experiment further illustrates the benefit of allocating purification resources unevenly across a heterogeneous chain. The detailed results are provided in Table~\ref{tab:weaklink} in Appendix~\ref{app:sweeps}.
 
 The same tendency is observed over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$). Among the networks for which a feasible uniform link-level candidate exists, the optimizer improves rate by a mean of $20.37\%$ and does not perform worse in the tested sample. Further interpretation of this behaviour is deferred to Chapter~\ref{chap:discussion}.
 
