@@ -3,7 +3,6 @@
 
 % Sources: outputs/*/README.md, experiments/*.py,
 %          docs/Design Principles.md
-
 % Every result in this chapter concerns the Integrating paper~\cite{Benchasattabuse2025Integrating}: unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' refers to the Integrating paper, whose Fig.\,4 hand-picked schedule (Section~\ref{sec:exp:baselines}) and Fig.\,5 fidelity benchmarks (Section~\ref{sec:exp:validation}) provide the main comparison points used throughout this chapter. The term \emph{paper schedule} refers specifically to the Fig.\,4 example, avoiding ambiguity with the schedule \Gls{dag} formalism of Chapter~\ref{chap:model}.
 
 This chapter validates the evaluator against the Integrating paper's~\cite{Benchasattabuse2025Integrating} fidelity results, compares the paper schedule with schedules found by search under several network conditions, and evaluates cost-quality tradeoffs, chain-length scaling, and timing sensitivity. Additional runtime, beam-width, and supplementary sweep results are reported in Appendix~\ref{app:sweeps}. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' in this chapter refers to the Integrating paper.
@@ -16,10 +15,7 @@ This chapter validates the evaluator against the Integrating paper's~\cite{Bench
 
 Unless stated otherwise, all experiments use the beam search with $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}. They start from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}), with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$. Each experiment changes only the parameters specified for that experiment; all remaining parameters are held fixed. A complete summary of the experimental parameters and sweep ranges is provided in Table~\ref{tab:params} in Appendix~\ref{app:sweeps}.
 
-\paragraph{Search method runtime}
-\label{sec:exp:runtime}
-
-Both the exact dynamic program (Section~\ref{sec:alg:dp}) and the beam search, using beam width 25 and with the same-span pumping move enabled (Section~\ref{sec:alg:pumping}), complete within the tested range $N\le18$ without reaching the 300~s timeout imposed on each configuration. Detailed wall-clock times and returned scores for representative chain lengths under the paper's $E_{\max}=10N$ budget are reported in Table~\ref{tab:benchmarks} in Appendix~\ref{app:sweeps}.
+The tree branching factor is not varied because it does not affect $F$, $C$, or $R$ in the model of Chapter~\ref{chap:model}. Uniform hop-length scaling likewise leaves relative schedule comparisons unchanged; heterogeneous hop lengths are considered separately in Section~\ref{sec:exp:heterogeneous}.
 
 \paragraph{Baselines}
 \label{sec:exp:baselines}
@@ -42,7 +38,7 @@ The evaluator of Section~\ref{sec:alg:evaluator} reproduces the source paper's F
 \section{Optimizer versus the Paper Schedule}
 \label{sec:exp:comparison}
 
-This section first compares the search results with the source paper's schedule at the reference configuration, then examines the effect of non-ideal inner-qubit noise and outer-photon noise.
+This section first compares the search results with the source paper's schedule at the reference configuration, then examines the effect of non-ideal inner-qubit noise, outer-photon noise, and heterogeneous per-hop conditions.
 
 \subsection{Headline Comparison}
 \label{sec:exp:headline}
@@ -63,16 +59,14 @@ The optimizer was also evaluated under non-ideal inner-qubit errors and differen
 
 \input{tables/network_generalization}
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/results/fidelity_by_config.png}
     \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$. Hatched bars fall below the $F_{\min}=0.9$ threshold. The paper schedule is infeasible under both non-ideal configurations, while the schedules found by search remain feasible.}
     \label{fig:netgen}
-\end{figure}
+\end{figure*}
 
 The main result is a difference in feasibility rather than a rate improvement: the paper schedule is infeasible in both non-ideal configurations, while the searched schedules remain feasible at the same budget. Rate values for an infeasible schedule are therefore not directly comparable to those of a feasible one.
-
-\TOFIX{here or in the experimental setup?}{The tree branching factor is not used as a sensitivity axis in this chapter because it does not affect $F$, $C$, or $R$ in the model of Chapter~\ref{chap:model}. Hop length is considered separately below; uniformly rescaling every hop length would multiply all schedule latencies by the same factor and leave relative schedule comparisons unchanged, whereas the heterogeneous hop lengths tested in Section~\ref{sec:exp:heterogeneous} change the relative physical conditions between hops.}
 
 \subsection{Per-Hop Heterogeneous Networks}
 \label{sec:exp:heterogeneous}
@@ -82,10 +76,7 @@ The main result is a difference in feasibility rather than a rate improvement: t
 
 Section~\ref{sec:exp:netgen} changes the noise model while keeping it uniform across hops. A real-world deployment, by contrast, can have different link lengths, hardware quality, and error rates from one hop to another. This section tests that setting by assigning each hop's length, inner-qubit error rates, and arm count independently at random. The search remains non-adaptive: the schedule is fixed once selected, and only the network configuration supplied to the search changes.
 
-% OLD PART OF PARAGRAPH (removed because contained too much commenting on the table itself)
-% At $E_{\max}=50$ and $F_{\min}=0.9$, the best uniform link-level strategy is infeasible, while the optimizer finds a feasible schedule at lower cost. Table~\ref{tab:weaklink} reports the detailed comparison.
-
-A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example. A designed weak-link experiment further illustrates the benefit of allocating purification resources unevenly across a heterogeneous chain. The detailed results are provided in Table~\ref{tab:weaklink} in Appendix~\ref{app:sweeps}.
+A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example of the benefit of allocating purification resources unevenly across a heterogeneous chain. The detailed results are provided in Table~\ref{tab:weaklink} in Appendix~\ref{app:sweeps}.
 
 The same tendency is observed over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$). Among the networks for which a feasible uniform link-level candidate exists, the optimizer improves rate by a mean of $20.37\%$ and does not perform worse in the tested sample. Further interpretation of this behaviour is deferred to Chapter~\ref{chap:discussion}.
 
@@ -96,13 +87,13 @@ The same tendency is observed over 100 independently generated random $N=6$ netw
 
 Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the corresponding rate and fidelity curves for the paper baseline, the matched-cost optimizer, and the budget-relaxed optimizer. At low noise, the three variants remain close; the rate curves begin to separate visibly around $e_d=0.004$. The matched-cost optimizer may also change schedule structure as the noise level varies, so its curve represents the best cost-$100$ result at each point rather than a single fixed schedule followed throughout the sweep. Further interpretation of these transitions is given in Chapter~\ref{chap:discussion}.
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=0.48\textwidth]{figures/results/rate_vs_ed.png}
     \includegraphics[width=0.48\textwidth]{figures/results/fidelity_vs_ed.png}
     \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer.}
     \label{fig:edsweep}
-\end{figure}
+\end{figure*}
 
 \section{Cost-Quality Tradeoffs}
 \label{sec:exp:tradeoffs}
@@ -116,13 +107,13 @@ With a permissive objective ($F_{\min}=0$, $E_{\max}=150$), the beam search eval
 
 In the fidelity-cost projection, the paper schedule lies inside the frontier, while the frontier changes little once the cost exceeds approximately $C=60$. The paper schedule and the uniform link-level baseline are marked for reference. Appendix~\ref{app:dags} discusses the schedule \glspl{dag} corresponding to the key optima cited here and in Section~\ref{sec:exp:headline}.
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=0.48\textwidth]{figures/results/fidelity_vs_cost_n10.png}
     \includegraphics[width=0.48\textwidth]{figures/results/fidelity_vs_rate_n10.png}
     \caption{Pareto frontiers at $N=10$, $e_d=0.01$, and $E_{\max}=150$, over the candidates evaluated by the beam search under a permissive objective ($F_{\min}=0$). Grey points are dominated candidates; connected points form the non-dominated frontier under each pair of objectives.}
     \label{fig:pareto}
-\end{figure}
+\end{figure*}
 
 \paragraph{Alternative objectives}
 \label{sec:exp:objectives}
@@ -147,12 +138,12 @@ These fitted values describe the minimum budget found within the searched schedu
 
 Appendix~\ref{app:sweeps} additionally reports the minimum feasible budget as a function of $e_d$ at fixed $N=10$.
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/min_budget_vs_n.png}
     \caption{Minimum feasible $E_{\max}$ required to reach $F_{\min}=0.9$ as a function of $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the descriptive power-law fit $E_{\max}^{\min}\approx1.192\,N^{1.666}$. Solid markers and the solid portion of the fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range and does not represent additional measured data.}
     \label{fig:budget}
-\end{figure}
+\end{figure*}
 
 Appendix~\ref{app:results} (Section~\ref{sec:exp:excluded}) reports a related optimality-scope check at $N=18$, where a hand-constructed schedule using a same-span construction excluded from the search reaches the paper's own budget.
 
@@ -162,3 +153,5 @@ Appendix~\ref{app:results} (Section~\ref{sec:exp:excluded}) reports a related op
 % Source: outputs/sweep_gamma_and_tau_emit/README.md
 
 Memory dephasing and generation latency affect schedules through their timing structure, including the placement of \texttt{HeraldNode}s and \texttt{IdleNode}s (Section~\ref{sec:model:dag}). Sweeping the memory dephasing rate $\gamma$ leaves the raw chain and paper schedule unchanged over the tested range, while heralded end-node pumping degrades as $\gamma$ increases because its sacrificial copies remain in memory during the round-trip heralding delays. The schedules selected by the optimizer remain flat over the tested range because the search favours optimistic schedules. Sweeping the generation latency $\tau_{\mathrm{emit}}$ reduces the rate of every schedule. Detailed timing curves and the corresponding parameter sweeps are given in Appendix~\ref{app:sweeps}.
+
+\TODO{figure currently in appendix here?}
