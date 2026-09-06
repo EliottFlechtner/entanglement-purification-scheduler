@@ -1,14 +1,14 @@
 \begin{table}[h]
-    \centering
-    \caption{Designed weak-link contrast: one hop at $12\times$ the inner-qubit error rate of its neighbours ($N=5$, $e_d=0.01$, $E_{\max}=50$, $F_{\min}=0.9$). Feasible marks whether the schedule clears the fidelity floor $F\ge F_{\min}$.}
-    \label{tab:weaklink}
-    \small
-    \begin{tabular}{lcccc}
-        \hline
-        Schedule & $C$ & $F$ & Feasible & Rate \\
-        \hline
-        Best uniform link-level recipe & 40 & 0.88 & \textbf{no} & 1738.32 \\
-        Optimizer's schedule & 38 & 0.90 & yes & 1798.57 \\
-        \hline
-    \end{tabular}
+\centering
+\caption{Designed weak-link contrast for a heterogeneous $N=5$ network at $e_d=0.01$, $E_{\max}=50$, and $F_{\min}=0.9$. One hop has an inner-qubit error rate $12\times$ higher than its neighbours. The uniform link-level baseline uses the same purification configuration at every hop, whereas the optimizer may allocate resources differently across hops. A schedule is feasible when $F\ge F_{\min}$.}
+\label{tab:weaklink}
+\small
+\begin{tabular}{lcccc}
+\hline
+Schedule & $C$ & $F$ & Feasible & Rate \\
+\hline
+Best uniform link-level recipe & 40 & 0.88 & \textbf{no} & 1738.32 \\
+Optimizer's schedule & 38 & 0.90 & yes & 1798.57 \\
+\hline
+\end{tabular}
 \end{table}

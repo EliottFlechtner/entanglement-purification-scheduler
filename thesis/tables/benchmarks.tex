@@ -1,21 +1,17 @@
-% Kept in the main text (rather than an appendix) because it backs the
-% no-timeout claim of Section~\ref{sec:exp:runtime} and, with the exact
-% DP score column below, the pumping caveat of Section~\ref{sec:alg:pumping}.
-
 \begin{table}[ht]
 \centering
-\caption{Wall-clock search time and score at representative chain lengths $N$, under the paper's $E_{\max}=10N$ generation-cost budget, $F_{\min}=0.9$, beam width $w_{\text{beam}}=25$, same-span pumping enabled (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a 3~GiB memory cap. Score is the returned candidate's value of whichever quantity the active objective maximizes (Section~\ref{sec:alg:beam}, Section~\ref{sec:model:objectives}); under the default rate-maximizing objective used here, this is the candidate's rate $R(\Sigma)$. \textsuperscript{$\dagger$}At $N=18$ the exact dynamic program completes within the timeout but finds no candidate clearing the fidelity floor (score $-\infty$), while the beam search does; \textsuperscript{$\ddagger$}at $N=6$ the exact program's own best score is lower than the beam search's. Both cases occur because the exact program's own same-span pumping move is itself beam-limited by default (Section~\ref{sec:alg:pumping}), so it is not a guaranteed upper bound on the beam search once pumping is enabled.}
+\caption{Wall-clock runtime and returned score for the exact dynamic program and beam search at representative chain lengths. Unless otherwise stated, each run uses the paper budget $E_{\max}=10N$, fidelity threshold $F_{\min}=0.9$, beam width $w_{\text{beam}}=25$, same-span pumping enabled (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a 3~GiB memory limit. The score is the value of the quantity maximized by the active objective (Section~\ref{sec:alg:beam}); under the default rate-maximizing objective used here, the score is the returned schedule rate $R(\Sigma)$. \textsuperscript{$\dagger$}At $N=18$, the exact dynamic program completes within the timeout but finds no feasible candidate, so its score is $-\infty$, whereas the beam search returns a feasible candidate. \textsuperscript{$\ddagger$}At $N=6$, the exact dynamic program returns a lower score than the beam search. These cases occur because same-span pumping is itself beam-limited in the implementation, so the pumping-enabled exact dynamic program is not a guaranteed upper bound on the beam search (Section~\ref{sec:alg:pumping}).}
 \label{tab:runtimes}
 \small
 \begin{tabular}{rrllrr}
 \toprule
 $N$ & $E_{\max}$ & Exact DP (s) & Beam search (s) & Exact DP score & Beam search score \\
 \midrule
- 2 &  20 &   0.10 &   0.10 & 50\,000 & 50\,000     \\
- 6 &  60 &   3.82 &   3.34 & 14\,372\textsuperscript{$\ddagger$} & 15\,391     \\
-10 & 100 &  20.43 &  16.50 &  6\,196 &  6\,196     \\
-14 & 140 &  85.37 &  66.93 &  3\,394 &  3\,394     \\
-18 & 180 & 203.68\textsuperscript{$\dagger$} & 153.52 & $-\infty$ &  1\,214     \\
+2  & 20  & 0.10 & 0.10 & 50\,000 & 50\,000 \\
+6  & 60  & 3.82 & 3.34 & 14\,372\textsuperscript{$\ddagger$} & 15\,391 \\
+10 & 100 & 20.43 & 16.50 & 6\,196 & 6\,196 \\
+14 & 140 & 85.37 & 66.93 & 3\,394 & 3\,394 \\
+18 & 180 & 203.68\textsuperscript{$\dagger$} & 153.52 & $-\infty$ & 1\,214 \\
 \bottomrule
 \end{tabular}
 \end{table}

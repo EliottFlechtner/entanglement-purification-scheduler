@@ -1,19 +1,19 @@
 \begin{table}[h]
-    \centering
-    \caption{Optimizer vs.\ paper schedule under two non-idealized network configurations (non-zero inner-qubit error $p_X^{\mathrm{in}}=p_Z^{\mathrm{in}}=3\times10^{-3}$, unlike the source paper's own noiseless assumption), distinguished by \Gls{bsm} arm count, at $N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$. \textbf{no} marks a schedule that falls below $F_{\min}=0.9$.}
-    \label{tab:netgen}
-    \small
-    \begin{tabular}{llcccc}
-        \hline
-        Config & Schedule & $C$ & $F$ & Rate & Feasible \\
-        \hline
-        18 arms & Paper schedule & 100 & 0.67 & 103.18 & \textbf{no} \\
-        18 arms & Matched-cost & 100 & 0.90 & 25.31 & yes \\
-        18 arms & Budget-relaxed & 80 & 0.90 & 85.30 & yes \\
-        \hline
-        6 arms & Paper schedule & 100 & 0.87 & 871.55 & \textbf{no} \\
-        6 arms & Matched-cost & 100 & 0.93 & 681.56 & yes \\
-        6 arms & Budget-relaxed & 60 & 0.91 & 2096.91 & yes \\
-        \hline
-    \end{tabular}
+\centering
+\caption{Optimizer versus the paper schedule under two non-ideal network configurations. Both use $N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$, and non-zero inner-qubit error $p_X^{\mathrm{in}}=p_Z^{\mathrm{in}}=3\times10^{-3}$, unlike the source paper's idealized inner-qubit assumption. The configurations differ in the number of redundant \Gls{bsm} arms per hop. A schedule is feasible when $F\ge F_{\min}=0.9$.}
+\label{tab:netgen}
+\small
+\begin{tabular}{llcccc}
+\hline
+Config & Schedule & $C$ & $F$ & Rate & Feasible \\
+\hline
+18 arms & Paper schedule & 100 & 0.67 & 103.18 & \textbf{no} \\
+18 arms & Matched-cost & 100 & 0.90 & 25.31 & yes \\
+18 arms & Budget-relaxed & 80 & 0.90 & 85.30 & yes \\
+\hline
+6 arms & Paper schedule & 100 & 0.87 & 871.55 & \textbf{no} \\
+6 arms & Matched-cost & 100 & 0.93 & 681.56 & yes \\
+6 arms & Budget-relaxed & 60 & 0.91 & 2096.91 & yes \\
+\hline
+\end{tabular}
 \end{table}

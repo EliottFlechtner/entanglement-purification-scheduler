@@ -1,25 +1,22 @@
 \begin{table}[ht]
 \centering
-\caption{Experimental parameters: nominal values and sweep ranges. All other hop-level parameters follow the Integrating paper's~\cite{Benchasattabuse2025Integrating} reference configuration $\mathcal{N}_\text{ref}$ (Section~\ref{sec:model:network}).}
+\caption{Experimental parameters. The reference column gives the nominal value used unless a parameter is varied in the indicated experiment. All parameters not listed as varying follow the Integrating paper's~\cite{Benchasattabuse2025Integrating} reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}).}
 \label{tab:params}
 \small
 \begin{tabular}{p{4.8cm}llp{3.2cm}}
 \toprule
 Parameter & Reference & Sweep range & Where varied \\
 \midrule
-% integrate as rows: ($\ell_i=2$~km, branching $(16,14,1)$, $c=2\!\times\!10^5$~km/s)
-
 $N$ (hop count) & 10 & 10--28 & Section~\ref{sec:exp:budget} \\
 $\ell_i$ (hop length) & 2~km & 1, 2, 3, 4~km & Section~\ref{sec:exp:heterogeneous} \\
-$c$ (speed of light in fiber) & $2\!\times\!10^5$~km/s & $2\!\times\!10^5$~km/s & Section~\ref{sec:exp:timing} \\
-branching (tree structure) & (16,14,1) & (16,14,1) & Section~\ref{sec:exp:netgen} \\
-$e_d$ (depolarizing rate) & 0.01 & $[0,\,0.01]$ & Section~\ref{sec:exp:edsweep} \\
-$E_{\max}$ (resource budget) & 100 & varies & Sections~\ref{sec:exp:headline}--\ref{sec:exp:budget} \\
-$p_X^{\mathrm{in}}, p_Z^{\mathrm{in}}$ (inner-qubit error) & 0 & 0, $3\!\times\!10^{-3}$ & Section~\ref{sec:exp:netgen} \\
-$k_i$ (BSM arm count) & 18 & 6, 18 & Section~\ref{sec:exp:netgen} \\
+$c$ (propagation speed) & $2\!\times\!10^5$~km/s & $2\!\times\!10^5$~km/s & Section~\ref{sec:exp:timing} \\
+branching (tree structure) & $(16,14,1)$ & $(16,14,1)$ & Section~\ref{sec:exp:netgen} \\
+$e_d$ (outer-photon depolarizing rate) & 0.01 & $[0,\,0.01]$ & Section~\ref{sec:exp:edsweep} \\
+$E_{\max}$ (generation-cost budget) & 100 & varies & Sections~\ref{sec:exp:headline}--\ref{sec:exp:budget} \\
+$p_X^{\mathrm{in}},p_Z^{\mathrm{in}}$ (inner-qubit error rates) & 0 & 0, $3\!\times\!10^{-3}$ & Section~\ref{sec:exp:netgen} \\
+$k_i$ (\Gls{bsm} arm count) & 18 & 6, 18 & Section~\ref{sec:exp:netgen} \\
 $\gamma$ (memory dephasing rate) & 0 & $[0,\,10^5]$ & Section~\ref{sec:exp:timing} \\
 $\tau_{\mathrm{emit}}$ (emission delay) & 0 & $[10^{-4},\,10^0]$ & Section~\ref{sec:exp:timing} \\
-% Per-hop $\ell_i,\,p_{X,i}^{\mathrm{in}},\,p_{Z,i}^{\mathrm{in}},\,k_i$ (independently random per hop) & uniform across hops & $\ell_i\!\in\![1,4]$~km, $p_{X,i}^{\mathrm{in}},p_{Z,i}^{\mathrm{in}}\!\in\![0,\,6\!\times\!10^{-3}]$, $k_i\!\in\!\{6,10,14,18\}$ & Section~\ref{sec:exp:heterogeneous} \\
 \bottomrule
 \end{tabular}
 \end{table}

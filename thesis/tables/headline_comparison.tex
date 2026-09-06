@@ -1,19 +1,16 @@
-\begin{table}[h]
-    \centering
-    \caption{Headline comparison at $N=10$, $e_d=0.01$: paper schedule and searched variants.}
-    \label{tab:headline}
-    \small
-    \begin{tabular}{lcccl}
-        \hline
-        Schedule & $C$ & $F$ & Rate & Note \\
-        \hline
-        Paper schedule & 100 & 0.93 & 4055.92 & hand-picked \\
-        Matched-cost & 100 & 0.92 & 4158.14 & +2.5\% rate \\
-        Budget-relaxed & 60 & 0.91 & 6195.95 & +52.8\% rate, 60\% of cost \\
-        Budget-relaxed, pumping disabled & 50 & 0.90 & 6713.18 & lower cost still \\
-        \hline
-    \end{tabular}
+\begin{table}[ht]
+\centering
+\caption{Headline comparison at the reference configuration ($N=10$, $e_d=0.01$, $F_{\min}=0.9$, $E_{\max}=100$). The paper schedule is the hand-picked Fig.\,4 construction from the Integrating paper~\cite{Benchasattabuse2025Integrating}. Matched-cost search fixes $C=100$; budget-relaxed search allows any schedule with $C\le100$. Rate is $R=P_{\mathrm{success}}/T_{\mathrm{attempt}}$.}
+\label{tab:headline}
+\small
+\begin{tabular}{lcccl}
+\hline
+Schedule & $C$ & $F$ & Rate & Note \\
+\hline
+Paper schedule & 100 & 0.93 & 4055.92 & hand-picked \\
+Matched-cost & 100 & 0.92 & 4158.14 & +2.5\% rate \\
+Budget-relaxed & 60 & 0.91 & 6195.95 & +52.8\% rate, 60\% of cost \\
+Budget-relaxed, pumping disabled & 50 & 0.90 & 6713.18 & lower cost still \\
+\hline
+\end{tabular}
 \end{table}
-
-% Kept as a quick-reference table: Section~\ref{sec:exp:headline}'s main
-% text stays qualitative and points here for the actual numbers.
