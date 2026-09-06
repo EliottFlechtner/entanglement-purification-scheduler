@@ -1,6 +1,21 @@
 \chapter{Additional Experimental Results}
 \label{app:results}
 
+\TODO{marker=DAG\_EXAMPLE to refer back to this figure from the main text (Section~\ref{sec:model:dag})}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
+    \caption{\small%
+        $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves).
+        \textbf{Copy~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw.
+        \textbf{Copy~B} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}.
+        The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}.
+        The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}).
+        \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$. Edges run bottom-to-top.
+    }
+    \label{fig:model:dag-example}
+\end{figure}
+
 \section{Validation Figures}
 \label{app:validation}
 

@@ -93,19 +93,21 @@ The implementation checks the root, graph structure, and stage consistency befor
 
 This representation was checked against the source paper's own Fig.\,4 schedule~\cite{Benchasattabuse2025Integrating}, which builds one Bell pair from purified individual links, a second from two purified 5-hop segments, and a third with no purification at all, then combines all three with a final purification round at the end nodes. It combines branches purified to different degrees and built up in different ways, and this is exactly the class of schedule this model can express: allowing $\kappa$ to be an arbitrary span, and requiring \texttt{PurifyNode} to check only $\kappa$ and not how each branch was built, is what makes that combination legal.
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
-    \caption{\small%
-        $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves).
-        \textbf{Copy~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw.
-        \textbf{Copy~B} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}.
-        The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}.
-        The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}).
-        \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$. Edges run bottom-to-top.
-    }
-    \label{fig:model:dag-example}
-\end{figure}
+\TODO{figure added in appendix (marker = DAG\_EXAMPLE); need to make sure the reference back to here is clear }
+
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
+%     \caption{\small%
+%         $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves).
+%         \textbf{Copy~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw.
+%         \textbf{Copy~B} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}.
+%         The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}.
+%         The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}).
+%         \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$. Edges run bottom-to-top.
+%     }
+%     \label{fig:model:dag-example}
+% \end{figure}
 
 Section~\ref{sec:exp:validation} confirms that this representation is not merely descriptive: evaluating the raw, heralded, and optimistic end-node pumping schedules (defined in Section~\ref{sec:alg:bruteforce}) through the same bottom-up pass used elsewhere in this thesis reproduces the source paper's fidelity values to four significant figures.
 
