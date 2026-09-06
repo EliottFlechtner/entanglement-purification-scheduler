@@ -6,9 +6,9 @@
 
 % Every result in this chapter concerns the Integrating paper~\cite{Benchasattabuse2025Integrating}: unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, every mention of ``the source paper'' below refers to the Integrating paper, the source of both the Fig.\,4 hand-picked schedule (Section~\ref{sec:exp:baselines}) and the Fig.\,5 fidelity benchmarks (Section~\ref{sec:exp:validation}) this chapter's comparisons are built around. This chapter uses \emph{the paper schedule} for that Fig.\,4 example throughout, to avoid ambiguity with the schedule \Gls{dag} formalism of Chapter~\ref{chap:model}.
 
-All experiments use the beam search ($w_{\text{beam}}=25$, Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}, unless stated otherwise. The reference configuration is $\mathcal{N}_{\mathrm{ref}}$ with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$, matching the source paper's main experimental setting. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' in this chapter refers to the Integrating paper~\cite{Benchasattabuse2025Integrating}, whose Fig.\,4 schedule and Fig.\,5 fidelity results provide the main comparison points.
+\TOFIX{repeating the paramters and sweeps part? fix oth paragraphs}{All experiments use the beam search ($w_{\text{beam}}=25$, Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}, unless stated otherwise. The reference configuration is $\mathcal{N}_{\mathrm{ref}}$ with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$, matching the source paper's main experimental setting. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' in this chapter refers to the Integrating paper~\cite{Benchasattabuse2025Integrating}, whose Fig.\,4 schedule and Fig.\,5 fidelity results provide the main comparison points.}
 
-\TODO{add smaller intro paragraph to announce structure + say that appendix is to be added}
+This chapter first establishes that the evaluator reproduces the source paper's physical results, then compares the paper schedule with schedules found by search. It next examines how those results change under non-ideal and heterogeneous network conditions, followed by cost-quality tradeoffs and scaling with chain length. The chapter closes with timing sensitivity; additional runtime, beam-width, and sweep results are collected in Appendix~\ref{app:sweeps}.
 
 \section{Experimental Setup}
 \label{sec:exp:setup}
@@ -18,16 +18,14 @@ All experiments use the beam search ($w_{\text{beam}}=25$, Section~\ref{sec:alg:
 \paragraph{Parameters and sweeps}
 \label{sec:exp:params}
 
-\TOFIX{totally repeats intro??}{Unless stated otherwise, every experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all other parameters remain fixed. The search uses beam width $w_{\text{beam}}=25$ and the fixed schedule families of Section~\ref{sec:alg:bruteforce}. Table~\ref{tab:params} lists the parameters varied in this chapter.}
-
-
+Unless stated otherwise, every experiment starts from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}) and changes only the parameters specified for that experiment; all other parameters remain fixed. Table~\ref{tab:params} lists the parameters varied in this chapter.
 
 \input{tables/experiment_parameters}
 
 \paragraph{Search method runtime}
 \label{sec:exp:runtime}
 
-Both the exact dynamic program (Section~\ref{sec:alg:dp}) and the beam search, using beam width 25 and with same-span pumping move enabled (Section~\ref{sec:alg:pumping}), complete within the tested range $N\le18$ without reaching the 300~s timeout imposed on each configuration. Table~\ref{tab:runtimes} reports the corresponding wall-clock times under the paper's $E_{\max}=10N$ budget.
+Both the exact dynamic program (Section~\ref{sec:alg:dp}) and the beam search, using beam width 25 and with the same-span pumping move enabled (Section~\ref{sec:alg:pumping}), complete within the tested range $N\le18$ without reaching the 300~s timeout imposed on each configuration. Table~\ref{tab:runtimes} reports the corresponding wall-clock times under the paper's $E_{\max}=10N$ budget.
 
 \input{tables/benchmarks}
 
@@ -52,7 +50,7 @@ The evaluator of Section~\ref{sec:alg:evaluator} reproduces the source paper's F
 \section{Optimizer versus the Paper Schedule}
 \label{sec:exp:comparison}
 
-This section first compares the search results with the source paper's schedule at the reference configuration, then tests the effect of non-ideal inner-qubit noise and outer-photon noise.
+This section first compares the search results with the source paper's schedule at the reference configuration, then examines the effect of non-ideal inner-qubit noise and outer-photon noise.
 
 \subsection{Headline Comparison}
 \label{sec:exp:headline}
@@ -60,7 +58,7 @@ This section first compares the search results with the source paper's schedule 
 % Source: outputs/headline_experiment_n10/README.md,
 %          outputs/sweep_network_sensitivity/README.md
 
-At $N=10$ and $e_d=0.01$, the optimizer improves on the paper schedule at both matched cost and under a relaxed budget. Table~\ref{tab:headline} reports the four variants. At matched cost, the optimizer returns $F=0.9168$ and $R=4158.14$ at $C=100$, compared with $F=0.9295$ and $R=4055.92$ for the paper schedule, giving a $2.5\%$ rate improvement while remaining above the fidelity floor. With the budget relaxed and same-span pumping enabled (Section~\ref{sec:alg:pumping}), the optimizer returns $C=60$, $F=0.9063$, and $R=6195.95$, using $60\%$ of the paper schedule's cost while increasing rate by $52.8\%$. With pumping disabled, the search instead returns $C=50$, $F=0.9047$, and $R=6713.18$. \TOFIX{not sure about keeping this}{This result predates the pumping extension and is retained as a historical comparison; both search settings are reported because they are used elsewhere in this thesis.}
+At $N=10$ and $e_d=0.01$, the optimizer improves on the paper schedule at both matched cost and under a relaxed budget. Table~\ref{tab:headline} reports the four variants. At matched cost, the optimizer returns $F=0.9168$ and $R=4158.14$ at $C=100$, compared with $F=0.9295$ and $R=4055.92$ for the paper schedule, giving a $2.5\%$ rate improvement while remaining above the fidelity floor. With the budget relaxed and same-span pumping enabled (Section~\ref{sec:alg:pumping}), the optimizer returns $C=60$, $F=0.9063$, and $R=6195.95$, using $60\%$ of the paper schedule's cost while increasing rate by $52.8\%$. With pumping disabled, the search instead returns $C=50$, $F=0.9047$, and $R=6713.18$. Both search settings are retained in the comparison because the pumping extension changes the beam-limited search space and is studied separately in Section~\ref{sec:alg:pumping}.
 
 \input{tables/headline_comparison}
 
@@ -90,11 +88,9 @@ The tree branching factor is not used as a sensitivity axis in this chapter beca
 % Source: outputs/random_network_adaptation/{30 seeds,100 seeds}/README.md,
 %         src/hrgs_scheduler/models/random_network.py
 
-Section~\ref{sec:exp:netgen} changes the noise model while keeping it uniform across hops. A \TOFIX{is wording ok to mean "IRL network/ a quantum network deployed in real life conditions"}{real deployed network}, by contrast, can have different link lengths, hardware quality, and error rates from one hop to another. This section tests that setting by assigning each hop's length, inner-qubit error rates, and arm count independently at random. The search remains non-adaptive: the schedule is fixed once selected, and only the network configuration supplied to the search changes.
+Section~\ref{sec:exp:netgen} changes the noise model while keeping it uniform across hops. A real-world deployment, by contrast, can have different link lengths, hardware quality, and error rates from one hop to another. This section tests that setting by assigning each hop's length, inner-qubit error rates, and arm count independently at random. The search remains non-adaptive: the schedule is fixed once selected, and only the network configuration supplied to the search changes.
 
 A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete test. At $E_{\max}=50$ and $F_{\min}=0.9$, the best uniform link-level candidate has $C=40$ and $F=0.88$ and is infeasible, while the optimizer finds a schedule with $C=38$, $F=0.90$, and $R=1798.57$ that clears the threshold by allocating resources differently across the hops.
-
-\TODO{put in separate file}
 
 \input{tables/weak_link_contrast.tex}
 
