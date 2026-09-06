@@ -1,0 +1,167 @@
+\chapter{Background and Preliminaries}
+\label{chap:background}
+
+This chapter introduces the physical operations and mathematical quantities that Chapter~\ref{chap:model} assembles into a searchable schedule model.
+
+Section~\ref{sec:bg:networks} reviews Bell pairs and the \Gls{hrgs} repeater architecture proposed in the Bridging paper, whose fixed protocol-level operations form what Chapter~\ref{chap:model} calls the \emph{backbone layer}. Section~\ref{sec:bg:errors} introduces the two quantities used to track a resource's quality through a schedule: the error vector and the Z side-effect parity, together with the decoherence law that acts on the former while a resource is idle. Section~\ref{sec:bg:purification} then covers the Integrating paper's purification circuits and the distinction between heralded and optimistic execution, which determines their timing cost.
+
+\section{Quantum Networks and Repeaters}
+\label{sec:bg:networks}
+
+\subsection{Bell Pairs and Fidelity}
+\label{sec:bg:bellpairs}
+
+A Bell pair is an entangled two-qubit state shared between two nodes. The canonical Bell state is
+\[
+    \ket{\Phi^+} = \frac{1}{\sqrt{2}}\bigl(\ket{00} + \ket{11}\bigr).
+\]
+Its quality is measured by a single scalar, the fidelity $F = \bra{\Phi^+}\rho\ket{\Phi^+}$, which quantifies how close the shared state $\rho$ is to a perfect pair ($F_\text{max}=1$). Depolarising noise on the transmitted qubit and memory decoherence reduce $F$; photon loss instead lowers the probability that a pair can be established in the first place. Chapter~\ref{chap:model} evaluates each finished schedule by its fidelity, rate, and resource cost for producing such a pair between the end nodes. Improving one of these quantities is meaningful only relative to this definition of $F$.
+
+\glsreset{bsm}
+
+While Chapter~\ref{chap:related} surveys why direct photonic transmission cannot distribute such pairs over long distances, we introduce here the elementary operation used to establish and extend links: a two-qubit \Gls{bsm}. Realized with passive linear optics and no ancillary photons, a \Gls{bsm} succeeds with probability at most 50\% per attempt, conditional on the photons arriving~\cite{Ewert20143,Benchasattabuse2026Bridging}. This ceiling is why the architecture below builds redundancy into every hop.
+
+\subsection{Half-RGS Repeater Architecture}
+\label{sec:bg:hrgs}
+
+A \emph{graph state} associates one qubit with every vertex of a graph $\mathcal{G}=(V,E)$: each qubit starts in state $\ket{+}$ and a controlled-$Z$ gate is applied along every edge of the graph~\cite{Briegel2001Persistent,Raussendorf2003Measurementbased,Hein2004Multiparty,Hein2006Entanglement}. The result is a multipartite entangled resource whose measurement outcomes at one vertex can be used, with appropriate local single-qubit operations, to establish entanglement between other vertices~\cite{Raussendorf2002oneway,Raussendorf2003Measurementbased,Zwerger2012Measurementbased}. This is the underlying resource of the architectures surveyed in Section~\ref{sec:rw:rgs}, including the one this thesis builds on.
+
+A \emph{repeater graph state} (\Gls{rgs}) is one such graph state, with $2m$ inner qubits and $2m$ outer qubits, where $m$ is the number of outer-qubit arms on each side. It is proposed as the basis for a memory-free all-photonic quantum repeater~\cite{Azuma2015All}. The inner qubits form a complete bipartite graph and are tree-encoded~\cite{Varnava2006Loss}, allowing the logical measurements required by the protocol to be performed despite photon loss~\cite{Varnava2008How}. Each outer qubit is attached to one inner qubit and is consumed by a \Gls{bsm} with a neighbouring station. Such a network has two station types: \Gls{rgss} nodes, which generate the \Gls{rgs} and hold it only until it is transmitted, and \Gls{absa} nodes, which perform the \Glspl{bsm} between neighbouring stations and forward only the resulting entanglement, never generating anything themselves~\cite{Azuma2015All,Benchasattabuse2026Bridging}.
+
+The Bridging paper's own contribution is the \Gls{hrgs}: half of an \Gls{rgs}, consisting of an \emph{anchor qubit} together with its associated inner and outer qubits, generated and held at a single station rather than requiring the full $2m$-qubit state to exist in one place~\cite{Benchasattabuse2026Bridging}. Two \Glspl{hrgs} are combined into a full \Gls{rgs} by a controlled-phase gate followed by an $XX$ measurement on their two anchor qubits, which realizes entanglement swapping -- called \emph{Swap} in this thesis -- and is treated as a single operation throughout (Section~\ref{sec:bg:backbone}). Because a \Gls{hrgs} only needs to be generated and briefly held, an end node can act as its own source: it generates a \Gls{hrgs} using its stationary anchor and emits the photonic qubits toward its neighbouring \Gls{absa}, rather than requiring a separate \Gls{rgss}. This is what lets end-node memory scale additively with the number of hops instead of multiplicatively, the central resource-saving claim of the Bridging paper.
+
+An $N$-hop chain between two end nodes has $N+1$ stations numbered $0,\dots,N$: stations $0$ and $N$ are the end nodes (Alice and Bob), and stations $1,\dots,N-1$ are \Gls{rgss} nodes. Every \Gls{rgss} generates a full \Gls{rgs} and distributes its two halves to the \Gls{absa} on each side; an end node generates only the one \Gls{hrgs} it needs and sends its photonic qubits to its single neighbouring \Gls{absa}. Each hop $i$, the link between stations $i-1$ and $i$, has one \Gls{absa} that receives outer qubits from both sides and performs the requisite \Glspl{bsm}, so that entanglement is established one hop at a time until it spans the whole chain~\cite{Benchasattabuse2026Bridging}.
+
+\subsection{Backbone Operations and Spans}
+\label{sec:bg:backbone}
+
+Because the \Gls{bsm}'s success probability is capped at 50\% (Section~\ref{sec:bg:bellpairs}), each hop provisions $k_i$ redundant outer-qubit arms rather than a single pair; Chapter~\ref{chap:model} uses $k_i$ as the per-hop arm-count parameter. At every \Gls{absa}, once one arm's \Gls{bsm} succeeds, that arm's inner qubits are \emph{kept}: the station \emph{discards} the redundancy by measuring every other arm's inner qubits in the $Z$ basis~\cite{Azuma2015All,Benchasattabuse2026Bridging}. This \emph{backbone selection} is forced by the protocol at every hop, on every trial.
+
+A resource that has not yet crossed any hop -- a freshly generated \Gls{hrgs} anchor or two such anchors combined by a Swap at the same station, for instance -- is still \emph{local} to its station of origin. Once a chain of \Glspl{bsm} and Swap operations connects stations across one or more hops, it forms a resource connecting stations $a$ and $b$. Its \emph{span} is written $\mathrm{Span}(a,b)$, or simply $(a,b)$ where no ambiguity arises. The symbol $\kappa$ denotes the current stage of a resource, either local to a single station or spanning some interval of the chain; Chapter~\ref{chap:model} gives this notation a full formal treatment. Two properties of spans matter for everything that follows:
+
+\begin{enumerate}
+    \item A resource's span is always a contiguous interval of stations, so that if it spans $(a,b)$ then it also spans every intermediate station $a < i < b$. This is because every backbone operation that extends a span (a \Gls{bsm} or a Swap) connects resources across adjacent stations or at a shared endpoint.
+    \item A resource's span is independent of its history. Two resources that have the same span $(a,b)$ may have reached that state by entirely different routes, e.g. one purified at every hop and the other not at all, since all that matters is the current extent of the span.
+\end{enumerate}
+
+Every \Gls{bsm}, arm measurement, and Swap operation also produces a possible Pauli-$Z$ side effect on the resulting resource, which must eventually be corrected. This side effect is what Section~\ref{sec:bg:sideffects} tracks formally; the key fact needed here is that resolving it costs only a small, constant amount of classical communication per \Gls{absa} per trial, regardless of how deep the tree-encoded inner qubits are, since each arm's side effects collapse to a couple of bits before the \Gls{absa} passes them on~\cite{Benchasattabuse2026Bridging}.
+
+\section{Error Representation}
+\label{sec:bg:errors}
+
+\subsection{The Error Vector}
+\label{sec:bg:errorvec}
+
+Just like the two source papers~\cite{Benchasattabuse2026Bridging,Benchasattabuse2025Integrating}, this thesis models outer-photon depolarising noise, tree-encoded inner-qubit measurement error, and memory decoherence (Section~\ref{sec:bg:decoherence}) as Pauli channels acting on an ideal Bell pair. Conditional on a successful transmission, the resulting state remains diagonal in the Bell basis at every stage. It is therefore represented by a real, normalized vector of four probabilities,
+\begin{equation}
+    \mathbf{e} = (w, x, y, z)^\top,
+    \qquad w+x+y+z=1,
+    \label{eq:errorvec}
+\end{equation}
+corresponding to the Bell-diagonal density operator
+\begin{equation}
+    \rho(\mathbf{e}) := w\,|\phi_{II}\rangle\!\langle\phi_{II}|
+        + x\,|\phi_{ZI}\rangle\!\langle\phi_{ZI}|
+        + y\,|\phi_{ZZ}\rangle\!\langle\phi_{ZZ}|
+        + z\,|\phi_{IZ}\rangle\!\langle\phi_{IZ}|.
+    \label{eq:bell-diagonal-state}
+\end{equation}
+
+The four components are the probabilities of no error, a $Z$ error on the first qubit only, a $Z$ error on both qubits, and a $Z$ error on the second qubit only, respectively~\cite{Benchasattabuse2025Integrating}. The first component $w$ is exactly the fidelity of Section~\ref{sec:bg:bellpairs} and it is the quantity Chapter~\ref{chap:model} reads off as the fidelity cost function $F(\Sigma;\mathcal{N})$. The same formalism describes a pre-transmission local pairing (an anchor and its own outer qubit, before either has crossed a hop) just as it does an established edge, which is what allows purification to be defined once and reused identically at every stage of the schedule (Section~\ref{sec:bg:purmath}). This representation is closed under every operation the backbone and scheduling layers perform.
+
+At the error-vector level, a \Gls{bsm} and a Swap operation apply the same bilinear composition rule to their two inputs:
+\begin{equation}
+    \mathrm{BSM}(\mathbf{e}_1,\mathbf{e}_2) =
+    \begin{bmatrix}
+        w_1 w_2 + x_1 x_2 + y_1 y_2 + z_1 z_2 \\
+        w_1 x_2 + x_1 w_2 + z_1 y_2 + y_1 z_2 \\
+        w_1 y_2 + y_1 w_2 + x_1 z_2 + z_1 x_2 \\
+        w_1 z_2 + z_1 w_2 + x_1 y_2 + y_1 x_2
+    \end{bmatrix},
+    \label{eq:bsmcompose}
+\end{equation}
+which again yields a Bell-diagonal vector~\cite{Benchasattabuse2025Integrating,Benchasattabuse2026Bridging}; purification (Section~\ref{sec:bg:purmath}) and idle-time decoherence (Section~\ref{sec:bg:decoherence}) preserve the same property. Two independent contributions feed into $\mathbf{e}$ as a resource crosses a hop: an outer-qubit term from the depolarising rate $e_d$ applied to the transmitted photon and an inner-qubit term from the tree-encoded measurement error rates $p^X_{\mathrm{in}}, p^Z_{\mathrm{in}}$, which contributes only to the independent $x$ and $z$ components, never to $y$~\cite{Benchasattabuse2026Bridging}. Under otherwise-isotropic noise, this biases the accumulated error toward independent single-sided $Z$ errors ($x$, $z$) over correlated two-sided ones ($y$), a bias that Section~\ref{sec:bg:circuits} shows the purification circuits can exploit.
+
+\subsection{Z Side-Effect Algebra}
+\label{sec:bg:sideffects}
+
+Independently of the error vector, every backbone operation (Section~\ref{sec:bg:backbone}) may flip the sign of the surviving qubit's stabilizers, a Pauli-$Z$ \emph{side effect}. Unlike $\mathbf{e}$, a side effect is exactly known once its source measurement outcome is known; it therefore needs only a single bit, $s\in\mathbb{F}_2$ per resource, rather than a probability distribution. Side effects compose by \gls{xor} whenever two resources are merged at a \Gls{bsm}, an arm measurement, or a Swap. This composition rule is exact, since a Pauli-$Z$ commutes through every other operation in the model up to a sign that is tracked the same way~\cite{Benchasattabuse2026Bridging}. The parity accumulated by a \Gls{hrgs} during its own generation, from the sequence of emitter operations used to build its tree-encoded inner qubits, is folded into this same bit before the \Gls{hrgs} is ever used, so no separate bookkeeping is needed for it. At the very end of a schedule, the total accumulated parity $s^{\mathrm{total}}$ at an end node is the \Gls{xor} of every contributing side effect and a single conditional correction $Z^{s^{\mathrm{total}}}$ applied at that point is enough to recover the intended state.
+
+This parity bookkeeping is separate from the error vector: $s$ determines the Pauli frame in which a resource is expressed, while $\mathbf{e}$ determines its noise. Since all side effects within an arm reduce to their \Gls{xor} parity, each arm contributes only the constant-size classical message noted in Section~\ref{sec:bg:backbone}, regardless of the depth of its tree encoding~\cite{Benchasattabuse2026Bridging}. The scheduler tracks the parity for correctness, but compares candidate schedules through the error vector and the cost functions derived from it.
+
+\subsection{Decoherence Model}
+\label{sec:bg:decoherence}
+
+While idle, a resource's error vector relaxes toward the maximally mixed state at a rate set by the memory's coherence time, $T_2 = 1/\gamma$, the standard coherence-time convention~\cite{Nielsen2010Quantum}:
+\[
+    \mathbf{e}(t) = \tfrac{1}{4}\mathbf{1} +
+    e^{-\gamma t}\bigl(\mathbf{e}(t_0) - \tfrac{1}{4}\mathbf{1}\bigr).
+\]
+This relaxation is applied locally and independently at every node of a schedule to the exact idle interval that node experiences, rather than just once as a single correction at the end. Consequently, two resources that wait for different durations must be decohered before they are combined; replacing those waits by one averaged duration after composition would generally produce a different error vector~\cite{Benchasattabuse2025Integrating,Benchasattabuse2026Bridging}.
+
+How much idle time a resource accumulates depends entirely on how a schedule is arranged, which is why the Integrating paper~\cite{Benchasattabuse2025Integrating} singles out three canonical timing patterns that later serve, in Chapter~\ref{chap:results}, as a validation target for this thesis' own cost functions:
+
+\begin{itemize}
+    \item \emph{Raw}: a chain with no purification at all, so every resource is used as soon as it is generated.
+    \item \emph{Baseline}: each purification round is heralded before the next round begins. This avoids speculative purification but incurs a separate classical confirmation delay after every round.
+    \item \emph{Optimistic}: generation and purification proceed back-to-back, with intermediate confirmation deferred until the end of the sequence. Section~\ref{sec:bg:optimistic} explains the resulting communication-time saving and its effect on rate.
+\end{itemize}
+
+\section{Entanglement Purification}
+\label{sec:bg:purification}
+
+\subsection{Purification Circuits: \texorpdfstring{$\mathcal C_\mathrm{YY}$, $\mathcal C_\mathrm{ZX}$, and $\mathcal C_\mathrm{XZ}$}{CYY, CZX, and CXZ}}
+\label{sec:bg:circuits}
+
+Purification trades copies for quality, as surveyed in Section~\ref{sec:rw:purification}. In this architecture, a circuit acts on two resources at the same span $\kappa$ (Section~\ref{sec:bg:backbone}) through a probabilistic \gls{locc} measurement. On success, it consumes the two inputs and leaves one output resource with an updated error vector; on failure, both inputs are discarded. The Integrating paper adapts this idea to the \Gls{rgs}-based resources used here~\cite{Benchasattabuse2025Integrating}. Three such circuits are available, distinguished by the stabilizer they jointly measure across the two input pairs: $\mathcal C_\mathrm{ZX}$ detects a $Z$ error on the second qubit of the pair, $\mathcal C_\mathrm{XZ}$ detects a $Z$ error on the first qubit~\cite{Deutsch1996Quantum}, and $\mathcal C_\mathrm{YY}$ detects the corresponding parity of $Z$ errors across the four qubits involved~\cite{Benchasattabuse2025Integrating}. Each circuit is heralded by comparing the two parties' local measurement outcomes; Section~\ref{sec:bg:optimistic} distinguishes immediate from deferred confirmation. Because the inner-qubit noise term biases accumulated error toward independent single-sided errors ($x$, $z$) rather than correlated ones ($y$), purification sequences can exploit this bias by applying $\mathcal C_\mathrm{YY}$ first, before switching to $\mathcal C_\mathrm{ZX}$ or $\mathcal C_\mathrm{XZ}$ (Section~\ref{sec:bg:errorvec}).
+
+\subsection{Success Probabilities and Output States}
+\label{sec:bg:purmath}
+
+The success probability and purified output vector for each
+circuit~\cite{Benchasattabuse2025Integrating} are:
+\begin{align}
+    P_{\mathcal C_\mathrm{ZX}}(\mathbf{e}_1,\mathbf{e}_2)
+        &= (w_1+x_1)(w_2+x_2)+(z_1+y_1)(z_2+y_2), \label{eq:pzx}\\
+    P_{\mathcal C_\mathrm{XZ}}(\mathbf{e}_1,\mathbf{e}_2)
+        &= (w_1+z_1)(w_2+z_2)+(x_1+y_1)(x_2+y_2), \label{eq:pxz}\\
+    P_{\mathcal C_\mathrm{YY}}(\mathbf{e}_1,\mathbf{e}_2)
+        &= (w_1+y_1)(w_2+y_2)+(x_1+z_1)(x_2+z_2). \label{eq:pyy}
+\end{align}
+\begin{align}
+    \mathrm{Pur}_{\mathcal C_\mathrm{ZX}}(\mathbf{e}_1,\mathbf{e}_2) &=
+        \frac{1}{P_{\mathcal C_\mathrm{ZX}}}
+        \begin{bmatrix}
+            w_1 w_2 + z_1 z_2 \\
+            z_1 w_2 + w_1 z_2 \\
+            x_1 y_2 + y_1 x_2 \\
+            x_1 x_2 + y_1 y_2
+        \end{bmatrix},
+    \label{eq:purzx}\\
+    \mathrm{Pur}_{\mathcal C_\mathrm{XZ}}(\mathbf{e}_1,\mathbf{e}_2) &=
+        \frac{1}{P_{\mathcal C_\mathrm{XZ}}}
+        \begin{bmatrix}
+            w_1 w_2 + x_1 x_2 \\
+            z_1 z_2 + y_1 y_2 \\
+            z_1 y_2 + y_1 z_2 \\
+            x_1 w_2 + w_1 x_2
+        \end{bmatrix},
+    \label{eq:purxz}\\
+    \mathrm{Pur}_{\mathcal C_\mathrm{YY}}(\mathbf{e}_1,\mathbf{e}_2) &=
+        \frac{1}{P_{\mathcal C_\mathrm{YY}}}
+        \begin{bmatrix}
+            w_1 w_2 + y_1 y_2 \\
+            x_1 z_2 + z_1 x_2 \\
+            y_1 w_2 + w_1 y_2 \\
+            x_1 x_2 + z_1 z_2
+        \end{bmatrix}.
+    \label{eq:puryy}
+\end{align}
+
+
+\subsection{Heralded versus Optimistic Purification}
+\label{sec:bg:optimistic}
+
+In the \emph{heralded} model, each purification round waits for a full classical round-trip ($2L/c$, where $L$ is the end-to-end fiber length and $c$ is the signal propagation speed) to confirm the previous round's success before the next round begins. The \emph{optimistic} (or blind) model~\cite{Mobayenjarihani2023Optimistic,Benchasattabuse2025Integrating} instead runs generation and purification back-to-back without intermediate confirmation: operations are executed speculatively, and their classical outcomes are compared only in a deferred communication phase at the end. This replaces the $n_{\mathrm{pur}}$ round-trip heraldings that heralded execution would otherwise require with a single final heralding phase, which is the main source of the rate advantage reported in~\cite{Benchasattabuse2025Integrating}.
+
+Crucially, \emph{optimistic} is not a property of an individual purification operation. It follows from the placement of heralding steps relative to purification steps in the complete schedule. Section~\ref{sec:model:dag} states this criterion precisely in the formal \Gls{dag} representation.
