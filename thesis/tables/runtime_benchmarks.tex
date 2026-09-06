@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \caption{Wall-clock runtime and returned score for the exact dynamic program and beam search at representative chain lengths. Unless otherwise stated, each run uses the paper budget $E_{\max}=10N$, fidelity threshold $F_{\min}=0.9$, beam width $w_{\text{beam}}=25$, same-span pumping enabled (Section~\ref{sec:alg:pumping}), a 300~s per-point timeout, and a 3~GiB memory limit. The score is the value of the quantity maximized by the active objective (Section~\ref{sec:alg:beam}); under the default rate-maximizing objective used here, the score is the returned schedule rate $R(\Sigma)$. \textsuperscript{$\dagger$}At $N=18$, the exact dynamic program completes within the timeout but finds no feasible candidate, so its score is $-\infty$, whereas the beam search returns a feasible candidate. \textsuperscript{$\ddagger$}At $N=6$, the exact dynamic program returns a lower score than the beam search. These cases occur because same-span pumping is itself beam-limited in the implementation, so the pumping-enabled exact dynamic program is not a guaranteed upper bound on the beam search (Section~\ref{sec:alg:pumping}).}
-\label{tab:runtimes}
+\label{tab:benchmarks}
 \small
 \begin{tabular}{rrllrr}
 \toprule
