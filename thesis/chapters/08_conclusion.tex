@@ -11,7 +11,9 @@
 \glsreset{hrgs}
 \glsreset{rgs}
 
-This thesis addresses the problem of optimizing entanglement-purification schedules in \Gls{hrgs}-based all-photonic quantum repeaters by making four main contributions.
+\TODO{conclusion should be max 1 page. summarize faster the contributions and results, and then focus on future work. The summary should be more concise and less repetitive than the discussion chapter.}
+
+\TOFIX{restate its extending both source papers to recite in the intro but not in the bullet point 2 of this enumeration right after}{This thesis addresses the problem of optimizing entanglement-purification schedules in \Gls{hrgs}-based all-photonic quantum repeaters by making four main contributions.}
 
 \begin{enumerate}
 
@@ -21,7 +23,7 @@ This thesis addresses the problem of optimizing entanglement-purification schedu
 
       \item \emph{A feasibility advantage under non-ideal noise.} Network generalization experiments show that the paper's fixed schedule can fall below the $F\ge0.9$ threshold under non-zero inner-qubit error, reaching as low as $F=0.67$, while a searched schedule remains feasible at the same $C=100$ budget. This is the strongest result of the thesis: the benefit of scheduling is demonstrated as a feasibility advantage, not as a percentage improvement in rate, and it is produced by non-uniform, non-trivial schedule structures the source paper's own fixed example cannot express. A sample of 100 independently random, per-hop heterogeneous networks (Section~\ref{sec:exp:heterogeneous}) shows the same advantage holds beyond hand-picked configurations: the searched schedule beats a uniform per-hop convention in 80 of 100 networks, by a mean of $20.37\%$ rate and never worse, and a designed adversarial network reproduces the sharper infeasibility-versus-feasibility version of the same result.
 
-      \item \emph{A synthesis of when and why scheduling matters.} Chapter~\ref{chap:discussion} draws the results above together: the advantage is largest in an intermediate regime, tight enough that placement decisions bind but not so tight that no searched schedule remains feasible. Among the searched schedule families, the minimum feasible generation-cost budget over $N=10$--28 is described by the empirical fit $E_{\max}^{\min}\approx1.369\,N^{1.620}$. This indicates super-linear growth over the tested range and places the source paper's linear $10N$ budget under pressure near $N=28$.
+      \item \emph{A synthesis of when and why scheduling matters.} Chapter~\ref{chap:discussion} draws the results above together: the advantage is largest in an intermediate regime, tight enough that placement decisions bind but not so tight that no searched schedule remains feasible. Among the searched schedule families, the minimum feasible generation-cost budget over $N=10$--28 is described by the empirical fit $E_{\max}^{\min}\approx1.192\,N^{1.666}$. This indicates super-linear growth over the tested range and places the source paper's linear $10N$ budget under pressure near $N=28$.
 
 \end{enumerate}
 
@@ -36,11 +38,11 @@ Several extensions follow naturally from the present model and its limitations.
 
 \begin{itemize}
 
-      \item \emph{Adaptive scheduling.} A schedule that conditions later purification decisions on earlier measurement or heralding outcomes could adapt to the realized state of the network rather than committing to a fixed sequence in advance. Reinforcement learning is one possible approach, but both the state representation and action space would need to be defined carefully for this setting.
+      \item \emph{Adaptive scheduling.} \TOFIX{extend a little maybe? depends if below bullet point is kept}{ A schedule that conditions later purification decisions on earlier measurement or heralding outcomes could adapt to the realized state of the network rather than committing to a fixed sequence in advance. Reinforcement learning is one possible approach, but both the state representation and action space would need to be defined carefully for this setting}.
 
-      \item \emph{Online optimization.} Network conditions can change over time as noise levels and link quality drift. Integrating the search with online estimation of these parameters could allow schedules to be recomputed or adjusted as the operating conditions change rather than relying on a configuration fixed at commissioning.
+      \item \emph{Online optimization.} \TOFIX{need clarification on the difference between this and the previous bullet point}{Network conditions can change over time as noise levels and link quality drift. Integrating the search with online estimation of these parameters could allow schedules to be recomputed or adjusted as the operating conditions change rather than relying on a configuration fixed at commissioning.}
 
-      \item \emph{Predicting the benefit of per-hop scheduling from network structure.} Section~\ref{sec:exp:heterogeneous} finds that a schedule adapted to a heterogeneous network reliably beats a uniform one on average, but that a simple coefficient-of-variation summary of per-hop noise does not predict the size of that benefit for a specific network. A more targeted heterogeneity measure, or a direct predictive model relating network structure to achievable improvement, could turn this from an average, sample-level observation into a per-network guarantee.
+      % \item \emph{Predicting the benefit of per-hop scheduling from network structure.} Section~\ref{sec:exp:heterogeneous} finds that a schedule adapted to a heterogeneous network reliably beats a uniform one on average, but that a simple coefficient-of-variation summary of per-hop noise does not predict the size of that benefit for a specific network. A more targeted heterogeneity measure, or a direct predictive model relating network structure to achievable improvement, could turn this from an average, sample-level observation into a per-network guarantee.
 
       \item \emph{Multi-path routing.} The current model assumes a single repeater chain between the end nodes. Extending the \Gls{dag} formalism to tree or mesh networks would require a more general representation of resource connectivity and a corresponding extension of the current span-based search.
 
