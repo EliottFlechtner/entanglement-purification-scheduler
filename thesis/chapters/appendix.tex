@@ -119,3 +119,47 @@ Section~\ref{sec:exp:objectives} summarizes the objective-substitution result; T
     \end{tabular}
 \end{table}
 
+\section{Optimality Bound at $N=18$}
+\label{sec:exp:excluded}
+
+% Source: outputs/excluded_move_n14_n18/README.md,
+%          docs/Optimality Scope.md
+
+Section~\ref{sec:exp:budget} bisects the minimum feasible budget within the schedule families the search actually considers. This section checks that bound against one schedule outside those families, at the single point where Section~\ref{sec:exp:budget}'s crossover analysis is most sensitive to it, $N=18$.
+
+A hand-constructed schedule using a same-span construction excluded from the search (purifying two independently constructed $\mathrm{Span}(0,18)$ resources) achieves $F=0.93$ at $E_{\max}=180$, the paper's own budget for $N=18$. The beam search cannot reach this schedule even with same-span pumping enabled (Section~\ref{sec:alg:pumping}), because that construction lies outside the schedule families it considers.
+
+This is an optimality-scope result, not a scalability result: it demonstrates that the searched families do not cover the full legal schedule space, consistent with the scope stated in Section~\ref{sec:model:scope}, and gives a concrete example of why the bounded-search results of Section~\ref{sec:exp:budget} must not be read as proofs of global optimality.
+
+\section{Timing Sensitivity, Full Sweeps}
+\label{app:timing}
+
+% Source: outputs/sweep_gamma_and_tau_emit/README.md
+
+Section~\ref{sec:exp:timing} summarizes the effect of memory dephasing and generation latency on schedule rate and fidelity; Figure~\ref{fig:timing} gives both sweeps in full, at $N=10$ and $e_d=0.01$.
+
+\paragraph{Memory dephasing ($\gamma$)}
+
+Sweeping $\gamma$ from 0 to $10^5$ leaves the raw chain and paper schedule's fidelity unchanged across the tested range: neither contains a resource that waits for another branch to become ready, so the simulated execution introduces no additional memory-decoherence interval for these schedules. By contrast, heralded end-node pumping falls from $F=0.92$ at $\gamma=0$ to $F=0.25$, the maximally mixed limit, at $\gamma=10^5$, because its sacrificial copies remain stored while each round-trip heralding delay is incurred. The schedules selected by the optimizer remain flat across the tested values of $\gamma$; this does not mean memory dephasing is generally harmless, only that the search favours optimistic schedules in which the relevant intermediate heralding delays are deferred, avoiding the specific waiting pattern that causes the collapse of the heralded pumping schedule (Section~\ref{sec:disc:optimistic}).
+
+\paragraph{Generation latency ($\tau_{\mathrm{emit}}$)}
+
+Sweeping $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate monotonically for every schedule. The relative rate loss is largest for the optimistic pumping family, whose baseline latency is approximately $1\times L/c$, and smallest for heralded end-node pumping, whose baseline latency is approximately $9\times L/c$: a schedule that already has a larger fixed latency is proportionally less affected by the same additional per-photon generation delay. The two schedules cross near $\tau_{\mathrm{emit}}\approx0.01$; above this value, the larger fixed latency of heralded pumping makes it less sensitive, in relative terms, to further increases in generation latency.
+
+\begin{figure*}[ht]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/results/gamma_fidelity.png}
+        \caption{Fidelity vs.\ $\gamma$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/results/tau_emit_rate.png}
+        \caption{Rate vs.\ $\tau_{\mathrm{emit}}$ (log-log)}
+    \end{subfigure}
+    \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping, at $N=10$ and $e_d=0.01$.}
+    \label{fig:timing}
+\end{figure*}
+
