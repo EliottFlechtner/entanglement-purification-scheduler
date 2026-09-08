@@ -83,3 +83,10 @@
     \vskip 25\p@ % Space after chapter title (default: 40)
   }}
 \makeatother
+
+%==============================
+% Section spacing (titlesec's [compact] option is quite tight; nudge
+% \section/\subsection spacing up slightly without abandoning compact mode)
+%==============================
+\titlespacing*{\section}{0pt}{2.2ex plus 0.3ex minus 0.2ex}{1.2ex plus 0.2ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 0.3ex minus 0.2ex}{1.0ex plus 0.2ex}
