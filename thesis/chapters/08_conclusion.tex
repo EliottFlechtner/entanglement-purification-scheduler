@@ -11,37 +11,33 @@
 \glsreset{hrgs}
 \glsreset{rgs}
 
-This thesis formalized the schedule space left informal by the source papers and searched it systematically, yielding four contributions.
+This thesis formalized the schedule space left informal by the source papers~\cite{Benchasattabuse2026Bridging,Benchasattabuse2025Integrating} and searched it systematically, yielding four contributions.
 
 \begin{enumerate}
 
-      \item \emph{A validated formal model.} A non-adaptive purification schedule is represented as a \Gls{dag} $\Sigma=(T,\phi)$ and evaluated by a single bottom-up pass, which reproduces the source paper's fidelity results to four significant figures ($0.82$, $0.92$, $0.93$; Section~\ref{sec:exp:validation}).
+      \item \emph{A validated formal model.} A non-adaptive purification schedule is represented as a \Gls{dag} $\Sigma=(T,\phi)$ and evaluated by a single bottom-up pass, which reproduces the source paper's fidelity results to four significant figures (Section~\ref{sec:exp:validation}).
 
-      \item \emph{A three-tier search framework.} At the source papers'~\cite{Benchasattabuse2026Bridging,Benchasattabuse2025Integrating} reference configuration, the optimizer improves rate by $2.5\%$ over the paper's own hand-picked schedule at matched cost, and by $52.8\%$ at $60\%$ of its cost when the budget is relaxed (Section~\ref{sec:exp:headline}). Since that hand-picked schedule is explicitly presented by its authors as one example rather than an optimized design, this comparison mainly demonstrates that the search machinery produces real, working schedules.
+      \item \emph{A three-tier search framework.} At the source papers' reference configuration, the optimizer improves rate over the paper's own hand-picked schedule both at matched cost and, more substantially, once the budget is relaxed (Section~\ref{sec:exp:headline}). Since that hand-picked schedule is explicitly presented by its authors as one example rather than an optimized design, this comparison mainly demonstrates that the search machinery produces real, working schedules.
 
-      \item \emph{A feasibility advantage under non-ideal noise.} Under inner-qubit error the source papers do not model, the paper's fixed schedule can fall below $F\ge0.9$ entirely while a searched schedule at the same cost remains feasible (Section~\ref{sec:exp:netgen}). This feasibility, rather than rate, advantage is the strongest result of the thesis, and it holds beyond hand-picked configurations: across 100 random per-hop heterogeneous networks, the searched schedule beats a uniform convention by a mean of $20.37\%$ rate and never does worse (Section~\ref{sec:exp:heterogeneous}).
+      \item \emph{A feasibility advantage under non-ideal noise.} Under inner-qubit error the source papers do not model, the paper's fixed schedule can fall below $F\ge0.9$ entirely while a searched schedule at the same cost remains feasible (Section~\ref{sec:exp:netgen}). This feasibility, rather than rate, advantage is the strongest result of the thesis, and it holds beyond hand-picked configurations, both on average over 100 random per-hop heterogeneous networks and on one deliberately constructed one (Section~\ref{sec:exp:heterogeneous}).
 
-      \item \emph{A synthesis of when scheduling matters.} The advantage is largest in an intermediate regime, tight enough that placement decisions bind but not so tight that no searched schedule is feasible (Chapter~\ref{chap:discussion}). Along chain length, the minimum feasible budget over $N=10$--$28$ follows the empirical fit $E_{\max}^{\min}\approx1.192\,N^{1.666}$, exceeding the source paper's linear $10N$ formula near $N=28$.
+      \item \emph{A synthesis of when scheduling matters.} The advantage is largest in an intermediate regime, tight enough that placement decisions bind but not so tight that no searched schedule is feasible; the same regime recurs across noise level and chain length (Chapter~\ref{chap:discussion}).
 
 \end{enumerate}
 
-These results establish what the searched schedule families can achieve; they are not proofs of global optimality over the full legal schedule space (Section~\ref{sec:disc:scope}). Together, contributions 2 and 3 support this thesis's working hypothesis (Section~\ref{sec:intro:gap}): systematic search improves on the paper's hand-picked baseline at equal cost, and, more importantly, retains feasibility in regimes where that baseline fails.
+These are existence claims within the searched schedule families, not proofs of global optimality over the full legal schedule space (Section~\ref{sec:disc:scope}). Together they support this thesis's working hypothesis (Section~\ref{sec:intro:gap}): systematic search improves on the paper's hand-picked baseline at equal cost and, more importantly, retains feasibility in regimes where that baseline fails.
 
 \section{Future Work}
 \label{sec:conc:future}
 
-Several extensions follow naturally from the present model and its limitations.
-
 \begin{itemize}
 
-      \item \emph{Adaptive scheduling.} A schedule that conditions later purification decisions on earlier measurement or heralding outcomes, within a single execution, could adapt to the realized state of the network rather than committing to a fixed sequence in advance. Reinforcement learning is one possible approach, but both the state representation and action space would need to be defined carefully for this setting.
+      \item \emph{Adaptive scheduling.} Conditioning later purification decisions on earlier measurement or heralding outcomes, within a single execution, could adapt to the realized state of the network rather than committing to a fixed sequence in advance; reinforcement learning is one candidate approach, though the state and action space would need to be defined carefully for this setting.
 
-      \item \emph{Online optimization.} Unlike adaptive scheduling, which reacts within a single execution, this instead re-runs the search across executions as the network itself drifts: noise levels and link quality can change over minutes to months, well outside the timescale of a single schedule attempt. Integrating the search with online estimation of these parameters could let the chosen schedule be recomputed periodically, rather than fixed once at commissioning as it is throughout this thesis.
+      \item \emph{Online optimization.} Rather than adapting within one execution, the search itself could be re-run periodically as noise and link quality drift over minutes to months, instead of being fixed once at commissioning as it is throughout this thesis.
 
-      % \item \emph{Predicting the benefit of per-hop scheduling from network structure.} Section~\ref{sec:exp:heterogeneous} finds that a schedule adapted to a heterogeneous network reliably beats a uniform one on average, but that a simple coefficient-of-variation summary of per-hop noise does not predict the size of that benefit for a specific network. A more targeted heterogeneity measure, or a direct predictive model relating network structure to achievable improvement, could turn this from an average, sample-level observation into a per-network guarantee.
+      \item \emph{Multi-path routing.} Extending the \Gls{dag} formalism from a single repeater chain to tree or mesh networks would require a more general connectivity representation and a corresponding extension of the current span-based search.
 
-      \item \emph{Multi-path routing.} The current model assumes a single repeater chain between the end nodes. Extending the \Gls{dag} formalism to tree or mesh networks would require a more general representation of resource connectivity and a corresponding extension of the current span-based search.
-
-      \item \emph{Beyond the Pauli-channel model.} Replacing the current Pauli-channel approximation with hardware-specific noise models, including more detailed photon-loss and gate-error processes, would allow the optimizer to be evaluated against a broader range of physical implementations and could change the relative ranking of candidate schedules.
+      \item \emph{Beyond the Pauli-channel model.} Hardware-specific noise models, including more detailed photon-loss and gate-error processes, would let the optimizer be evaluated against a broader range of physical implementations and could change the relative ranking of candidate schedules.
 
 \end{itemize}
