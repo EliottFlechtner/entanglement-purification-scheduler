@@ -110,25 +110,69 @@ def _thesis_label(node: object) -> str:
     return type(node).__name__
 
 
-def to_dot_thesis(dag: ScheduleDAG) -> str:
-    """DOT source with simplified labels and larger font for thesis figures."""
+def to_dot_thesis(
+    dag: ScheduleDAG,
+    *,
+    highlight_groups: dict[str, tuple[set[NodeId], str]] | None = None,
+) -> str:
+    """DOT source with simplified labels and larger font for thesis figures.
+
+    *highlight_groups* wraps chosen node subsets in labeled, dashed cluster
+    subgraphs (matching the caption's bold "Copy A"/"Copy B" callouts) --
+    same convention as ``schedule.visualize.to_dot``'s own parameter of the
+    same name, reimplemented here since this function keeps its own
+    simplified label logic rather than the shared one.
+    """
+    highlight_groups = highlight_groups or {}
+    node_to_group: dict[NodeId, tuple[str, str]] = {}
+    for group_label, (node_ids, color) in highlight_groups.items():
+        for nid in node_ids:
+            node_to_group[nid] = (group_label, color)
+
     lines = [
         "digraph Sigma_N2_thesis {",
         '    rankdir="BT";',
         '    node [fontname="Helvetica", fontsize=16];',
         '    edge [fontname="Helvetica", color="#555555"];',
     ]
-    for nid, node in dag.nodes.items():
+
+    def _node_decl(nid: NodeId, node: object) -> str:
         label = _thesis_label(node)
         fillcolor, shape, style = _THESIS_NODE_STYLE.get(
             type(node), ("#FFFFFF", "box", "filled")
         )
         penwidth = "3" if nid == dag.root_id else "1"
+        border = ""
+        group = node_to_group.get(nid)
+        if group is not None:
+            _, color = group
+            penwidth = "4"
+            border = f', color="{color}"'
         label_escaped = _html.escape(label).replace("\\n", "<BR/>")
-        lines.append(
+        return (
             f"    n{nid} [label=<{label_escaped}>, shape={shape}, "
-            f'style="{style}", fillcolor="{fillcolor}", penwidth={penwidth}];'
+            f'style="{style}", fillcolor="{fillcolor}", penwidth={penwidth}{border}];'
         )
+
+    grouped_ids: set[NodeId] = set(node_to_group)
+    for i, (group_label, (node_ids, color)) in enumerate(highlight_groups.items()):
+        present = [nid for nid in node_ids if nid in dag.nodes]
+        if not present:
+            continue
+        lines.append(f"    subgraph cluster_{i} {{")
+        lines.append(f'        label="{_html.escape(group_label)}";')
+        lines.append('        style="dashed";')
+        lines.append(f'        color="{color}";')
+        lines.append('        fontname="Helvetica"; fontsize=18;')
+        for nid in present:
+            lines.append("        " + _node_decl(nid, dag.nodes[nid]))
+        lines.append("    }")
+
+    for nid, node in dag.nodes.items():
+        if nid in grouped_ids:
+            continue
+        lines.append(_node_decl(nid, node))
+
     for nid, node in dag.nodes.items():
         children = getattr(node, "children", ())
         for child_id in children:
@@ -137,9 +181,15 @@ def to_dot_thesis(dag: ScheduleDAG) -> str:
     return "\n".join(lines)
 
 
-def render_thesis_png(dag: ScheduleDAG, path: str, dpi: int = 200) -> None:
+def render_thesis_png(
+    dag: ScheduleDAG,
+    path: str,
+    dpi: int = 200,
+    *,
+    highlight_groups: dict[str, tuple[set[NodeId], str]] | None = None,
+) -> None:
     """Render thesis-quality PNG using simplified labels at *dpi* resolution."""
-    dot_src = to_dot_thesis(dag)
+    dot_src = to_dot_thesis(dag, highlight_groups=highlight_groups)
     proc = subprocess.run(
         ["dot", "-Tpng", f"-Gdpi={dpi}", "-o", path],
         input=dot_src.encode("utf-8"),
@@ -248,15 +298,24 @@ def _build_trial(
     return swap_node.node_id, nid
 
 
-def build_n2_worked_example() -> ScheduleDAG:
-    """Construct the N=2 worked-example DAG from §9."""
+def build_n2_worked_example() -> tuple[ScheduleDAG, dict[str, tuple[set[NodeId], str]]]:
+    """Construct the N=2 worked-example DAG from §9.
+
+    Also returns ``highlight_groups`` (Copy A / Copy B node-id sets) for
+    ``to_dot_thesis``, so the thesis figure visually circles each copy's
+    subtree to match the caption's bold callouts.
+    """
     nodes: dict[NodeId, object] = {}
     nid = 0
 
+    _before = set(nodes)
     trial_a_id, nid = _build_trial(nodes, nid)
+    trial_a_ids = set(nodes) - _before
     # Trial B: same structure but hop-1 right-side Gen waits (IdleNode)
     # to illustrate timing synchronisation between the two arms.
+    _before = set(nodes)
     trial_b_id, nid = _build_trial(nodes, nid, idle_until=1.0)
+    trial_b_ids = set(nodes) - _before
 
     # End-node purification: Purify-XZ(trial_A, trial_B)
     pur_end = PurifyNode(
@@ -288,7 +347,11 @@ def build_n2_worked_example() -> ScheduleDAG:
 
     dag = ScheduleDAG(nodes=nodes, root_id=root_id, N=N)
     dag.validate()
-    return dag
+    groups: dict[str, tuple[set[NodeId], str]] = {
+        "Copy A": (trial_a_ids, "#1f77b4"),
+        "Copy B": (trial_b_ids, "#d62728"),
+    }
+    return dag, groups
 
 
 def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
@@ -363,7 +426,7 @@ def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
 
 def main() -> None:
     print("Building N=2 worked-example DAG ...", flush=True)
-    dag = build_n2_worked_example()
+    dag, groups = build_n2_worked_example()
     print(
         f"DAG built and validated: {len(dag.nodes)} nodes, "
         f"{dag.gen_node_count} Gen nodes (C={dag.gen_node_count})",
@@ -385,9 +448,10 @@ def main() -> None:
     render(dag, svg_path, fmt="svg", graph_name="Sigma_N2_example")
     print(f"SVG rendered: {svg_path}", flush=True)
 
-    # Thesis-quality version: simplified labels, no IDs, larger font
+    # Thesis-quality version: simplified labels, no IDs, larger font,
+    # with Copy A/Copy B subtrees circled to match the caption's callouts.
     thesis_png_path = str(OUTPUT_DIR / "dag_thesis.png")
-    render_thesis_png(dag, thesis_png_path, dpi=300)
+    render_thesis_png(dag, thesis_png_path, dpi=300, highlight_groups=groups)
     print(f"Thesis PNG rendered: {thesis_png_path}", flush=True)
 
     # Evaluate against N=2 version of the paper config for the README
