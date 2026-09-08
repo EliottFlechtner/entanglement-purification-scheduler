@@ -57,3 +57,29 @@
   \renewcommand{\headrulewidth}{0pt}%
   \renewcommand{\footrulewidth}{0pt}%
 }
+
+%==============================
+% Chapter Spacing Reductions
+%==============================
+\makeatletter
+\def\@makechapterhead#1{%
+  \vspace*{10\p@}% % Reduced top space (default: 50)
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        \huge\bfseries \@chapapp\ \thechapter
+        \par\nobreak
+        \vskip 8\p@
+    \fi
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 15\p@ % Space after chapter title (default: 40)
+  }}
+\def\@makeschapterhead#1{%
+  \vspace*{10\p@}% % Reduced top space (default: 50)
+  {\parindent \z@ \raggedright
+    \normalfont
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 25\p@ % Space after chapter title (default: 40)
+  }}
+\makeatother
