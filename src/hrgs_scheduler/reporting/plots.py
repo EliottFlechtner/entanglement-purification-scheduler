@@ -44,7 +44,7 @@ except ImportError as exc:  # pragma: no cover - exercised only when missing
 
 FIGSIZE: tuple[float, float] = (7.0, 4.5)
 DPI: int = 150
-SAVE_FORMATS: tuple[str, ...] = ("png", "svg")
+SAVE_FORMATS: tuple[str, ...] = ("png",)  # "svg")
 
 # Canonical style per schedule "role", reused across every sweep figure so
 # a reader learns the legend once. Sweep scripts should map their own

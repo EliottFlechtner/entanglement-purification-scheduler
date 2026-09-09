@@ -24,6 +24,7 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
 OUT_DIR = _PROJECT_ROOT / "thesis" / "figures" / "results"
@@ -69,7 +70,7 @@ def main() -> None:
         feasible = [
             by_config[cfg][variant]["meets_floor"] == "True" for cfg in CONFIG_ORDER
         ]
-        bars = ax.bar(offsets, heights, width, **VARIANT_STYLE[variant])
+        bars = ax.bar(offsets, heights, width, **VARIANT_STYLE[variant])  # type: ignore
         # Hatch infeasible bars so the "paper schedule breaks" point reads
         # from the figure itself, not just the caption/table.
         for bar, ok in zip(bars, feasible):
@@ -82,7 +83,7 @@ def main() -> None:
         color="black",
         linestyle=":",
         linewidth=1.2,
-        label=f"$f_{{\\min}}={F_MIN}$",
+        label=f"$F_{{\\min}}={F_MIN}$",
     )
     ax.set_xticks(x)
     ax.set_xticklabels([CONFIG_LABELS[c] for c in CONFIG_ORDER], fontsize=10)
@@ -90,7 +91,24 @@ def main() -> None:
     ax.set_ylim(0.6, 1.0)
     ax.grid(alpha=0.3, axis="y")
     ax.tick_params(labelsize=9.5)
-    ax.legend(fontsize=9, ncol=2, loc="lower left")
+    hatch_patch = mpatches.Patch(
+        facecolor="white",
+        edgecolor="black",
+        hatch="////",
+        label="Infeasible ($F<F_{\\min}$)",
+    )
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(hatch_patch)
+    labels.append(hatch_patch.get_label())
+    ax.legend(
+        handles,
+        labels,
+        fontsize=9,
+        ncol=2,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.18),
+        frameon=False,
+    )
     fig.tight_layout()
     for fmt in ("png", "svg"):
         fig.savefig(OUT_DIR / f"fidelity_by_config.{fmt}", dpi=DPI, bbox_inches="tight")
