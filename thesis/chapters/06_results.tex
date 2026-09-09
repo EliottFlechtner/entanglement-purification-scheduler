@@ -82,12 +82,23 @@ The same tendency is observed over 100 independently generated random $N=6$ netw
 
 % Source: outputs/sweep_ed_n10/README.md
 
-Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the corresponding rate and fidelity curves for the paper baseline, the matched-cost optimizer, and the budget-relaxed optimizer. At low noise, the three variants remain close; the rate curves begin to separate visibly around $e_d=0.004$. The matched-cost optimizer may also change schedule structure as the noise level varies, so its curve represents the best cost-$100$ result at each point rather than a single fixed schedule followed throughout the sweep. Further interpretation of these transitions is given in Section~\ref{sec:disc:nearoptimal}.
+Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the corresponding rate (Figure~\ref{fig:edsweep:rate}) and fidelity (Figure~\ref{fig:edsweep:fidelity}) curves for the paper baseline, the matched-cost optimizer, and the budget-relaxed optimizer. At low noise, the three variants remain close; the rate curves begin to separate visibly around $e_d=0.004$. The matched-cost optimizer may also change schedule structure as the noise level varies, so its curve represents the best cost-$100$ result at each point rather than a single fixed schedule followed throughout the sweep. Further interpretation of these transitions is given in Section~\ref{sec:disc:nearoptimal}.
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.48\textwidth]{figures/results/rate_vs_ed.png}
-    \includegraphics[width=0.48\textwidth]{figures/results/fidelity_vs_ed.png}
+    \begin{subfigure}[b]{0.46\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/results/rate_vs_ed.png}
+        \caption{Rate vs.\ $e_d$}
+        \label{fig:edsweep:rate}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.46\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/results/fidelity_vs_ed.png}
+        \caption{Fidelity vs.\ $e_d$}
+        \label{fig:edsweep:fidelity}
+    \end{subfigure}
     \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer.}
     \label{fig:edsweep}
 \end{figure*}
