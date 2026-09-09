@@ -4,7 +4,7 @@
 \section{Validation Figures}
 \label{app:validation}
 
-Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} gives the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:results}, rather than only at that one point.
+Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} give the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:results}, rather than only at that one point.
 
 The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.
 
@@ -31,6 +31,40 @@ $e_d$ & $F_{\text{raw}}$ & $F_{\text{baseline (heralded)}}$ & $F_{\text{flexible
 \hline
 \end{tabular}
 \end{table}
+
+% \begin{figure}[h]
+% \centering
+% \begin{minipage}[c]{0.48\textwidth}
+% \centering
+% \captionof{table}{Evaluator-derived fidelity vs.\ $e_d$ for the three canonical schedules of Section~\ref{sec:bg:decoherence}, at $N=10$. Only $e_d=0.000$ and $e_d=0.010$ have a published reference value to compare against (see text).}
+% \label{tab:app:validation}
+% \small
+% \begin{tabular}{cccc}
+% \hline
+% $e_d$ & $F_{\text{raw}}$ & $F_{\text{baseline}}$ & $F_{\text{flexible}}$ \\
+% \hline
+% 0.000 & 1.0000 & 1.0000 & 1.0000 \\
+% 0.001 & 0.9803 & 0.9932 & 0.9933 \\
+% 0.002 & 0.9610 & 0.9861 & 0.9866 \\
+% 0.003 & 0.9422 & 0.9787 & 0.9799 \\
+% 0.004 & 0.9239 & 0.9710 & 0.9730 \\
+% 0.005 & 0.9061 & 0.9629 & 0.9661 \\
+% 0.006 & 0.8887 & 0.9544 & 0.9591 \\
+% 0.007 & 0.8717 & 0.9456 & 0.9519 \\
+% 0.008 & 0.8552 & 0.9364 & 0.9446 \\
+% 0.009 & 0.8391 & 0.9268 & 0.9372 \\
+% 0.010 & 0.8234 & 0.9168 & 0.9295 \\
+% \hline
+% \end{tabular}
+% \end{minipage}
+% \hfill
+% \begin{minipage}[c]{0.48\textwidth}
+% \centering
+% \includegraphics[width=\textwidth]{figures/appendix/fidelity_vs_ed_validation.png}
+% \captionof{figure}{Same data as Table~\ref{tab:app:validation}, plotted.}
+% \label{fig:app:validation}
+% \end{minipage}
+% \end{figure}
 
 \section{Schedule DAGs of Selected Optima}
 \label{app:dags}
