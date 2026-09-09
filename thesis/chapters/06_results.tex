@@ -59,7 +59,7 @@ The optimizer was also evaluated under non-ideal inner-qubit errors and differen
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/results/fidelity_by_config.png}
-    \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$. Hatched bars fall below the $F_{\min}=0.9$ threshold. The paper schedule is infeasible under both non-ideal configurations, while the schedules found by search remain feasible.}
+    \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$. Hatched bars fall below the $F_{\min}=0.9$ threshold. The paper schedule is infeasible under both non-ideal configurations, while the schedules found by search remain feasible at the same generation budget by redistributing purification effort rather than spending more resources.}
     \label{fig:netgen}
 \end{figure*}
 
@@ -99,7 +99,7 @@ Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantag
         \caption{Fidelity vs.\ $e_d$}
         \label{fig:edsweep:fidelity}
     \end{subfigure}
-    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer.}
+    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate the optimizer instead reallocates, not a search failure.}
     \label{fig:edsweep}
 \end{figure*}
 \FloatBarrier
@@ -131,7 +131,7 @@ In the fidelity-cost projection (Figure~\ref{fig:pareto:cost}), the paper schedu
         \caption{Fidelity vs.\ rate}
         \label{fig:pareto:rate}
     \end{subfigure}
-    \caption{Pareto frontiers at $N=10$, $e_d=0.01$, and $E_{\max}=150$, over the candidates evaluated by the beam search under a permissive objective ($F_{\min}=0$). Grey points are dominated candidates; connected points form the non-dominated frontier under each pair of objectives.}
+    \caption{Pareto frontiers at $N=10$, $e_d=0.01$, and $E_{\max}=150$, over the candidates evaluated by the beam search under a permissive objective ($F_{\min}=0$). Grey points are dominated candidates; connected points form the non-dominated frontier under each pair of objectives, with the paper schedule and uniform link-level baseline marked for reference.}
     \label{fig:pareto}
 \end{figure*}
 \FloatBarrier
