@@ -5,9 +5,15 @@ One-off regeneration of the Chapter 6 e_d-sweep figures (Figure 6.1) for
 thesis placement (two 0.48\\textwidth subfigures side by side), matching
 the sizing/legend conventions used by `_thesis_fig_pareto.py`.
 
-Does NOT rerun any search or touch underlying data: reads the already-
-computed `outputs/sweep_ed_n10/results.csv`. The in-plot title is
-dropped (redundant with the LaTeX subfigure caption) to free vertical
+Reads `outputs/sweep_ed_n10/results_extended.csv`, a supplementary run
+of the same `sweep_ed.py` methodology (paper config, `e_max=100`,
+`beam_width=25`, `enable_pumping=False`) extended from the paper's own
+`e_d<=0.01` range out to `e_d=0.02`, so the fidelity panel shows the
+paper schedule's fidelity crossing below the optimizer variants once its
+fixed circuit stops sustaining $F_{min}=0.9$ (around $e_d=0.014$). Points
+up to `e_d=0.01` reproduce `results.csv` exactly; `e_d>0.01` is beyond
+the range any other reported result in this repo uses. The in-plot title
+is dropped (redundant with the LaTeX subfigure caption) to free vertical
 space, and fonts/figure size are tuned for legibility once shrunk to
 half the thesis text width.
 
@@ -29,7 +35,7 @@ sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 import matplotlib.pyplot as plt
 
 OUT_DIR = _PROJECT_ROOT / "thesis" / "figures" / "results"
-CSV_PATH = _PROJECT_ROOT / "outputs" / "sweep_ed_n10" / "results.csv"
+CSV_PATH = _PROJECT_ROOT / "outputs" / "sweep_ed_n10" / "results_extended.csv"
 
 FIGSIZE = (4.6, 3.9)
 DPI = 200
@@ -98,7 +104,15 @@ def make_fidelity_plot(series: dict[str, list[tuple[float, float, float]]]) -> N
             **STYLE[variant],
         )
     ax.axhline(
-        0.9, color="black", linestyle=":", linewidth=1.1, label="$f_{\\min}=0.9$"
+        0.9, color="black", linestyle=":", linewidth=1.1, label="$F_{\\min}=0.9$"
+    )
+    ax.axvline(
+        0.01,
+        color="black",
+        linestyle="--",
+        linewidth=0.9,
+        alpha=0.6,
+        label="Paper's tested range ends",
     )
     ax.set_xlabel("Depolarizing error $e_d$", fontsize=11)
     ax.set_ylabel("Fidelity $F$", fontsize=11)
