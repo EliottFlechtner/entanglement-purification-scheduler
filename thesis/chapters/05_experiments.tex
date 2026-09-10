@@ -33,10 +33,10 @@ Section~\ref{sec:exp:validation} shows that this pass reproduces the source pape
 
 The first tier enumerates four fixed structural families:
 \begin{itemize}
-    \item a single raw end-to-end chain, with no purification;
-    \item end-node pumping, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds (\emph{heralded} end-node pumping);
-    \item the optimistic counterpart, which defers classical heralding until the end (\emph{optimistic} end-node pumping); and
-    \item uniform link-level purification, applying the same copy count and circuit sequence at every hop.
+    \item a \emph{single raw end-to-end chain}, with no purification;
+    \item \emph{end-node pumping}, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds (\emph{heralded} end-node pumping);
+    \item its \emph{optimistic counterpart}, deferring heralding until the end (\emph{optimistic} end-node pumping);
+    \item \emph{uniform link-level purification}, using the same copy count and circuit at every hop.
 \end{itemize}
 For even $N$ within budget, the Integrating paper's hand-chosen schedule~\cite{Benchasattabuse2025Integrating} is included as a fifth fixed comparison point.
 
@@ -50,6 +50,8 @@ These fixed families serve two purposes: they provide explicit baselines through
 \label{sec:alg:dp}
 
 For every span $\mathrm{Span}(a,b)$, the second tier memoizes a Pareto frontier~\cite{Pareto2014Manual} of ways to create one resource over that span. A single-hop frontier ($b=a+1$) contains the raw link and link-level purification choices. For a wider span, the recurrence tries every split point $a<m<b$ and combines each retained candidate from $\mathrm{Span}(a,m)$ with each from $\mathrm{Span}(m,b)$ using a Swap operation (Section~\ref{sec:bg:hrgs}). Each sub-span is computed once and reused in wider constructions. This reuse, rather than repeatedly constructing and evaluating complete end-to-end schedules, is the main computational advantage of the dynamic program.
+
+\clearpage
 
 The frontier retained at each span is multi-objective over $(C,F,P_{\mathrm{success}})$ (Pareto dominance, Section~\ref{sec:alg:prelims}). Only non-dominated candidates are retained, following the standard Pareto-pruning rule~\cite{Ehrgott2005Multicriteria}. This pruning is exact with respect to the three quantities tracked by the frontier, but does not make the search exhaustive: the caps and heuristic retention rules introduced in the next two sections can still discard a non-dominated candidate before it reaches the end-to-end span.
 
