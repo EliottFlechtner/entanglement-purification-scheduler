@@ -25,6 +25,8 @@ where, for each hop $i$, $\ell_i$ is its length; $\vec{b}^{(i)}$ is the list of 
 
 An \emph{idealized network configuration} is one with identical hop parameters ($\ell_i=\ell$, $\vec b^{(i)}=\vec b$, $k_i=k$ for all $i$) and noiseless inner-qubit measurements ($p_{\mathrm{in},i}^{X}=p_{\mathrm{in},i}^{Z}=0$ for all $i$); Section~\ref{sec:exp:netgen} relaxes the noiseless-inner-qubit assumption specifically and refers back to this definition.
 
+\clearpage %\TODO{recheck if this doesn't break pagination}
+
 Unless stated otherwise, experiments start from the Integrating paper configuration, written $\mathcal{N}_{\mathrm{ref}}$. It has identically configured hops:
 \[
 \begin{gathered}
@@ -49,6 +51,8 @@ The vector $\mathbf{e}$ is the error vector introduced in Section~\ref{sec:bg:er
     \item $h \in \{\mathit{pending}, \mathit{resolved}\}$ records whether the classical heralding signal for this resource has been received yet.
 \end{itemize}
 The field that matters most for what a schedule is allowed to do is $\kappa$: two states can only be combined by a purification circuit if they carry the \emph{same} $\kappa$. Two branches with different histories, one purified twice and the other once for instance, can still be combined as long as both currently have the same span as previously stated in Section~\ref{sec:bg:backbone}. This rule lets the model express schedules that mix purification strategies across different parts of the chain, including the type of schedule illustrated in the source paper's Fig.\,4~\cite{Benchasattabuse2025Integrating}.
+
+% \clearpage
 
 \section{Schedules as Directed Acyclic Graphs}
 \label{sec:model:dag}
@@ -99,7 +103,7 @@ Section~\ref{sec:exp:validation} confirms that this representation is not merely
     \centering
     \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
     \caption{\small%
-        $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \textbf{Copy~A} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \textbf{Copy~B} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$. Edges run bottom-to-top.
+        $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \TOFIX{color in blue}{\textbf{Copy~A}} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \TOFIX{color in red}{\textbf{Copy~B}} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$. Edges run bottom-to-top.
     }
     \label{fig:model:dag-example}
 \end{figure}
@@ -145,6 +149,8 @@ The same four metrics support other research questions by swapping which one is 
 
 \section{Scope and Assumptions}
 \label{sec:model:scope}
+
+\TODO{recheck if to state here; maybe only in discussions of chapter 7 ?}
 
 % Source: Optimizer Status.md §Known Limits
 
