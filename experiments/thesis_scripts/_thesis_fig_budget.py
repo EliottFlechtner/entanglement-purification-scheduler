@@ -91,7 +91,7 @@ def main() -> None:
         linestyle="--",
         color="black",
         linewidth=1.3,
-        label="Paper's formula: $E_{max}=10N$",
+        label="Paper's proposed formula: $E_{max}=10N$",
     )
 
     # Fitted power law: solid over the measured range, dotted/lighter
@@ -126,7 +126,7 @@ def main() -> None:
         linestyle=":",
         color="tab:blue",
         alpha=0.6,
-        label="Power-law fit (extrapolated beyond N=10--28)",
+        label="Power-law fit (extrapolated beyond N=10-28)",
     )
 
     ax.scatter(
@@ -136,7 +136,7 @@ def main() -> None:
         marker="o",
         s=32,
         zorder=3,
-        label="Minimum feasible $E_{max}$ (measured, N=10--28)",
+        label="Minimum feasible $E_{max}^{min}$ (measured, N=10-28)",
     )
 
     ax.set_xlabel("Number of hops $N$", fontsize=11)
