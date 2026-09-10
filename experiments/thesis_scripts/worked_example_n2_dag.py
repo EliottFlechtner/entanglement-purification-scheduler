@@ -66,6 +66,7 @@ from hrgs_scheduler.schedule.node import (
     NodeId,
     PauliCorrectNode,
     PurifyNode,
+    ScheduleNode,
     SwapNode,
 )
 from hrgs_scheduler.schedule.visualize import render, save_dot
@@ -83,6 +84,11 @@ _THESIS_NODE_STYLE: dict = {
     HeraldNode: ("#F7DC6F", "diamond", "filled"),
     PauliCorrectNode: ("#F1948A", "doublecircle", "filled"),
 }
+
+FONT_NAME = "CMU Serif"
+DOT_EXPORT = True
+PNG_EXPORT = True
+SVG_EXPORT = False
 
 
 def _thesis_label(node: object) -> str:
@@ -106,7 +112,7 @@ def _thesis_label(node: object) -> str:
     if isinstance(node, HeraldNode):
         return "Herald"
     if isinstance(node, PauliCorrectNode):
-        return "PauliCorrect\\n(root)"
+        return "PauliCorrect\\n(Root)"
     return type(node).__name__
 
 
@@ -114,6 +120,7 @@ def to_dot_thesis(
     dag: ScheduleDAG,
     *,
     highlight_groups: dict[str, tuple[set[NodeId], str]] | None = None,
+    force_child_order: set[NodeId] | None = None,
 ) -> str:
     """DOT source with simplified labels and larger font for thesis figures.
 
@@ -122,8 +129,17 @@ def to_dot_thesis(
     same convention as ``schedule.visualize.to_dot``'s own parameter of the
     same name, reimplemented here since this function keeps its own
     simplified label logic rather than the shared one.
+
+    *force_child_order* pins the left-to-right in-edge order (per each
+    node's ``children`` declaration order) only for the listed node ids,
+    via Graphviz's per-node ``ordering=in``. Left deliberately asymmetric
+    otherwise: Copy A and Copy B are structurally near-identical, so
+    letting the layout engine pick each Swap's child order independently
+    (except where forced) keeps their small real difference visible
+    rather than making both sides look artificially identical.
     """
     highlight_groups = highlight_groups or {}
+    force_child_order = force_child_order or set()
     node_to_group: dict[NodeId, tuple[str, str]] = {}
     for group_label, (node_ids, color) in highlight_groups.items():
         for nid in node_ids:
@@ -132,8 +148,8 @@ def to_dot_thesis(
     lines = [
         "digraph Sigma_N2_thesis {",
         '    rankdir="BT";',
-        '    node [fontname="Helvetica", fontsize=16];',
-        '    edge [fontname="Helvetica", color="#555555"];',
+        f'    node [fontname="{FONT_NAME}", fontsize=18];',
+        f'    edge [fontname="{FONT_NAME}", color="#000000", penwidth=1.7];',
     ]
 
     def _node_decl(nid: NodeId, node: object) -> str:
@@ -148,10 +164,14 @@ def to_dot_thesis(
             _, color = group
             penwidth = "4"
             border = f', color="{color}"'
+        ordering = ', ordering="in"' if nid in force_child_order else ""
         label_escaped = _html.escape(label).replace("\\n", "<BR/>")
+        label_escaped = label_escaped.replace(
+            "κ", '<FONT FACE="Helvetica Neue">κ</FONT>'
+        )
         return (
-            f"    n{nid} [label=<{label_escaped}>, shape={shape}, "
-            f'style="{style}", fillcolor="{fillcolor}", penwidth={penwidth}{border}];'
+            f"    n{nid} [label=<<b>{label_escaped}</b>>, shape={shape}, "
+            f'style="{style}", fillcolor="{fillcolor}", penwidth={penwidth}{border}{ordering}];'
         )
 
     grouped_ids: set[NodeId] = set(node_to_group)
@@ -160,10 +180,10 @@ def to_dot_thesis(
         if not present:
             continue
         lines.append(f"    subgraph cluster_{i} {{")
-        lines.append(f'        label="{_html.escape(group_label)}";')
+        lines.append(f"        label=<<b>{_html.escape(group_label)}</b>>;")
         lines.append('        style="dashed";')
-        lines.append(f'        color="{color}";')
-        lines.append('        fontname="Helvetica"; fontsize=18;')
+        lines.append(f'        color="{color}"; penwidth=3.0; fontcolor="{color}";')
+        lines.append(f'        fontname="{FONT_NAME}"; fontsize=18;')
         for nid in present:
             lines.append("        " + _node_decl(nid, dag.nodes[nid]))
         lines.append("    }")
@@ -187,9 +207,12 @@ def render_thesis_png(
     dpi: int = 200,
     *,
     highlight_groups: dict[str, tuple[set[NodeId], str]] | None = None,
+    force_child_order: set[NodeId] | None = None,
 ) -> None:
     """Render thesis-quality PNG using simplified labels at *dpi* resolution."""
-    dot_src = to_dot_thesis(dag, highlight_groups=highlight_groups)
+    dot_src = to_dot_thesis(
+        dag, highlight_groups=highlight_groups, force_child_order=force_child_order
+    )
     proc = subprocess.run(
         ["dot", "-Tpng", f"-Gdpi={dpi}", "-o", path],
         input=dot_src.encode("utf-8"),
@@ -207,7 +230,7 @@ N = 2
 
 
 def _build_trial(
-    nodes: dict[NodeId, object],
+    nodes: dict[NodeId, ScheduleNode],
     nid: int,
     idle_until: float = 0.0,
 ) -> tuple[NodeId, int]:
@@ -298,14 +321,18 @@ def _build_trial(
     return swap_node.node_id, nid
 
 
-def build_n2_worked_example() -> tuple[ScheduleDAG, dict[str, tuple[set[NodeId], str]]]:
+def build_n2_worked_example() -> (
+    tuple[ScheduleDAG, dict[str, tuple[set[NodeId], str]], NodeId]
+):
     """Construct the N=2 worked-example DAG from §9.
 
     Also returns ``highlight_groups`` (Copy A / Copy B node-id sets) for
     ``to_dot_thesis``, so the thesis figure visually circles each copy's
-    subtree to match the caption's bold callouts.
+    subtree to match the caption's bold callouts, and ``trial_b_id`` (Copy
+    B's Swap(0,2) node), so its child order (hop0 left, hop1 right) can be
+    pinned while Copy A's Swap keeps its own independently laid-out order.
     """
-    nodes: dict[NodeId, object] = {}
+    nodes: dict[NodeId, ScheduleNode] = {}
     nid = 0
 
     _before = set(nodes)
@@ -351,7 +378,7 @@ def build_n2_worked_example() -> tuple[ScheduleDAG, dict[str, tuple[set[NodeId],
         "Copy A": (trial_a_ids, "#1f77b4"),
         "Copy B": (trial_b_ids, "#d62728"),
     }
-    return dag, groups
+    return dag, groups, trial_b_id
 
 
 def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
@@ -426,7 +453,7 @@ def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
 
 def main() -> None:
     print("Building N=2 worked-example DAG ...", flush=True)
-    dag, groups = build_n2_worked_example()
+    dag, groups, trial_b_id = build_n2_worked_example()  # type: ignore
     print(
         f"DAG built and validated: {len(dag.nodes)} nodes, "
         f"{dag.gen_node_count} Gen nodes (C={dag.gen_node_count})",
@@ -439,19 +466,31 @@ def main() -> None:
     png_path = str(OUTPUT_DIR / "dag.png")
     svg_path = str(OUTPUT_DIR / "dag.svg")
 
-    save_dot(dag, dot_path, graph_name="Sigma_N2_example")
-    print(f"DOT written: {dot_path}", flush=True)
+    if DOT_EXPORT:
+        save_dot(dag, dot_path, graph_name="Sigma_N2_example")
+        print(f"DOT written: {dot_path}", flush=True)
 
-    render(dag, png_path, fmt="png", graph_name="Sigma_N2_example")
-    print(f"PNG rendered: {png_path}", flush=True)
+    if PNG_EXPORT:
+        render(dag, png_path, fmt="png", graph_name="Sigma_N2_example")
+        print(f"PNG rendered: {png_path}", flush=True)
 
-    render(dag, svg_path, fmt="svg", graph_name="Sigma_N2_example")
-    print(f"SVG rendered: {svg_path}", flush=True)
+    if SVG_EXPORT:
+        render(dag, svg_path, fmt="svg", graph_name="Sigma_N2_example")
+        print(f"SVG rendered: {svg_path}", flush=True)
 
     # Thesis-quality version: simplified labels, no IDs, larger font,
     # with Copy A/Copy B subtrees circled to match the caption's callouts.
+    # Only Copy B's Swap(0,2) child order is pinned (hop0 left, hop1
+    # right); Copy A's Swap is left to the layout engine's own choice,
+    # keeping the two copies' rendering deliberately asymmetric.
     thesis_png_path = str(OUTPUT_DIR / "dag_thesis.png")
-    render_thesis_png(dag, thesis_png_path, dpi=300, highlight_groups=groups)
+    render_thesis_png(
+        dag,
+        thesis_png_path,
+        dpi=300,
+        highlight_groups=groups,
+        force_child_order={trial_b_id},
+    )
     print(f"Thesis PNG rendered: {thesis_png_path}", flush=True)
 
     # Evaluate against N=2 version of the paper config for the README
