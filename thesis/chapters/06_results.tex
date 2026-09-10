@@ -58,12 +58,12 @@ The optimizer was also evaluated under non-ideal inner-qubit errors and differen
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/results/fidelity_by_config.png}
-    \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$. Hatched bars fall below the $F_{\min}=0.9$ threshold. The paper schedule is infeasible under both non-ideal configurations, while the schedules found by search remain feasible at the same generation budget by redistributing purification effort rather than spending more resources.}
+    \includegraphics[width=0.62\textwidth]{figures/results/fidelity_by_config.png}
+    \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$. Hatched bars fall below $F_{\min}=0.9$. The paper schedule is infeasible under both non-ideal configurations; the schedules found by search remain feasible at the same budget.}
     \label{fig:netgen}
 \end{figure*}
 
-Here, the paper schedule is infeasible in both non-ideal configurations, while the searched schedules remain feasible at the same budget; rate values for an infeasible schedule are not directly comparable to those of a feasible one. Section~\ref{sec:disc:synthesis} returns to this feasibility-versus-rate distinction as a general pattern.
+Rate values for an infeasible schedule are not directly comparable to those of a feasible one; Section~\ref{sec:disc:synthesis} returns to this feasibility-versus-rate distinction as a general pattern.
 
 \subsection{Per-Hop Heterogeneous Networks}
 \label{sec:exp:heterogeneous}
@@ -71,17 +71,17 @@ Here, the paper schedule is infeasible in both non-ideal configurations, while t
 % Source: outputs/random_network_adaptation/{30 seeds,100 seeds}/README.md,
 %         src/hrgs_scheduler/models/random_network.py
 
-So far, noise has only been varied uniformly across hops (Section~\ref{sec:exp:netgen}). A real-world deployment, by contrast, can have different link lengths, hardware quality, and error rates from one hop to another. This section tests that setting by assigning each hop's length, inner-qubit error rates, and arm count independently at random. The search remains non-adaptive: the schedule is fixed once selected, and only the network configuration supplied to the search changes.
+So far, noise has only been varied uniformly across hops (Section~\ref{sec:exp:netgen}). A real deployment, by contrast, can have different link lengths, hardware quality, and error rates from hop to hop. This section assigns each hop's length, inner-qubit error rate, and arm count independently at random; the search remains non-adaptive, only the supplied network configuration changes.
 
-A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example of the benefit of allocating purification resources unevenly across a heterogeneous chain. The detailed results are provided in \TOFIX{fix reference}{Table~\ref{tab:weaklink} (Appendix~\ref{app:weaklink})}.
+A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours illustrates the benefit of allocating purification resources unevenly across a heterogeneous chain, detailed in \TOFIX{fix reference}{Table~\ref{tab:weaklink} (Appendix~\ref{app:weaklink})}.
 
-The same tendency is observed over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$), \TOFIX{modify after cleaning the appendix}{reported in full in Appendix~\ref{app:weaklink}}. Among the networks for which a feasible uniform link-level candidate exists, the optimizer improves rate by a mean of $20.37\%$ and does not perform worse in the tested sample. Further interpretation of this behaviour is deferred to Section~\ref{sec:disc:synthesis}.
+The same tendency holds over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$), \TOFIX{modify after cleaning the appendix}{reported in full in Appendix~\ref{app:weaklink}}: among networks with a feasible uniform link-level candidate, the optimizer improves rate by a mean of $20.37\%$ and never performs worse in the tested sample (Section~\ref{sec:disc:synthesis}).
 \subsection{Noise Sensitivity}
 \label{sec:exp:edsweep}
 
 % Source: outputs/sweep_ed_n10/README.md
 
-Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the rate (Figure~\ref{fig:edsweep:rate}) and fidelity (Figure~\ref{fig:edsweep:fidelity}) curves for the paper baseline, matched-cost optimizer, and budget-relaxed optimizer. At low noise, the three variants remain close, with the rate curves separating visibly around $e_d=0.004$. The matched-cost optimizer may also change schedule structure as noise varies, so its curve represents the best cost-$100$ result at each point rather than a single fixed schedule. Further interpretation is given in Section~\ref{sec:disc:nearoptimal}.
+Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the rate (\ref{fig:edsweep:rate}) and fidelity (\ref{fig:edsweep:fidelity}) curves for the paper baseline, matched-cost optimizer, and budget-relaxed optimizer. At low noise the three variants remain close, with the rate curves separating visibly around $e_d=0.004$. The matched-cost curve represents the best cost-$100$ result at each point, not a single fixed schedule structure. Further interpretation is given in Section~\ref{sec:disc:nearoptimal}.
 
 \begin{figure*}[ht]
     \centering
@@ -98,7 +98,7 @@ Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantag
         \caption{Fidelity vs.\ $e_d$}
         \label{fig:edsweep:fidelity}
     \end{subfigure}
-    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate the optimizer instead reallocates.}
+    \caption{Rate and fidelity vs.\ depolarizing error $e_d$ at $N=10$, $E_{\max}=100$, for the paper baseline, matched-cost optimizer, and budget-relaxed optimizer. The paper baseline's higher fidelity (right) reflects unused surplus above $F_{\min}=0.9$, purchased with cost and rate the optimizer reallocates instead.}
     \label{fig:edsweep}
 \end{figure*}
 \FloatBarrier
@@ -111,9 +111,9 @@ Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantag
 
 % Source: outputs/pareto_frontiers/README.md
 
-With a permissive objective ($F_{\min}=0$, $E_{\max}=150$), the beam search evaluates 180 candidates. Figure~\ref{fig:pareto} shows two projections of the resulting Pareto frontier, fidelity versus cost (Figure~\ref{fig:pareto:cost}) and fidelity versus rate (Figure~\ref{fig:pareto:rate}), with dominated candidates and the non-dominated frontier under each pair of objectives distinguished as described in the caption (Section~\ref{sec:alg:prelims}, Pareto frontiers).
+With a permissive objective ($F_{\min}=0$, $E_{\max}=150$), the beam search evaluates 180 candidates. Figure~\ref{fig:pareto} shows two projections of the resulting Pareto frontier, fidelity vs.\ cost (\ref{fig:pareto:cost}) and fidelity vs.\ rate (\ref{fig:pareto:rate}), with dominated candidates and the non-dominated frontier under each pair of objectives distinguished as described in the caption (Section~\ref{sec:alg:prelims}, Pareto frontiers).
 
-In the fidelity-cost projection (Figure~\ref{fig:pareto:cost}), the paper schedule lies inside the frontier, while the frontier changes little once the cost exceeds approximately $C=60$. In the fidelity-rate projection (Figure~\ref{fig:pareto:rate}), the paper schedule is again inside the frontier, and the frontier shows a tradeoff between achieving high fidelity and maintaining a high rate. The paper schedule and the uniform link-level baseline are marked for reference. Appendix~\ref{app:dags} discusses the schedule \glspl{dag} corresponding to the key optima cited here and in Section~\ref{sec:exp:headline}.
+In the fidelity-cost projection, the paper schedule lies inside the frontier, which changes little once cost exceeds $C\approx60$. In the fidelity-rate projection, the paper schedule is again inside the frontier, which trades off high fidelity against high rate. The paper schedule and the uniform link-level baseline are marked for reference; Appendix~\ref{app:dags} discusses the schedule \glspl{dag} for the key optima cited here and in Section~\ref{sec:exp:headline}.
 
 \begin{figure*}[ht]
     \centering
@@ -130,7 +130,7 @@ In the fidelity-cost projection (Figure~\ref{fig:pareto:cost}), the paper schedu
         \caption{Fidelity vs.\ rate}
         \label{fig:pareto:rate}
     \end{subfigure}
-    \caption{Pareto frontiers at $N=10$, $e_d=0.01$, and $E_{\max}=150$, over the candidates evaluated by the beam search under a permissive objective ($F_{\min}=0$). Grey points are dominated candidates; connected points form the non-dominated frontier under each pair of objectives, with the paper schedule and uniform link-level baseline marked for reference.}
+    \caption{Pareto frontiers at $N=10$, $e_d=0.01$, $E_{\max}=150$, over candidates evaluated under a permissive objective ($F_{\min}=0$). Grey points are dominated; connected points form the non-dominated frontier, with the paper schedule and uniform link-level baseline marked for reference.}
     \label{fig:pareto}
 \end{figure*}
 \FloatBarrier
@@ -138,7 +138,7 @@ In the fidelity-cost projection (Figure~\ref{fig:pareto:cost}), the paper schedu
 \paragraph{Alternative objectives}
 \label{sec:exp:objectives}
 
-Changing the optimization objective from maximizing rate to maximizing fidelity or minimizing cost produces different top-ranked schedules without changing the search algorithm. Maximizing fidelity subject to a rate floor returns a higher-fidelity schedule than the rate-maximizing objective, while minimizing cost with only a fidelity floor can select a substantially lower-rate schedule. Adding an explicit rate floor changes that selection without modifying the search procedure. The complete numerical comparison is given in Appendix~\ref{app:objectives}.
+Changing the objective from maximizing rate to maximizing fidelity or minimizing cost produces different top-ranked schedules without changing the search algorithm. Maximizing fidelity subject to a rate floor returns a higher-fidelity schedule; minimizing cost with only a fidelity floor can select a substantially lower-rate schedule. Adding an explicit rate floor changes that selection without modifying the search procedure; the complete numerical comparison is given in Appendix~\ref{app:objectives}.
 
 \section{Scaling with Chain Length}
 \label{sec:exp:scaling}
@@ -152,12 +152,12 @@ For $N$ ranging from 10 to 28, the minimum $E_{\max}$ for which a schedule withi
 \[
     E_{\max}^{\min} \approx 1.192\,N^{1.666},
 \]
-with an exponent greater than one over the measured range. The paper's budget is first exceeded at $N=28$, while remaining sufficient at $N=26$. Figure~\ref{fig:budget} shows the measured points together with the paper's linear budget and the fitted power law. These fitted values describe the minimum budget found within the searched schedule families at the chosen beam width, not a global lower bound over the full legal schedule space or an asymptotic result (Section~\ref{sec:model:scope}). Chapter~\ref{chap:discussion} discusses this scope limitation together with the excluded-construction result of Section~\ref{sec:exp:excluded}. Appendix~\ref{app:sweeps} additionally reports the minimum feasible budget as a function of $e_d$ at fixed $N=10$.
+with an exponent greater than one over the measured range; the paper's budget is first exceeded at $N=28$, while remaining sufficient at $N=26$. Figure~\ref{fig:budget} shows the measured points together with the paper's linear budget and the fitted power law. These fitted values describe the minimum budget found within the searched families at the chosen beam width, not a global lower bound or an asymptotic result (Section~\ref{sec:model:scope}); Chapter~\ref{chap:discussion} discusses this scope limitation together with the excluded-construction result of Section~\ref{sec:exp:excluded}. Appendix~\ref{app:sweeps} additionally reports the minimum feasible budget vs.\ $e_d$ at fixed $N=10$.
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/results/min_budget_vs_n.png}
-    \caption{Minimum feasible $E_{\max}$ required to reach $F_{\min}=0.9$ as a function of $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the descriptive power-law fit $E_{\max}^{\min}\approx1.192\,N^{1.666}$. Solid markers and the solid portion of the fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range and does not represent additional measured data.}
+    \includegraphics[width=0.62\textwidth]{figures/results/min_budget_vs_n.png}
+    \caption{Minimum feasible $E_{\max}$ to reach $F_{\min}=0.9$ vs.\ $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the fitted power law $E_{\max}^{\min}\approx1.192\,N^{1.666}$. Solid markers and the solid fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range, not additional data.}
     \label{fig:budget}
 \end{figure*}
 \FloatBarrier
