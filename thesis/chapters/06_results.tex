@@ -12,7 +12,7 @@ This chapter validates the evaluator against the Integrating paper's~\cite{Bench
 \paragraph{Parameters and sweeps}
 \label{sec:exp:params}
 
-Unless stated otherwise, all experiments use the beam search with $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}. They start from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}), notably with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$. Each experiment changes only the parameters specified for that experiment; all remaining parameters are held fixed. A complete summary of the experimental parameters and sweep ranges is provided in Table~\ref{tab:params} (Appendix~\ref{app:params}).
+Unless stated otherwise, all experiments use the beam search with $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}. They start from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}), notably with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$. \TOFIX{what does this mean}{Each experiment changes only the parameters specified for that experiment; all remaining parameters are held fixed}. A complete summary of the experimental parameters and sweep ranges is provided in Table~\ref{tab:params} (Appendix~\ref{app:params}).
 
 \TOFIX{recheck from table and content; might be useless or not placed correctly}{The tree branching factor is not varied because it does not affect $F$, $C$, or $R$ in the model of Chapter~\ref{chap:model}. Uniform hop-length scaling likewise leaves relative schedule comparisons unchanged; heterogeneous hop lengths are considered separately in Section~\ref{sec:exp:heterogeneous}.}
 
@@ -24,7 +24,7 @@ Three fixed non-adaptive baselines, introduced in Section~\ref{sec:alg:bruteforc
 \paragraph{Metrics}
 \label{sec:exp:metrics}
 
-As defined in Section~\ref{sec:model:objectives}, fidelity $F$ is the Bell-pair fidelity after all purification, backbone, and correction operations, i.e.\ the $w$ component of the error vector at the schedule root; rate is $R=P_{\mathrm{success}}/T_{\mathrm{attempt}}$, where $P_{\mathrm{success}}$ is the probability that a complete schedule attempt succeeds and $T_{\mathrm{attempt}}$ is its deterministic wall-clock duration; and resource cost $C$ counts the number of \Gls{hrgs} copies, or equivalently \texttt{GenNode} leaves, consumed per trial. Two comparison modes recur throughout this chapter: \emph{matched-cost}, in which the optimizer is constrained to $C=100$, and \emph{budget-relaxed}, in which it may choose any schedule satisfying $C\le E_{\max}$.
+As defined in Section~\ref{sec:model:objectives}, fidelity $F$ is the Bell-pair fidelity after all purification, backbone, and correction operations, i.e.\ the $w$ component of the error vector at the schedule root; rate is $R=P_{\mathrm{success}}/T_{\mathrm{attempt}}$, where $P_{\mathrm{success}}$ is the probability that a complete schedule attempt succeeds and $T_{\mathrm{attempt}}$ is its deterministic wall-clock duration; and resource cost $C$ counts the number of \Gls{hrgs} copies, or equivalently \TOFIX{add an s?}{\texttt{GenNode}} leaves, consumed per trial. Two comparison modes recur throughout this chapter: \emph{matched-cost}, in which the optimizer is constrained to $C=100$, and \emph{budget-relaxed}, in which it may choose any schedule satisfying $C\le E_{\max}$.
 
 \section{Physics Validation}
 \label{sec:exp:validation}
@@ -54,11 +54,11 @@ At the reference configuration, the optimizer improves on the paper schedule bot
 
 % Source: outputs/sweep_network_sensitivity/README.md
 
-The optimizer was also evaluated under non-ideal inner-qubit errors and different numbers of redundant \Gls{bsm} arms. The headline comparison uses the source paper's idealized network configuration, while the non-ideal configurations introduce physical constraints that can change which schedules remain feasible. At the same generation budget, the paper's schedule falls below the fidelity threshold in both non-ideal configurations tested, whereas rerunning the optimizer under the corresponding physical parameters identifies feasible schedules. Figure~\ref{fig:netgen} summarizes the resulting comparisons for the two \Gls{bsm} arm counts; the full numeric comparison is given in Table~\ref{tab:netgen} (Appendix~\ref{app:netgen}).
+The optimizer was also evaluated under non-ideal inner-qubit errors and different numbers of redundant \Gls{bsm} arms. While the headline comparison uses the source paper's idealized network configuration, the non-ideal configurations introduce physical constraints that can change which schedules remain feasible. At the same generation budget, the paper's schedule falls below the fidelity threshold in both non-ideal configurations tested, whereas rerunning the optimizer under the corresponding physical parameters identifies feasible schedules. Figure~\ref{fig:netgen} summarizes the resulting comparisons for the two \Gls{bsm} arm counts; the full numeric comparison is given in \TOFIX{fix reference}{Table~\ref{tab:netgen} (Appendix~\ref{app:netgen}).}
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.85\textwidth]{figures/results/fidelity_by_config.png}
+    \includegraphics[width=0.75\textwidth]{figures/results/fidelity_by_config.png}
     \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, and $\gamma=0$. Hatched bars fall below the $F_{\min}=0.9$ threshold. The paper schedule is infeasible under both non-ideal configurations, while the schedules found by search remain feasible at the same generation budget by redistributing purification effort rather than spending more resources.}
     \label{fig:netgen}
 \end{figure*}
@@ -73,33 +73,35 @@ Here, the paper schedule is infeasible in both non-ideal configurations, while t
 
 So far, noise has only been varied uniformly across hops (Section~\ref{sec:exp:netgen}). A real-world deployment, by contrast, can have different link lengths, hardware quality, and error rates from one hop to another. This section tests that setting by assigning each hop's length, inner-qubit error rates, and arm count independently at random. The search remains non-adaptive: the schedule is fixed once selected, and only the network configuration supplied to the search changes.
 
-A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example of the benefit of allocating purification resources unevenly across a heterogeneous chain. The detailed results are provided in Table~\ref{tab:weaklink} (Appendix~\ref{app:weaklink}).
+A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours provides a concrete example of the benefit of allocating purification resources unevenly across a heterogeneous chain. The detailed results are provided in \TOFIX{fix reference}{Table~\ref{tab:weaklink} (Appendix~\ref{app:weaklink})}.
 
-The same tendency is observed over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$). Among the networks for which a feasible uniform link-level candidate exists, the optimizer improves rate by a mean of $20.37\%$ and does not perform worse in the tested sample. Further interpretation of this behaviour is deferred to Section~\ref{sec:disc:synthesis}.
-
+\TOFIX{maybe have more data in appendix with remarkable seeds i.e. big improvement and in which cases? just use a bunch of data from that experiment in the appendix}{The same tendency is observed over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$). Among the networks for which a feasible uniform link-level candidate exists, the optimizer improves rate by a mean of $20.37\%$ and does not perform worse in the tested sample. Further interpretation of this behaviour is deferred to Section~\ref{sec:disc:synthesis}.
+}
 \subsection{Noise Sensitivity}
 \label{sec:exp:edsweep}
 
 % Source: outputs/sweep_ed_n10/README.md
 
-Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the corresponding rate (Figure~\ref{fig:edsweep:rate}) and fidelity (Figure~\ref{fig:edsweep:fidelity}) curves for the paper baseline, the matched-cost optimizer, and the budget-relaxed optimizer. At low noise, the three variants remain close; the rate curves begin to separate visibly around $e_d=0.004$. The matched-cost optimizer may also change schedule structure as the noise level varies, so its curve represents the best cost-$100$ result at each point rather than a single fixed schedule followed throughout the sweep. Further interpretation of these transitions is given in Section~\ref{sec:disc:nearoptimal}.
+Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantage over the uniform link-level baseline increases with noise. Figure~\ref{fig:edsweep} shows the rate (Figure~\ref{fig:edsweep:rate}) and fidelity (Figure~\ref{fig:edsweep:fidelity}) curves for the paper baseline, matched-cost optimizer, and budget-relaxed optimizer. At low noise, the three variants remain close, with the rate curves separating visibly around $e_d=0.004$. The matched-cost optimizer may also change schedule structure as noise varies, so its curve represents the best cost-$100$ result at each point rather than a single fixed schedule. Further interpretation is given in Section~\ref{sec:disc:nearoptimal}.
+
+\TODO{if possible do a joint legend? or move the right figure's around so the figure can fit on the above page}
 
 \begin{figure*}[ht]
     \centering
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.2\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/results/rate_vs_ed.png}
         \caption{Rate vs.\ $e_d$}
         \label{fig:edsweep:rate}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.2\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/results/fidelity_vs_ed.png}
         \caption{Fidelity vs.\ $e_d$}
         \label{fig:edsweep:fidelity}
     \end{subfigure}
-    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate the optimizer instead reallocates, not a search failure.}
+    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate the optimizer instead reallocates.}
     \label{fig:edsweep}
 \end{figure*}
 \FloatBarrier
@@ -112,7 +114,7 @@ Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantag
 
 % Source: outputs/pareto_frontiers/README.md
 
-With a permissive objective ($F_{\min}=0$, $E_{\max}=150$), the beam search evaluates 180 candidates. Figure~\ref{fig:pareto} shows two projections of the resulting Pareto frontier: fidelity versus cost and fidelity versus rate. Each point represents one evaluated schedule, while grey points are dominated candidates and connected points form the non-dominated frontier under the corresponding pair of objectives (Section \ref{sec:alg:prelims}, Pareto frontiers).
+\TOFIX{maybe restating a little too much the caption of the figure when describing the gray points? to keep in the caption only and maybe merge with below paragraph?}{With a permissive objective ($F_{\min}=0$, $E_{\max}=150$), the beam search evaluates 180 candidates. Figure~\ref{fig:pareto} shows two projections of the resulting Pareto frontier: \TOFIX{specify a or b}{fidelity versus cost and fidelity versus rate}. Each point represents one evaluated schedule, while grey points are dominated candidates and connected points form the non-dominated frontier under the corresponding pair of objectives (Section \ref{sec:alg:prelims}, Pareto frontiers).}
 
 In the fidelity-cost projection (Figure~\ref{fig:pareto:cost}), the paper schedule lies inside the frontier, while the frontier changes little once the cost exceeds approximately $C=60$. In the fidelity-rate projection (Figure~\ref{fig:pareto:rate}), the paper schedule is again inside the frontier, and the frontier shows a tradeoff between achieving high fidelity and maintaining a high rate. The paper schedule and the uniform link-level baseline are marked for reference. Appendix~\ref{app:dags} discusses the schedule \glspl{dag} corresponding to the key optima cited here and in Section~\ref{sec:exp:headline}.
 
@@ -163,7 +165,7 @@ with an exponent greater than one over the measured range. The paper's budget is
 \end{figure*}
 \FloatBarrier
 
-Appendix~\ref{app:results} (Section~\ref{sec:exp:excluded}) reports a related optimality-scope check at $N=18$, where a hand-constructed schedule using a same-span construction excluded from the search reaches the paper's own budget.
+\TOFIX{fix reference once appendix is clarified \& properly structured}{Appendix~\ref{app:results} (Section~\ref{sec:exp:excluded})} additionally reports a related optimality-scope check at $N=18$, where a hand-constructed schedule using a same-span construction excluded from the search reaches the paper's own budget.
 
 
 \section{Timing Sensitivity}
