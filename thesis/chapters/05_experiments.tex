@@ -4,6 +4,8 @@
 % Sources: src/hrgs_scheduler/search/, docs/Optimizer Status.md,
 % docs/Justification of Implementation.md §4
 
+\TODO{maybe also remind about term optimizer in chapter 6 or just define it over there as not used in this chapter}
+
 Three search tiers share one schedule representation and one evaluator. Whichever tier is under discussion, the schedule it returns is called \emph{the optimizer} throughout this thesis; no single software artefact carries that name, and Chapters~\ref{chap:results}--\ref{chap:discussion} state which tier produced a given result whenever it matters. Every returned candidate passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass of Section~\ref{sec:model:objectives}; the tiers differ only in which legal \Glspl{dag} they consider, never in how a returned \Gls{dag}'s fidelity, success probability, latency, or cost is calculated.
 
 The chapter moves from general search concepts (Section~\ref{sec:alg:prelims}) through the shared evaluator (Section~\ref{sec:alg:evaluator}) to three increasingly broad but less exhaustive tiers: fixed baseline families (Section~\ref{sec:alg:bruteforce}), the exact span-partition recurrence (Section~\ref{sec:alg:dp}), same-span pumping (Section~\ref{sec:alg:pumping}), and beam search (Section~\ref{sec:alg:beam}), the heuristic used for the production-scale experiments of Chapter~\ref{chap:results}.
@@ -36,7 +38,7 @@ The first tier enumerates four fixed structural families:
     \item a \emph{single raw end-to-end chain}, with no purification;
     \item \emph{end-node pumping}, in which $n_{\mathrm{pur}}$ independent raw chains are purified sequentially at the end nodes with a round-trip herald between rounds (\emph{heralded} end-node pumping);
     \item its \emph{optimistic counterpart}, deferring heralding until the end (\emph{optimistic} end-node pumping);
-    \item \emph{uniform link-level purification}, using the same copy count and circuit at every hop.
+    \item \emph{uniform link-level} purification, using the same copy count and circuit at every hop.
 \end{itemize}
 For even $N$ within budget, the Integrating paper's hand-chosen schedule~\cite{Benchasattabuse2025Integrating} is included as a fifth fixed comparison point.
 
