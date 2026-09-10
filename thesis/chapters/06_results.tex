@@ -14,7 +14,7 @@ This chapter validates the evaluator against the Integrating paper's~\cite{Bench
 
 Unless stated otherwise, all experiments use the beam search with $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}) together with the fixed schedule families of Section~\ref{sec:alg:bruteforce}. They start from the reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}), notably with $N=10$, $e_d=0.01$, $F_{\min}=0.9$, and $E_{\max}=100$. Each experiment changes only the parameters specified for that experiment; all remaining parameters are held fixed. A complete summary of the experimental parameters and sweep ranges is provided in Table~\ref{tab:params} (Appendix~\ref{app:params}).
 
-The tree branching factor is not varied because it does not affect $F$, $C$, or $R$ in the model of Chapter~\ref{chap:model}. Uniform hop-length scaling likewise leaves relative schedule comparisons unchanged; heterogeneous hop lengths are considered separately in Section~\ref{sec:exp:heterogeneous}.
+The tree branching factor is not varied because it does not affect the objectives $F$, $C$, or $R$ introduced in Chapter~\ref{chap:model}. Uniform hop-length scaling likewise leaves relative schedule comparisons unchanged; heterogeneous hop lengths are considered separately in Section~\ref{sec:exp:heterogeneous}.
 
 \paragraph{Baselines}
 \label{sec:exp:baselines}
@@ -85,20 +85,20 @@ Sweeping $e_d$ from 0 to 0.01 at $N=10$ shows that the optimizer's rate advantag
 
 \begin{figure*}[ht]
     \centering
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/results/rate_vs_ed.png}
         \caption{Rate vs.\ $e_d$}
         \label{fig:edsweep:rate}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.53\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/results/fidelity_vs_ed.png}
         \caption{Fidelity vs.\ $e_d$}
         \label{fig:edsweep:fidelity}
     \end{subfigure}
-    \caption{Rate and fidelity vs.\ depolarizing error $e_d$ at $N=10$, $E_{\max}=100$, for the paper baseline, matched-cost optimizer, and budget-relaxed optimizer. The paper baseline's higher fidelity (right) reflects unused surplus above $F_{\min}=0.9$, purchased with cost and rate the optimizer reallocates instead.}
+    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate the optimizer instead reallocates.}
     \label{fig:edsweep}
 \end{figure*}
 \FloatBarrier
@@ -156,7 +156,7 @@ with an exponent greater than one over the measured range; the paper's budget is
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.62\textwidth]{figures/results/min_budget_vs_n.png}
+    \includegraphics[width=0.9\textwidth]{figures/results/min_budget_vs_n.png}
     \caption{Minimum feasible $E_{\max}$ to reach $F_{\min}=0.9$ vs.\ $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the fitted power law $E_{\max}^{\min}\approx1.192\,N^{1.666}$. Solid markers and the solid fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range, not additional data.}
     \label{fig:budget}
 \end{figure*}
