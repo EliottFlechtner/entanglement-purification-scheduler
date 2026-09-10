@@ -2,6 +2,8 @@
 
 \TODO{check for e\_max occurences in figures or text; should be capital E}
 
+\TODO{if files of thesis are renamed, also make sure to rename the labels \& references BUT CAREFULLY!}
+
 \TODO{recheck for appendix references}
 
 \TODO{add manually made figures in appendix; ask for directions on where to add any}
@@ -15,7 +17,6 @@ This thesis represents every fixed non-adaptive purification schedule as a \Gls{
 At the source paper's~\cite{Benchasattabuse2025Integrating} reference configuration, a schedule found by search at the same generation cost as the hand-picked baseline improves the output rate by $2.5\%$. Allowing the search to use less generation cost yields a schedule requiring only $60\%$ of the baseline generation cost while achieving a $52.8\%$ higher output rate. A more important result concerns the effect of noise on schedule feasibility: once inner-qubit error (a form of noise not modelled in the source paper) is introduced, the fixed baseline can fall below the required fidelity, whereas a schedule re-selected by search at the same generation cost remains feasible. The same feasibility advantage is observed on average across a sample of independently randomized per-hop heterogeneous networks. Further experiments characterize how this advantage changes with noise level, timing effects, and chain length, including the minimum generation cost at which at least one searched schedule remains feasible as the chain grows.
 
 These results are existence claims within the schedule families and search limits implemented here, not proofs of global optimality: the beam search and its pumping operation retain only a bounded frontier at each stage. Consequently, failure to find a schedule does not establish that no feasible schedule exists; a suitable schedule may remain outside the explored frontier.
-
 
 \glsreset{hrgs-long}
 
