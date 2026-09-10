@@ -4,7 +4,7 @@
 \section{Validation Figures}
 \label{app:validation}
 
-Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} give the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:results}, rather than only at that one point.
+Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} gives the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:results}, rather than only at that one point.
 
 The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.
 
@@ -32,40 +32,6 @@ $e_d$ & $F_{\text{raw}}$ & $F_{\text{baseline (heralded)}}$ & $F_{\text{flexible
 \end{tabular}
 \end{table}
 
-% \begin{figure}[h]
-% \centering
-% \begin{minipage}[c]{0.48\textwidth}
-% \centering
-% \captionof{table}{Evaluator-derived fidelity vs.\ $e_d$ for the three canonical schedules of Section~\ref{sec:bg:decoherence}, at $N=10$. Only $e_d=0.000$ and $e_d=0.010$ have a published reference value to compare against (see text).}
-% \label{tab:app:validation}
-% \small
-% \begin{tabular}{cccc}
-% \hline
-% $e_d$ & $F_{\text{raw}}$ & $F_{\text{baseline}}$ & $F_{\text{flexible}}$ \\
-% \hline
-% 0.000 & 1.0000 & 1.0000 & 1.0000 \\
-% 0.001 & 0.9803 & 0.9932 & 0.9933 \\
-% 0.002 & 0.9610 & 0.9861 & 0.9866 \\
-% 0.003 & 0.9422 & 0.9787 & 0.9799 \\
-% 0.004 & 0.9239 & 0.9710 & 0.9730 \\
-% 0.005 & 0.9061 & 0.9629 & 0.9661 \\
-% 0.006 & 0.8887 & 0.9544 & 0.9591 \\
-% 0.007 & 0.8717 & 0.9456 & 0.9519 \\
-% 0.008 & 0.8552 & 0.9364 & 0.9446 \\
-% 0.009 & 0.8391 & 0.9268 & 0.9372 \\
-% 0.010 & 0.8234 & 0.9168 & 0.9295 \\
-% \hline
-% \end{tabular}
-% \end{minipage}
-% \hfill
-% \begin{minipage}[c]{0.48\textwidth}
-% \centering
-% \includegraphics[width=\textwidth]{figures/appendix/fidelity_vs_ed_validation.png}
-% \captionof{figure}{Same data as Table~\ref{tab:app:validation}, plotted.}
-% \label{fig:app:validation}
-% \end{minipage}
-% \end{figure}
-
 \section{Schedule DAGs of Selected Optima}
 \label{app:dags}
 
@@ -76,7 +42,7 @@ Reproducing one of these diagrams here at a reduced scale would not add informat
 \section{Supplementary Sweep Figures}
 \label{app:sweeps}
 
-These figures support the runtime and determinism claims of Section~\ref{sec:exp:runtime} and Table~\ref{tab:runtimes}, without interrupting the main narrative of Chapter~\ref{chap:results}.
+These figures support the runtime and determinism claims of Table~\ref{tab:benchmarks} (Appendix~\ref{app:runtime}), without interrupting the main narrative of Chapter~\ref{chap:results}.
 
 Figure~\ref{fig:app:beamwidth} shows why beam width $w_\text{beam}=25$ was chosen as the default used throughout this thesis: at $N=10$, wall-clock search time grows mildly up to a beam width of about 16 and then sharply beyond it, while the best rate found is already flat across the entire tested range, so widening the beam past 25 buys no further quality improvement at this configuration.
 
@@ -86,6 +52,7 @@ Figure~\ref{fig:app:beamwidth} shows why beam width $w_\text{beam}=25$ was chose
     \caption{Beam search wall-clock time and best rate found vs.\ beam width, at $N=10$, $e_d=0.01$.}
     \label{fig:app:beamwidth}
 \end{figure}
+\FloatBarrier
 
 Figure~\ref{fig:app:qualitygap} confirms the determinism claim underlying that choice: at $N=6$, where the exact dynamic program (Section~\ref{sec:alg:dp}) remains tractable, the beam search matches the exact optimum exactly at every beam width tested, with a zero gap throughout.
 
@@ -95,8 +62,9 @@ Figure~\ref{fig:app:qualitygap} confirms the determinism claim underlying that c
     \caption{Beam search's rate gap from the exact dynamic-program optimum vs.\ beam width, at $N=6$, $e_d=0.01$.}
     \label{fig:app:qualitygap}
 \end{figure}
+\FloatBarrier
 
-Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:runtimes} to every tested $N$: both the exact dynamic program and the beam search scale similarly with $N$ once the same-span pumping move (Section~\ref{sec:alg:pumping}) is enabled, with the beam search consistently the faster of the two.
+Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:benchmarks} to every tested $N$: both the exact dynamic program and the beam search scale similarly with $N$ once the same-span pumping move (Section~\ref{sec:alg:pumping}) is enabled, with the beam search consistently the faster of the two.
 
 \begin{figure}[H]
     \centering
@@ -104,6 +72,7 @@ Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:r
     \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and the beam search, same-span pumping move enabled throughout.}
     \label{fig:app:runtimen}
 \end{figure}
+\FloatBarrier
 
 \subsection{Concurrent Branch Budget ($M_{\max}$)}
 \label{app:mmax}
@@ -196,6 +165,7 @@ Sweeping $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate monotonically for
     \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping, at $N=10$ and $e_d=0.01$.}
     \label{fig:timing}
 \end{figure*}
+\FloatBarrier
 
 
 
@@ -203,11 +173,24 @@ Sweeping $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate monotonically for
 %%%% TO REMOVE & REORGANIZE PROPERLY ONCE CHAPTER 6 IS DONE
 % table here so as not to fuck up the references
 
-\TODO{moved table to appendix in dedicated section (PARAMETERS)}
+\section{Network Generalization, Full Comparison}
+\label{app:netgen}
+
+Section~\ref{sec:exp:netgen} summarizes the network-generalization result; Table~\ref{tab:netgen} gives the full numeric comparison (cost, fidelity, and rate) behind Figure~\ref{fig:netgen}.
+
+\input{tables/network_generalization}
+
+\section{Experimental Parameters}
+\label{app:params}
+
 \input{tables/experiment_parameters}
 
-\TODO{moved table to appendix in dedicated section (BENCHMARKS)}
+\section{Runtime Benchmarks}
+\label{app:runtime}
+
 \input{tables/runtime_benchmarks}
 
-\TODO{moved table to appendix in dedicated section (WEAK-LINK CONTRAST)}
+\section{Heterogeneous Weak-Link Contrast}
+\label{app:weaklink}
+
 \input{tables/weak_link_contrast.tex}
