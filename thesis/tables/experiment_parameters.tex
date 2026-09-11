@@ -3,22 +3,20 @@
 \caption{Experimental parameters. The reference column gives the nominal value used unless a parameter is varied in the indicated experiment. All parameters not listed as varying follow the Integrating paper's~\cite{Benchasattabuse2025Integrating} reference configuration $\mathcal{N}_{\mathrm{ref}}$ (Section~\ref{sec:model:network}).}
 \label{tab:params}
 \small
-\begin{tabular}{p{5.3cm}llp{3.2cm}}
+\begin{tabular}{p{5.7cm}llp{3.2cm}}
 \toprule
 Parameter & Reference & Sweep range & Where varied \\
 \midrule
 $N$ (hop count) & 10 & 10--28 & Section~\ref{sec:exp:budget} \\
 $\ell_i$ (hop length) & 2~km & 1, 2, 3, 4~km & Section~\ref{sec:exp:heterogeneous} \\
 $c$ (propagation speed) & $2\!\times\!10^5$~km/s & $2\!\times\!10^5$~km/s & Section~\ref{sec:exp:timing} \\
-$\vec b_i$ (tree-encoding branching vector) & $(16,14,1)$ & -- & Section~\ref{sec:exp:netgen} \\
+$\vec b^{(i)}$ (tree-encoding branching vector) & $(16,14,1)$ & -- & not varied \\
 $e_d$ (outer-photon depolarizing rate) & 0.01 & $[0,\,0.01]$ & Section~\ref{sec:exp:edsweep} \\
 $p_X^{\mathrm{in}},p_Z^{\mathrm{in}}$ (inner-qubit error rates) & 0 & [0, $3\!\times\!10^{-3}$] & Section~\ref{sec:exp:netgen} \\
 $k_i$ (\Gls{bsm} arm count) & 18 & 6, 18 & Section~\ref{sec:exp:netgen} \\
 $\gamma$ (memory dephasing rate) & 0 & $[0,\,10^5]$ & Section~\ref{sec:exp:timing} \\
 $\tau_{\mathrm{emit}}$ (emission delay) & 0 & $[10^{-4},\,10^0]$ & Section~\ref{sec:exp:timing} \\
-$E_{\max}$ (generation-cost budget) & 100 & \TOFIX{give values?}{varies} & Sections~\ref{sec:exp:headline}--\ref{sec:exp:budget} \\
+$E_{\max}$ (generation-cost budget) & 100 & 50--280 (per experiment) & Sections~\ref{sec:exp:headline}--\ref{sec:exp:budget} \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\TODO{recheck branching factor, says here its varied but claimed in the that its not}
