@@ -39,9 +39,11 @@ None of the results above needed a different search procedure. Replacing the obj
 
 The beam-search tier (Section~\ref{sec:alg:beam}) includes one same-span pumping operation, with the candidate frontier bounded by the beam width. All returned schedules are therefore valid constructions within the searched families, not proofs of global optimality: finding the same best candidate at two beam widths is evidence of stability, \emph{not proof that no better candidate was pruned}. An uncapped pumping mode (Section~\ref{sec:alg:pumping}) is available for targeted validation but becomes impractical on larger instances, so it is used as a diagnostic rather than the default.
 
-\TOFIX{recheck}{The excluded-construction result at $N=18$ is the clearest demonstration: a schedule built from a purification pattern the search never considers, combining two independently constructed full-span candidates, is feasible at the paper's own budget (Section~\ref{sec:exp:excluded}), even though the searched families themselves already reach a lower minimum budget at that $N$ (Section~\ref{sec:exp:budget}). The two facts do not conflict: that the searched families find their own feasible schedule at $N=18$ says nothing about whether they can construct this specific excluded one, since that construction lies outside every tier's search space regardless of budget. The same structural gap is what makes the budget-scaling fit of Section~\ref{sec:exp:budget} a bound on \emph{what the searched families require}, not on what any legal schedule requires, most directly relevant where that fit first exceeds the paper's own formula, at $N=28$.}
+The excluded-construction result at $N=18$ provides the clearest demonstration. A schedule built from a purification pattern that the search never considers, by combining two independently constructed full-span candidates, is feasible within the paper's own budget (Section~\ref{sec:exp:excluded}). This is true even though the searched families themselves already achieve a lower minimum budget at this $N$ (Section~\ref{sec:exp:budget}). These results do not conflict: the fact that the searched families find a feasible schedule at $N=18$ does not imply that they can construct this particular excluded schedule, since it lies outside the search space of every tier regardless of the available budget. The same structural gap means that the budget-scaling fit of Section~\ref{sec:exp:budget} should be interpreted as a bound on \emph{what the searched families require}, rather than on what any legal schedule requires. This distinction is most directly relevant at $N=28$, where the fitted bound first exceeds the paper's own formula.
 
 The results of Chapter~\ref{chap:experiments} should therefore distinguish between existence and non-existence claims. An existence claim, that a feasible schedule was found, holds for the searched model because the schedule is explicitly constructed, validated, and evaluated by the shared physical model. A non-existence claim applies only to the families and search limits actually explored; it does not prove that no legal schedule exists outside that space.
+
+\vspace{1cm}
 
 \section{Heralded vs.\ Optimistic Execution}
 \label{sec:disc:optimistic}
@@ -52,17 +54,19 @@ The timing results in Section~\ref{sec:exp:timing} show that the relative benefi
 
 These two effects reinforce each other in the reference regime: the timing structure that reduces communication latency also avoids the memory waiting that would otherwise increase decoherence. This is not a universal preference: the balance depends on the relative communication delay, memory coherence, as well as failure probabilities, and different physical parameters could favour intermediate heralding instead. It should therefore be read as a property of the tested configurations, not a general architectural rule.
 
+\vspace{0.8cm}
+
 \section{Limitations}
 \label{sec:disc:limitations}
 
 % Source: Optimizer Status.md §Known Limits
 
-Four limitations bound the scope of the results.
+\begin{enumerate}
+    \item \textit{Non-adaptive schedules.} Only non-adaptive schedules are evaluated: the schedule is fixed before execution and cannot condition a later purification step on an intermediate outcome (Section~\ref{sec:model:scope}). A fully adaptive strategy would require a different formulation, so the results bound only the non-adaptive schedule space.
 
-First, only non-adaptive schedules are evaluated: the schedule is fixed before execution and cannot condition a later purification step on an intermediate outcome (Section~\ref{sec:model:scope}). A fully adaptive strategy would need a different formulation; the results here bound only the non-adaptive schedule space.
+    \item \textit{Memory footprint.} The search does not prune on memory footprint. $M_{\max}$, the number of branches held in memory at once, is computed exactly for every candidate (Section~\ref{sec:model:scope}; quantified in Appendix~\ref{app:mmax}), but only the generation-cost budget $E_{\max}$ constrains the search. A schedule feasible under $E_{\max}$ may therefore still require more simultaneously held branches than a deployment with a strict memory limit could support.
 
-Second, the search does not prune on memory footprint. $M_{\max}$, the number of branches held in memory at once, is computed exactly for every candidate (Section~\ref{sec:model:scope}; quantified in Appendix~\ref{app:mmax}), but only the generation-cost budget $E_{\max}$ constrains which candidates the search keeps. A schedule reported here as feasible under $E_{\max}$ can therefore still need more simultaneously-held branches than a deployment with a strict memory limit could support.
+    \item \textit{Noise model.} The fidelity model assumes Pauli-channel noise, consistent with the source papers. Schedule comparisons are therefore internally consistent, but their ranking need not carry over to hardware dominated by different error processes. In particular, coupled loss, gate-error, and memory effects are not represented.
 
-Third, the fidelity model assumes Pauli-channel noise, consistent with the source papers. Comparisons between schedules are internally consistent under this model, but a ranking obtained here need not carry over to hardware dominated by a different error process. In particular, hardware may involve coupled loss, gate-error, and memory effects that are not represented here.
-
-Fourth, the fixed beam-width frontier makes the search sensitive to which construction types compete for retained slots: enabling same-span pumping changes which candidate is returned at the reference configuration, so adding a new construction can change previously reported results even at fixed beam width. Extensions should include explicit before-and-after comparisons rather than assume a new construction can only help.
+    \item \textit{Fixed beam width.} The search is sensitive to which construction types compete for retained slots. Enabling same-span pumping, for example, changes which candidate is returned at the reference configuration, so adding a construction can change previously reported results even at fixed beam width. Extensions should therefore include explicit before-and-after comparisons rather than assume that a new construction can only help.
+\end{enumerate}
