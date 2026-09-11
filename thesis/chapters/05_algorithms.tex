@@ -4,9 +4,7 @@
 % Sources: src/hrgs_scheduler/search/, docs/Optimizer Status.md,
 % docs/Justification of Implementation.md §4
 
-\TODO{maybe also remind about term optimizer in chapter 6 or just define it over there as not used in this chapter}
-
-Three search tiers share one schedule representation and one evaluator. Whichever tier is under discussion, the schedule it returns is called \emph{the optimizer} throughout this thesis; no single software artefact carries that name, and Chapters~\ref{chap:experiments}--\ref{chap:discussion} state which tier produced a given result whenever it matters. Every returned candidate passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass of Section~\ref{sec:model:objectives}; the tiers differ only in which legal \Glspl{dag} they consider, never in how a returned \Gls{dag}'s fidelity, success probability, latency, or cost is calculated.
+Three search tiers share one schedule representation and one evaluator. Every returned candidate passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass of Section~\ref{sec:model:objectives}; the tiers differ only in which legal \Glspl{dag} they consider, never in how a returned \Gls{dag}'s fidelity, success probability, latency, or cost is calculated.
 
 The chapter moves from general search concepts (Section~\ref{sec:alg:prelims}) through the shared evaluator (Section~\ref{sec:alg:evaluator}) to three increasingly broad but less exhaustive tiers: fixed baseline families (Section~\ref{sec:alg:bruteforce}), the exact span-partition recurrence (Section~\ref{sec:alg:dp}), same-span pumping (Section~\ref{sec:alg:pumping}), and beam search (Section~\ref{sec:alg:beam}), the heuristic used for the production-scale experiments of Chapter~\ref{chap:experiments}.
 
