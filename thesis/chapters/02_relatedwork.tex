@@ -1,5 +1,5 @@
 \chapter{Related Work and State of the Art}
-\label{chap:related}
+\label{chap:relatedwork}
 
 This chapter reviews the three main research areas on which this thesis builds: quantum repeater protocols, entanglement purification, and \Gls{rgs}-based architectures. It then places the scheduling gap identified in Section~\ref{sec:intro:gap} in the context of the existing state of the art.
 
@@ -12,7 +12,7 @@ A quantum repeater~\cite{Briegel1998Quantum} divides a long channel into shorter
 
 The all-photonic quantum repeaters~\cite{Azuma2015All} studied in this thesis belong to the third generation but differ from proposals based on matter-qubit error correction. They encode the transmitted qubit in a multi-photon graph state~\cite{Briegel2001Persistent,Hein2006Entanglement,Hein2004Multiparty}: the \Gls{rgs}~\cite{Azuma2015All}. Its tree encoding provides loss tolerance while operating on flying qubits, removing the need for quantum memories at intermediate stations. Section~\ref{sec:rw:rgs} places this architecture among related proposals; Chapter~\ref{chap:background} gives the mechanics required here.
 
-A related but architecturally distinct proposal, the measurement-based quantum repeater~\cite{Zwerger2012Measurementbased}, stores small pre-prepared entangled resource states~\cite{Raussendorf2002oneway,Raussendorf2002Computational,Raussendorf2003Measurementbased,Nielsen2006Clusterstate,Greenberger2009Compendium} at each station and couples them to incoming photons using simple \Glspl{bsm}, rather than constructing one graph state spanning the repeater chain~\cite{Browne2005Resourceefficient,Ewert20143,Zwerger2018Longrange}. Its emphasis on minimising the number of qubits held at each station provides a useful comparison for the resource costs studied in Chapter~\ref{chap:results}.
+A related but architecturally distinct proposal, the measurement-based quantum repeater~\cite{Zwerger2012Measurementbased}, stores small pre-prepared entangled resource states~\cite{Raussendorf2002oneway,Raussendorf2002Computational,Raussendorf2003Measurementbased,Nielsen2006Clusterstate,Greenberger2009Compendium} at each station and couples them to incoming photons using simple \Glspl{bsm}, rather than constructing one graph state spanning the repeater chain~\cite{Browne2005Resourceefficient,Ewert20143,Zwerger2018Longrange}. Its emphasis on minimising the number of qubits held at each station provides a useful comparison for the resource costs studied in Chapter~\ref{chap:experiments}.
 
 \section{Entanglement Purification Protocols}
 \label{sec:rw:purification}

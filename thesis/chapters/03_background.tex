@@ -19,7 +19,7 @@ Its quality is measured by a single scalar, the fidelity $F = \bra{\Phi^+}\rho\k
 
 \glsreset{bsm}
 
-While Chapter~\ref{chap:related} surveys why direct photonic transmission cannot distribute such pairs over long distances, we introduce here the elementary operation used to establish and extend links: a two-qubit \Gls{bsm}. Realized with passive linear optics and no ancillary photons, a \Gls{bsm} succeeds with probability at most 50\% per attempt, conditional on the photons arriving~\cite{Ewert20143,Benchasattabuse2026Bridging}. This ceiling is why the architecture below builds redundancy into every hop.
+While Chapter~\ref{chap:relatedwork} surveys why direct photonic transmission cannot distribute such pairs over long distances, we introduce here the elementary operation used to establish and extend links: a two-qubit \Gls{bsm}. Realized with passive linear optics and no ancillary photons, a \Gls{bsm} succeeds with probability at most 50\% per attempt, conditional on the photons arriving~\cite{Ewert20143,Benchasattabuse2026Bridging}. This ceiling is why the architecture below builds redundancy into every hop.
 
 \subsection{Half-RGS Repeater Architecture}
 \label{sec:bg:hrgs}
@@ -99,7 +99,7 @@ While idle, a resource's error vector relaxes toward the maximally mixed state a
 \]
 This relaxation is applied locally and independently at every node of a schedule to the exact idle interval that node experiences, rather than just once as a single correction at the end. Consequently, two resources that wait for different durations must be decohered before they are combined; replacing those waits by one averaged duration after composition would generally produce a different error vector~\cite{Benchasattabuse2025Integrating,Benchasattabuse2026Bridging}.
 
-How much idle time a resource accumulates depends entirely on how a schedule is arranged, which is why the Integrating paper~\cite{Benchasattabuse2025Integrating} singles out three canonical timing patterns that later serve, in Chapter~\ref{chap:results}, as a validation target for this thesis' own cost functions:
+How much idle time a resource accumulates depends entirely on how a schedule is arranged, which is why the Integrating paper~\cite{Benchasattabuse2025Integrating} singles out three canonical timing patterns that later serve, in Chapter~\ref{chap:experiments}, as a validation target for this thesis' own cost functions:
 
 \begin{itemize}
     \item \emph{Raw}: a chain with no purification at all, so every resource is used as soon as it is generated.

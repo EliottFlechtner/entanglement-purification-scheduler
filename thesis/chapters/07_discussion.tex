@@ -4,7 +4,7 @@
 % Sources: docs/Design Principles.md, docs/Optimality Scope.md,
 %          docs/Justification of Implementation.md §4
 
-Chapter~\ref{chap:results} reported results experiment by experiment. This chapter synthesizes them into a smaller number of broader claims: when and why scheduling helps (Section~\ref{sec:disc:synthesis}), the scope within which optimality claims should be read (Section~\ref{sec:disc:scope}), the heralded-versus-optimistic trade-off consistently exploited by the searched schedules (Section~\ref{sec:disc:optimistic}), and the limitations of the model and search procedure (Section~\ref{sec:disc:limitations}).
+Chapter~\ref{chap:experiments} reported results experiment by experiment. This chapter synthesizes them into a smaller number of broader claims: when and why scheduling helps (Section~\ref{sec:disc:synthesis}), the scope within which optimality claims should be read (Section~\ref{sec:disc:scope}), the heralded-versus-optimistic trade-off consistently exploited by the searched schedules (Section~\ref{sec:disc:optimistic}), and the limitations of the model and search procedure (Section~\ref{sec:disc:limitations}).
 
 \section{When Scheduling Matters}
 \label{sec:disc:synthesis}
@@ -41,7 +41,7 @@ The beam-search tier (Section~\ref{sec:alg:beam}) includes one same-span pumping
 
 The excluded-construction result at $N=18$ is the clearest demonstration: a schedule built using a purification pattern outside the searched families is feasible at the paper's own budget, while the beam search reports a higher minimum (Section~\ref{sec:exp:excluded}). This is the chain-length result of Section~\ref{sec:disc:synthesis} read from the other direction: the minimum-budget curve grows faster than $10N$ for the searched families, but that curve describes \emph{what the search can find}, not what is achievable in principle.
 
-The results of Chapter~\ref{chap:results} should therefore distinguish between existence and non-existence claims. An existence claim, that a feasible schedule was found, holds for the searched model because the schedule is explicitly constructed, validated, and evaluated by the shared physical model. A non-existence claim applies only to the families and search limits actually explored; it does not prove that no legal schedule exists outside that space.
+The results of Chapter~\ref{chap:experiments} should therefore distinguish between existence and non-existence claims. An existence claim, that a feasible schedule was found, holds for the searched model because the schedule is explicitly constructed, validated, and evaluated by the shared physical model. A non-existence claim applies only to the families and search limits actually explored; it does not prove that no legal schedule exists outside that space.
 
 \section{Heralded vs.\ Optimistic Execution}
 \label{sec:disc:optimistic}

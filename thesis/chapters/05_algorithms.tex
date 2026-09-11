@@ -6,9 +6,9 @@
 
 \TODO{maybe also remind about term optimizer in chapter 6 or just define it over there as not used in this chapter}
 
-Three search tiers share one schedule representation and one evaluator. Whichever tier is under discussion, the schedule it returns is called \emph{the optimizer} throughout this thesis; no single software artefact carries that name, and Chapters~\ref{chap:results}--\ref{chap:discussion} state which tier produced a given result whenever it matters. Every returned candidate passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass of Section~\ref{sec:model:objectives}; the tiers differ only in which legal \Glspl{dag} they consider, never in how a returned \Gls{dag}'s fidelity, success probability, latency, or cost is calculated.
+Three search tiers share one schedule representation and one evaluator. Whichever tier is under discussion, the schedule it returns is called \emph{the optimizer} throughout this thesis; no single software artefact carries that name, and Chapters~\ref{chap:experiments}--\ref{chap:discussion} state which tier produced a given result whenever it matters. Every returned candidate passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass of Section~\ref{sec:model:objectives}; the tiers differ only in which legal \Glspl{dag} they consider, never in how a returned \Gls{dag}'s fidelity, success probability, latency, or cost is calculated.
 
-The chapter moves from general search concepts (Section~\ref{sec:alg:prelims}) through the shared evaluator (Section~\ref{sec:alg:evaluator}) to three increasingly broad but less exhaustive tiers: fixed baseline families (Section~\ref{sec:alg:bruteforce}), the exact span-partition recurrence (Section~\ref{sec:alg:dp}), same-span pumping (Section~\ref{sec:alg:pumping}), and beam search (Section~\ref{sec:alg:beam}), the heuristic used for the production-scale experiments of Chapter~\ref{chap:results}.
+The chapter moves from general search concepts (Section~\ref{sec:alg:prelims}) through the shared evaluator (Section~\ref{sec:alg:evaluator}) to three increasingly broad but less exhaustive tiers: fixed baseline families (Section~\ref{sec:alg:bruteforce}), the exact span-partition recurrence (Section~\ref{sec:alg:dp}), same-span pumping (Section~\ref{sec:alg:pumping}), and beam search (Section~\ref{sec:alg:beam}), the heuristic used for the production-scale experiments of Chapter~\ref{chap:experiments}.
 
 \section{Preliminaries: Combinatorial Search Concepts}
 \label{sec:alg:prelims}
@@ -28,7 +28,7 @@ The schedule space defined in Section~\ref{sec:model:dag} is combinatorially lar
 
 The evaluator makes one bottom-up pass over a schedule \Gls{dag}. At each node it applies the corresponding physical operation to the current Pauli-channel state, synchronizes branches that become ready at different times, applies the resulting memory decoherence, and propagates side effects and timing. At the root it returns fidelity $F$, success probability $P_{\mathrm{success}}$, resource cost $C$, and latency $L$. Rate is then $R=P_{\mathrm{success}}/L$ under the full-restart model of Section~\ref{sec:model:objectives}.
 
-Section~\ref{sec:exp:validation} shows that this pass reproduces the source paper's Fig.\,5 fidelity numbers to four significant figures. This validates the physical model implemented by the evaluator, but does not establish that any search tier finds an optimal schedule, which is a separate question addressed by this chapter and Chapter~\ref{chap:results}.
+Section~\ref{sec:exp:validation} shows that this pass reproduces the source paper's Fig.\,5 fidelity numbers to four significant figures. This validates the physical model implemented by the evaluator, but does not establish that any search tier finds an optimal schedule, which is a separate question addressed by this chapter and Chapter~\ref{chap:experiments}.
 
 \section{Fixed Schedule Families}
 \label{sec:alg:bruteforce}
@@ -46,7 +46,7 @@ Three of these families, the raw chain, heralded end-node pumping, and optimisti
 
 Within each family, purification sequences use the three two-copy circuits $\mathcal C_{\mathrm{YY}}$, $\mathcal C_{\mathrm{ZX}}$, and $\mathcal C_{\mathrm{XZ}}$ (Section~\ref{sec:bg:circuits}). All $3^r$ circuit sequences are enumerated up to a configured round cutoff $r_{\max}$; above that cutoff, the implementation uses a small curated set. Thus, ``brute force'' denotes exhaustive enumeration within these predefined structural families and circuit grid, not enumeration of every legal schedule \Gls{dag}.
 
-These fixed families serve two purposes: they provide explicit baselines throughout Chapter~\ref{chap:results} (the raw chain and source-paper schedule as reference points, uniform link-level purification as a simple non-adaptive baseline requiring no structural search), and their candidates are always added to those produced by the two broader search tiers, so a known schedule class is never lost solely to frontier pruning.
+These fixed families serve two purposes: they provide explicit baselines throughout Chapter~\ref{chap:experiments} (the raw chain and source-paper schedule as reference points, uniform link-level purification as a simple non-adaptive baseline requiring no structural search), and their candidates are always added to those produced by the two broader search tiers, so a known schedule class is never lost solely to frontier pruning.
 
 \section{Span Dynamic Programming}
 \label{sec:alg:dp}
