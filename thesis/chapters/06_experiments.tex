@@ -54,7 +54,7 @@ At the reference configuration, the optimizer improves on the paper schedule bot
 
 % Source: outputs/sweep_network_sensitivity/README.md
 
-The optimizer was also evaluated under non-ideal inner-qubit errors and different numbers of redundant \Gls{bsm} arms. While the headline comparison uses the source paper's idealized network configuration, the non-ideal configurations introduce physical constraints that can change which schedules remain feasible. At the same generation budget, the paper's schedule falls below the fidelity threshold in both non-ideal configurations tested, whereas rerunning the optimizer under the corresponding physical parameters identifies feasible schedules. Figure~\ref{fig:netgen} summarizes the resulting comparisons for the two \Gls{bsm} arm counts; the full numeric comparison is given in \TOFIX{fix reference}{Table~\ref{tab:netgen} (Appendix~\ref{app:netgen}).}
+The optimizer was also evaluated under non-ideal inner-qubit errors and different numbers of redundant \Gls{bsm} arms. While the headline comparison uses the source paper's idealized network configuration, the non-ideal configurations introduce physical constraints that can change which schedules remain feasible. At the same generation budget, the paper's schedule falls below the fidelity threshold in both non-ideal configurations tested, whereas rerunning the optimizer under the corresponding physical parameters identifies feasible schedules. Figure~\ref{fig:netgen} summarizes the resulting comparisons for the two \Gls{bsm} arm counts; the full numeric comparison is given in Table~\ref{tab:netgen} (Appendix~\ref{app:netgen}).
 
 \begin{figure*}[ht]
     \centering
@@ -73,9 +73,9 @@ Rate values for an infeasible schedule are not directly comparable to those of a
 
 So far, noise has only been varied uniformly across hops (Section~\ref{sec:exp:netgen}). A real deployment, by contrast, can have different link lengths, hardware quality, and error rates from hop to hop. This section assigns each hop's length, inner-qubit error rate, and arm count independently at random; the search remains non-adaptive, only the supplied network configuration changes.
 
-A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours illustrates the benefit of allocating purification resources unevenly across a heterogeneous chain, detailed in \TOFIX{fix reference}{Table~\ref{tab:weaklink} (Appendix~\ref{app:weaklink})}.
+A five-hop network with one hop assigned a $12\times$ higher inner-qubit error rate than its neighbours illustrates the benefit of allocating purification resources unevenly across a heterogeneous chain, detailed in Table~\ref{tab:weaklink} (Appendix~\ref{app:weaklink}).
 
-The same tendency holds over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$), \TOFIX{modify after cleaning the appendix}{reported in full in Appendix~\ref{app:weaklink}}: among networks with a feasible uniform link-level candidate, the optimizer improves rate by a mean of $20.37\%$ and never performs worse in the tested sample (Section~\ref{sec:disc:synthesis}).
+The same tendency holds over 100 independently generated random $N=6$ networks (seeds 0--99, $e_d=0.01$, $E_{\max}=60$, $F_{\min}=0.9$), reported in full in Appendix~\ref{app:weaklink}: among the 100 networks, 80 have a feasible uniform link-level candidate; among those, the optimizer improves rate by a mean of $20.37\%$ and never performs worse in the tested sample (Section~\ref{sec:disc:synthesis}).
 
 \subsection{Noise Sensitivity}
 \label{sec:exp:edsweep}
@@ -163,7 +163,7 @@ with an exponent greater than one over the measured range; the paper's budget is
 \end{figure*}
 \FloatBarrier
 
-\TOFIX{fix reference once appendix is clarified \& properly structured}{Section~\ref{sec:exp:excluded} (Appendix~\ref{app:results})} additionally reports a related optimality-scope check at $N=18$, where a hand-constructed schedule using a same-span construction excluded from the search reaches the paper's own budget.
+Section~\ref{sec:exp:excluded} (Appendix~\ref{app:results}) additionally reports a related optimality-scope check at $N=18$, where a hand-constructed schedule using a same-span construction excluded from the search reaches the paper's own budget.
 
 
 \section{Timing Sensitivity}
