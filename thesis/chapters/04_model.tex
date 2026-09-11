@@ -103,7 +103,7 @@ Section~\ref{sec:exp:validation} confirms that this representation is not merely
     \centering
     \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
     \caption{\small%
-        $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \TOFIX{color in blue}{\textbf{Copy~A}} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \TOFIX{color in red}{\textbf{Copy~B}} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$. Edges run bottom-to-top.
+        $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \textcolor{copyAblue}{\textbf{Copy~A}} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \textcolor{copyBred}{\textbf{Copy~B}} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$ applying the final parity correction. Edges run bottom-to-top.
     }
     \label{fig:model:dag-example}
 \end{figure}
@@ -121,7 +121,9 @@ where $n_{\mathrm{pur}}$ specifies the number of extra \Gls{hrgs} copies generat
 
 A schedule $\Sigma$ is \emph{formally feasible} with respect to $B$ if it uses at most $E_{\max}$ \texttt{Gen} leaves and never holds more than $M_{\max}$ branches open at once. The resource cost $C(\Sigma)$ used throughout Chapter~\ref{chap:experiments} is simply the number of \texttt{Gen} leaves in $T$, and every headline result enforces $C(\Sigma) \le E_{\max}$. $M_{\max}$ is enforced separately: since $T$ only fixes a topological partial order on its operations, not a concrete real-time execution order, the number of branches simultaneously open depends on which legal execution order a scheduler chooses. For the tree-shaped candidate schedules considered here, the implementation instead computes $M(\Sigma)$ directly: the minimum peak number of concurrently open branches over every legal execution order, via the classical Sethi--Ullman register-allocation recurrence for expression trees~\cite{Sethi1970Generation}. Under this recurrence, a \texttt{Gen} leaf needs one register; \texttt{IdleNode}/\texttt{HeraldNode} inherit their child's register count because they preserve the same physical resource; and a 2-input node (\texttt{JoinNode}/\texttt{SwapNode}/\texttt{PurifyNode}) with children needing $L$ and $R$ registers needs $\max(L,R)$ if $L\neq R$, or $L+1$ if $L=R$ (the classical tie case, where the first-finished side's result must be held while the second side is built). This gives the minimum register requirement for a binary expression tree, so $M(\Sigma)$ is exact for the tree-shaped schedules considered here and is computed in a single $O(|T|)$ bottom-up pass without timing information. Unlike $F$, $R$, and $L$, $M(\Sigma)$ depends only on the schedule structure. $\Sigma$ is feasible with respect to $M_{\max}$ if and only if $M(\Sigma) \le M_{\max}$, checked directly by the \Gls{dag}-level method and, where requested, used as a constraint on the search objective (Section~\ref{sec:model:objectives}); Section~\ref{sec:model:scope} discusses the resulting scope limitation.
 
-The source paper's own budget convention is $E_{\max} = 10N$: five \Gls{hrgs} copies per side, on both sides, for every hop. This convention is used as the reference budget throughout the experiments, and Section~\ref{sec:exp:budget} asks directly whether it remains large enough as $N$ grows.
+The source paper's own budget proposed convention is $E_{\max} = 10N$: five \Gls{hrgs} copies per side, on both sides, for every hop. This convention is used as the reference budget throughout the experiments, and Section~\ref{sec:exp:budget} asks directly whether it remains large enough as $N$ grows.
+
+\vspace{0.8cm}
 
 \section{Objective Functions and the Optimization Problem}
 \label{sec:model:objectives}
@@ -131,12 +133,13 @@ The source paper's own budget convention is $E_{\max} = 10N$: five \Gls{hrgs} co
 
 Four metrics can be read from the finished schedule \Gls{dag} by a single bottom-up pass:
 \begin{itemize}
-    \item fidelity $F(\Sigma)$, the $w$ component of the error vector at the root;
+    \item fidelity $F(\Sigma)$, the $w$ component of the error vector at the root (Section~\ref{sec:bg:errorvec});
     \item rate $R(\Sigma) = P_{\mathrm{success}} / T_{\mathrm{attempt}}$, where $T_{\mathrm{attempt}}$ is the deterministic wall-clock duration of one complete schedule attempt. Under the renewal model, a failed non-adaptive purification attempt restarts the entire schedule, so the expected wall-clock time per successful pair is $T_{\mathrm{attempt}}/P_{\mathrm{success}}$, whose reciprocal is the stated rate;
     \item resource cost $C(\Sigma)$, defined in Section~\ref{sec:model:budget};
     \item latency $L(\Sigma)$, the makespan of $T$.
 \end{itemize}
 
+\clearpage
 
 The optimization problem this thesis addresses is then, given a resource budget $B$ (Section~\ref{sec:model:budget}),
 \[
