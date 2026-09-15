@@ -1,19 +1,21 @@
 \chapter{Search Methods}
 \label{chap:algorithms}
 
+\TODO{in appendix: add any figures? tables?}
+
 % Sources: src/hrgs_scheduler/search/, docs/Optimizer Status.md,
 % docs/Justification of Implementation.md §4
 
 Three search tiers share one schedule representation and one evaluator. Every returned candidate passes the structural checks of Section~\ref{sec:model:legality} and is evaluated by the bottom-up pass of Section~\ref{sec:model:objectives}; the tiers differ only in which legal \Glspl{dag} they consider, never in how a returned \Gls{dag}'s fidelity, success probability, latency, or cost is calculated.
 
-The chapter moves from general search concepts (Section~\ref{sec:alg:prelims}) through the shared evaluator (Section~\ref{sec:alg:evaluator}) to three increasingly broad but less exhaustive tiers: fixed baseline families (Section~\ref{sec:alg:bruteforce}), the exact span-partition recurrence (Section~\ref{sec:alg:dp}), same-span pumping (Section~\ref{sec:alg:pumping}), and beam search (Section~\ref{sec:alg:beam}), the heuristic used for the production-scale experiments of Chapter~\ref{chap:experiments}.
+Section~\ref{sec:alg:prelims} introduces the general concepts used throughout the search, followed by the shared evaluator in Section~\ref{sec:alg:evaluator}. The search itself is organised into four tiers of increasing scope and decreasing exhaustiveness: fixed baseline families in Section~\ref{sec:alg:bruteforce}, the exact span-partition recurrence in Section~\ref{sec:alg:dp}, same-span pumping in Section~\ref{sec:alg:pumping}, and beam search in Section~\ref{sec:alg:beam}. The latter is the heuristic used for the production-scale experiments in Chapter~\ref{chap:experiments}.
 
 \section{Preliminaries: Combinatorial Search Concepts}
 \label{sec:alg:prelims}
 
 The schedule space defined in Section~\ref{sec:model:dag} is combinatorially large: even modest chains admit too many legal schedules to enumerate individually. The three tiers below rely on three standard tools from combinatorial optimisation, introduced briefly here before being applied to schedules.
 
-\paragraph{Multi-objective optimisation and Pareto dominance} A search problem is \emph{multi-objective} when candidates are compared on several quantities at once, here cost $C$, fidelity $F$, and success probability $P_{\mathrm{success}}$ (Section \ref{sec:model:objectives}). Candidate $A$ \emph{Pareto-dominates} $B$ if $A$ is at least as good on every quantity and strictly better on one; a \emph{Pareto-optimal} candidate is dominated by none, and the \emph{Pareto frontier} is the set of all such candidates~\cite{Pareto2014Manual,Deb2002Fast,Ehrgott2005Multicriteria}. Retaining the whole frontier matters here because a locally inferior candidate can become the better choice once combined with another resource, as happens when two spans are swapped together.
+\paragraph{Multi-objective optimisation and Pareto dominance} A search problem is \emph{multi-objective} when candidates are compared on several quantities at once, here cost $C$, fidelity $F$, and success probability $P_{\mathrm{success}}$ (Section \ref{sec:model:objectives}). Candidate $A$ \emph{Pareto-dominates} $B$ if $A$ is at least as good on every quantity and strictly better on one; a \emph{Pareto-optimal} candidate is dominated by none, and the \emph{Pareto frontier} is the set of all such undominated candidates~\cite{Pareto2014Manual,Deb2002Fast,Ehrgott2005Multicriteria}. Retaining the whole frontier matters here because a locally inferior candidate can become the better choice once combined with another resource, as happens when two spans are swapped together.
 
 \paragraph{Dynamic programming} \emph{Dynamic programming} decomposes a large problem into smaller overlapping subproblems that are solved once and reused wherever they recur (\emph{memoized})~\cite{Bellman1984Dynamic}. Section~\ref{sec:alg:dp} applies this principle to schedules: candidate sub-schedules for a short span are computed once and reused when constructing longer spans.
 
@@ -71,4 +73,4 @@ At each span, the $w_{\text{beam}}$ slots split between two rankings: roughly ha
 
 Throughout this thesis, a \emph{score} is the returned candidate's value of whichever quantity the active objective maximizes (Section~\ref{sec:model:objectives}). Under the default rate-maximizing objective used for the beam-search benchmarks of Table~\ref{tab:benchmarks} in Appendix~\ref{app:sweeps}, score is simply the candidate's rate $R(\Sigma)$.
 
-A different heuristic (e.g.\ simulated annealing or a genetic search) would need its own schedule encoding and proposal operators respecting the legality conditions of Section~\ref{sec:model:legality}. Beam search instead keeps the same span-partition representation and only changes how many candidates survive at each frontier, keeping every tier on one physical evaluation path and every run \emph{deterministic}. The result is still only a valid candidate found by a bounded search, not a guarantee of global optimality.
+A different heuristic (e.g.\ simulated annealing or a genetic search) would need its own schedule encoding and proposal operators respecting the legality conditions of Section~\ref{sec:model:legality}. Beam search instead keeps the same span-partition representation and only changes how many candidates survive at each frontier, keeping every tier on one physical evaluation path and every run \emph{deterministic}. As stated before, any given result thus only represents a valid candidate found by a bounded search, not a guarantee of global optimality.
