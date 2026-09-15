@@ -32,11 +32,11 @@ An \emph{idealized network configuration} is one with identical hop parameters (
 Unless stated otherwise, experiments start from the Integrating paper configuration, written $\mathcal{N}_{\mathrm{ref}}$. It has identically configured hops:
 \[
 \begin{gathered}
-    N = 10,\quad \ell_i = 2\text{ km},\quad \vec{b}^{(i)} = (16,14,1),\quad k_i = 18\ \ \forall i,\quad e_d = 0.01,\quad \gamma = 0,\\
-    p_{\mathrm{in},i}^{X} = p_{\mathrm{in},i}^{Z} = 0\ \ \forall i,\quad c = 2\times 10^{5}\text{ km/s}.
+    \forall i:\quad N = 10,\quad \ell_i = 2\text{ km},\quad \vec{b}^{(i)} = (16,14,1),\quad k_i = 18,\quad p_{\mathrm{in},i}^{X} = p_{\mathrm{in},i}^{Z} = 0\\
+    \quad e_d = 0.01,\quad \gamma = 0,\quad c = 2\times 10^{5}\text{ km/s}.
 \end{gathered}
 \]
-The remaining per-hop parameter, $\eta_i$, is computed from $\ell_i$ using attenuation $\alpha=0.2\text{ dB/km}$, giving $\eta_i=10^{-\alpha\ell_i/10}\approx0.912$. The reference configuration leaves $\tau_{\mathrm{emit}}$ unset, so the default evaluator adds no branching-dependent generation offset to the latency. Table~\ref{tab:params} in Chapter~\ref{chap:experiments} restates these reference values and lists the parameters varied in the experiments, including $\tau_{\mathrm{emit}}$ in Section~\ref{sec:exp:timing}.
+The remaining per-hop parameter, $\eta_i$, is computed from $\ell_i$ using attenuation $\alpha=0.2\text{ dB/km}$, giving $\eta_i=10^{-\alpha\ell_i/10}\approx0.912$. The reference configuration leaves $\tau_{\mathrm{emit}}$ unset, so the default evaluator adds no branching-dependent generation offset to the latency. Table~\ref{tab:params} in Appendix~\ref{app:params} restates these reference values and lists the parameters varied in the experiments.
 
 \section{Representing a Partially-Built Bell Pair}
 \label{sec:model:state}
