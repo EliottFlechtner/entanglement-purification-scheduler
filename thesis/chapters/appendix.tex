@@ -1,6 +1,6 @@
 \chapter{Additional Figures}
 
-\section{Supplementary Figures for Chapter 2}
+\section{Supplementary Figures (chapters 2,3,4,5)}
 \label{app:relatedwork-figures}
 
 \TOFIX{populate once figures are designed}{This section is reserved for illustrative figures supporting Chapter~\ref{chap:relatedwork} (e.g.\ a labeled diagram of the \Gls{rgs}/\Gls{hrgs} structure, or a schematic comparing first-, second-, and third-generation repeater protocols like the one in~\cite{Muralidharan2016Efficient}). None of the related-work discussion in Chapter~\ref{chap:relatedwork} currently depends on a figure placed here; add the figure, a short caption, and a forward pointer from the relevant paragraph of Chapter~\ref{chap:relatedwork} to this section once the figures are designed.}
@@ -24,29 +24,7 @@ Section~\ref{sec:exp:validation} reports the evaluator's agreement with the sour
 
 The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.
 
-\begin{table}[h]
-\centering
-\caption{Evaluator-derived fidelity vs.\ $e_d$ for the three canonical schedules of Section~\ref{sec:bg:decoherence}, at $N=10$. Only $e_d=0.000$ and $e_d=0.010$ have a published reference value to compare against (see text).}
-\label{tab:app:validation}
-\small
-\begin{tabular}{cccc}
-\hline
-$e_d$ & $F_{\text{raw}}$ & $F_{\text{baseline (heralded)}}$ & $F_{\text{flexible (optimistic)}}$ \\
-\hline
-0.000 & 1.0000 & 1.0000 & 1.0000 \\
-0.001 & 0.9803 & 0.9932 & 0.9933 \\
-0.002 & 0.9610 & 0.9861 & 0.9866 \\
-0.003 & 0.9422 & 0.9787 & 0.9799 \\
-0.004 & 0.9239 & 0.9710 & 0.9730 \\
-0.005 & 0.9061 & 0.9629 & 0.9661 \\
-0.006 & 0.8887 & 0.9544 & 0.9591 \\
-0.007 & 0.8717 & 0.9456 & 0.9519 \\
-0.008 & 0.8552 & 0.9364 & 0.9446 \\
-0.009 & 0.8391 & 0.9268 & 0.9372 \\
-0.010 & 0.8234 & 0.9168 & 0.9295 \\
-\hline
-\end{tabular}
-\end{table}
+\input{tables/figures_validation}
 
 \begin{figure}[ht]
     \centering
@@ -101,23 +79,7 @@ Figure~\ref{fig:app:heterogeneity} extends this single designed case to the full
 
 Section~\ref{sec:exp:objectives} summarizes the objective-substitution result; Table~\ref{tab:app:objectives} gives the full five-objective comparison it draws from, at $N=10$ and $e_d=0.01$.
 
-\begin{table}[h]
-    \centering
-    \caption{Objective-substitution comparison at $N=10$, $e_d=0.01$: five objective definitions with no change to the search algorithm.}
-    \label{tab:app:objectives}
-    \small
-    \begin{tabular}{lccc}
-        \hline
-        Objective & $C$ & $F$ & Rate \\
-        \hline
-        Maximize rate & 60 & 0.9063 & 6195.95 \\
-        Maximize fidelity, paper-rate floor & 80 & 0.9351 & 4804.58 \\
-        Maximize fidelity, matched-rate floor & 80 & 0.9351 & 4804.58 \\
-        Minimize cost, $F \ge 0.9$ only & 60 & --- & 1239.19 \\
-        Minimize cost, $F \ge 0.9$ and $R \ge 4055.92$ & 60 & --- & 6195.95 \\
-        \hline
-    \end{tabular}
-\end{table}
+\input{tables/alternative_objectives}
 
 \subsection{Optimality Bound at $N=18$}
 \label{sec:exp:excluded}
@@ -161,25 +123,7 @@ Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:b
 
 Section~\ref{sec:model:scope} notes that $M_{\max}$, the number of concurrently open branches (Section~\ref{sec:model:budget}), is computed exactly for a given schedule but is not used to prune the search itself. Table~\ref{tab:app:mmax} gives $M(\Sigma)$ for the fixed schedule families and the optimizer's own budget-relaxed best schedule across $N=2$ to $N=18$ at $e_d=0.01$: no family shows $M(\Sigma)$ growing with $N$, since the register-allocation bound (Section~\ref{sec:model:budget}) is governed by \Gls{dag} depth and branching shape rather than hop count. Bisecting $m_{\max}$ downward from the unconstrained optimum at $N=10$, $E_{\max}=100$ shows that the budget-relaxed optimum ($M=4$) remains selectable down to $m_{\max}=4$, but no candidate in the beam-searched frontier clears both the rate objective and $m_{\max}=3$, at which point $M_{\max}$ becomes the actual binding constraint rather than $E_{\max}$ or $F_{\min}$.
 
-\begin{table}[h]
-    \centering
-    \caption{$M(\Sigma)$ vs.\ $N$ for the fixed schedule families and the budget-relaxed optimum, $e_d=0.01$.}
-    \label{tab:app:mmax}
-    \small
-    \begin{tabular}{cccc}
-        \hline
-        $N$ & Raw chain & Heralded end-node pumping & Optimizer (budget-relaxed) \\
-        \hline
-        2  & 3 & 4 & 3 \\
-        4  & 3 & 4 & 4 \\
-        6  & 3 & 4 & 4 \\
-        8  & 3 & 4 & 4 \\
-        10 & 3 & 4 & 4 \\
-        14 & 3 & 4 & 4 \\
-        18 & 3 & 4 & 5 \\
-        \hline
-    \end{tabular}
-\end{table}
+\input{tables/mmax_vs_n}
 
 \subsection{Runtime Benchmarks}
 \label{app:runtime}
