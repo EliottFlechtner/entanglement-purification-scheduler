@@ -78,7 +78,7 @@ Section~\ref{sec:exp:heterogeneous} summarizes both the designed five-hop weak-l
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/weak_link_allocation.png}
-    \caption{Per-hop \texttt{Gen}-node allocation for the optimizer's schedule and the best uniform link-level recipe, against the per-hop inner-qubit error rate, for the weak-link network of Table~\ref{tab:weaklink}. The optimizer spends less at hop 3 and reallocates the saved cost to the noisier hop 2, while the uniform recipe cannot vary its allocation across hops by construction.}
+    \caption{Per-hop \texttt{GenNode}-node allocation for the optimizer's schedule and the best uniform link-level recipe, against the per-hop inner-qubit error rate, for the weak-link network of Table~\ref{tab:weaklink}. The optimizer spends less at hop 3 and reallocates the saved cost to the noisier hop 2, while the uniform recipe cannot vary its allocation across hops by construction.}
     \label{fig:app:weaklink-allocation}
 \end{figure}
 \FloatBarrier
@@ -191,7 +191,7 @@ Table~\ref{tab:benchmarks} gives the wall-clock time and returned score underlyi
 \subsection{Minimum Budget vs.\ Noise}
 \label{app:minbudgeted}
 
-Section~\ref{sec:exp:budget} bisects the minimum feasible budget against chain length $N$ at fixed $e_d=0.01$. The same bisection procedure applied instead against $e_d$ at fixed $N=10$ (Figure~\ref{fig:app:minbudgeted}) gives the noise-side view behind the "$2.0$--$4.8\times$ overspend" figure quoted in Section~\ref{sec:disc:nearoptimal}: the minimum feasible budget is flat at $21$ (the raw chain's own \texttt{Gen}-node floor, not a noise effect) up to $e_d\approx0.005$, then rises to $50$ by the paper's own $e_d=0.01$, against the paper's fixed $E_{\max}=100$.
+Section~\ref{sec:exp:budget} bisects the minimum feasible budget against chain length $N$ at fixed $e_d=0.01$. The same bisection procedure applied instead against $e_d$ at fixed $N=10$ (Figure~\ref{fig:app:minbudgeted}) gives the noise-side view behind the "$2.0$--$4.8\times$ overspend" figure quoted in Section~\ref{sec:disc:nearoptimal}: the minimum feasible budget is flat at $21$ (the raw chain's own \texttt{GenNode}-node floor, not a noise effect) up to $e_d\approx0.005$, then rises to $50$ by the paper's own $e_d=0.01$, against the paper's fixed $E_{\max}=100$.
 
 \begin{figure}[ht]
     \centering

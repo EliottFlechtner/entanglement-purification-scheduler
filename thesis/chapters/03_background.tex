@@ -67,7 +67,6 @@ A resource that has not yet crossed any hop -- a freshly generated \Gls{hrgs} an
 
 \begin{enumerate}
     \item A resource's span is always a \emph{contiguous interval of stations}, so that if it spans $(a,b)$ then it also spans every intermediate station $a < i < b$. This is because every backbone operation that extends a span (a \Gls{bsm} or a Swap) connects resources across adjacent stations or at a shared endpoint.
-
     \item A resource's span is \emph{independent of its history}. Two resources that have the same span $(a,b)$ may have reached that state by entirely different routes, e.g. one purified at every hop and the other not at all, since all that matters is the current extent of the span.
 \end{enumerate}
 
@@ -130,9 +129,7 @@ How much idle time a resource accumulates depends entirely on how a schedule is 
 
 \begin{itemize}
     \item \emph{Raw}: a chain with no purification at all, so every resource is used as soon as it is generated.
-
     \item \emph{Baseline}: each purification round is heralded before the next round begins. This avoids speculative purification but incurs a separate classical confirmation delay after every round.
-
     \item \emph{Optimistic}: generation and purification proceed back-to-back, with intermediate confirmation deferred until the very end of the sequence. Section~\ref{sec:bg:optimistic} explains the resulting communication-time saving and its effect on rate.
 \end{itemize}
 
