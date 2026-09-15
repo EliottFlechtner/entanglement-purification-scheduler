@@ -7,9 +7,11 @@
 %          Benchasattabuse2025Integrating,
 %          Benchasattabuse2026Bridging
 
-\TOFIX{rewrite to shorten a bit but especially to not have sections in parenthesis but at the beginning of sentences}{As established in Chapter~\ref{chap:intro} (Section~\ref{sec:intro:gap}), the Integrating paper \cite{Benchasattabuse2025Integrating} demonstrates purification schedules that mix generation, link-level, and end-node purification through a single hand-picked example, leaving the search for a better schedule as an open problem. Turning this into a problem that can actually be searched requires a precise object to search over. This chapter builds that object step by step: the given physical network configuration (Section~\ref{sec:model:network}), the state carried by each partially built Bell pair (Section~\ref{sec:model:state}), the schedule itself as a graph of operations (Section~\ref{sec:model:dag}), the resources it is allowed to consume (Section~\ref{sec:model:budget}), and finally the optimization problem this thesis addresses (Section~\ref{sec:model:objectives}). Section~\ref{sec:model:scope} closes the chapter by stating precisely which schedules are excluded from this model and why.}
+\glsreset{dag}
 
-The building blocks introduced in Chapter~\ref{chap:background} -- generation, swapping, and backbone selection -- are reused without redefinition below. Together, they form the \emph{backbone layer}: the fixed, protocol-determined process of establishing entanglement. This chapter defines the \emph{scheduling layer} built on top of it: \TOFIX{the scheduling layer is this yes but the chapter is more presenting a way to represent this scheduling layer rather than defining the scheduling layer in itelf; to reword a bit}{where to insert purification, which circuit to use, in what order to apply operations, and how to compare the resulting schedules.}
+As established in Chapter~\ref{chap:intro}, the Integrating paper~\cite{Benchasattabuse2025Integrating} demonstrates schedules that combine generation, link-level, and end-node purification through a single hand-picked example, leaving the search for better schedules as an open problem. Section~\ref{sec:model:network} introduces the network configuration used to define the physical setting of the problem, while Section~\ref{sec:model:state} defines the resource state carried through a schedule. Section~\ref{sec:model:dag} then represents a schedule as a \Gls{dag} of operations, followed by the resource constraints in Section~\ref{sec:model:budget} and the optimization objectives in Section~\ref{sec:model:objectives}. Section~\ref{sec:model:scope} finally states the assumptions and limitations of the model.
+
+The building blocks introduced in Chapter~\ref{chap:background} -- generation, swapping, and backbone selection -- are reused without redefinition below. Together, they form the \emph{backbone layer}: the fixed, protocol-determined process of establishing entanglement. The model introduced in this chapter represents the \emph{scheduling layer} on top of it, specifying where purification is inserted, which circuit is used, the order in which operations are applied, and how resulting schedules are evaluated.
 
 \section{Network Configuration}
 \label{sec:model:network}
@@ -23,9 +25,9 @@ A network configuration fixes the physical parameters and infrastructure that a 
 \]
 where, for each hop $i$, $\ell_i$ is its length; $\vec{b}^{(i)}$ is the list of tree-encoding branching factors at successive levels; $k_i$ is its number of redundant \Gls{bsm} arms; $p_{\mathrm{in},i}^{X}$ and $p_{\mathrm{in},i}^{Z}$ are its inner-qubit measurement error rates; and $\eta_i$ is its photon survival probability. The remaining parameters are shared across the chain: $e_d$ is the outer-photon depolarizing rate, $\gamma$ is the memory dephasing rate, $c$ is the signal propagation speed in the fiber, and $\tau_{\mathrm{emit}}$ is an optional per-photon emission time used to model branching-dependent generation latency. Conditional on photon arrival, the per-arm \Gls{bsm} success probability is capped at 50\%~\cite{Ewert20143,Benchasattabuse2026Bridging} (Section~\ref{sec:bg:backbone}). The factor $\eta_i$ accounts separately for transmission loss, while $k_i$ supplies redundancy against the measurement ceiling.
 
-An \emph{idealized network configuration} is one with identical hop parameters ($\ell_i=\ell$, $\vec b^{(i)}=\vec b$, $k_i=k$ for all $i$) and noiseless inner-qubit measurements ($p_{\mathrm{in},i}^{X}=p_{\mathrm{in},i}^{Z}=0$ for all $i$); Section~\ref{sec:exp:netgen} relaxes the noiseless-inner-qubit assumption specifically and refers back to this definition.
+An \emph{idealized network configuration} is one with identical hop parameters ($\ell_i=\ell$, $\vec b^{(i)}=\vec b$, $k_i=k$ for all $i$) and noiseless inner-qubit measurements ($p_{\mathrm{in},i}^{X}=p_{\mathrm{in},i}^{Z}=0$ for all $i$). Section~\ref{sec:exp:netgen} relaxes the noiseless-inner-qubit assumption specifically and refers back to this definition.
 
-\clearpage %\TODO{recheck if this doesn't break pagination}
+% \clearpage %\TODO{recheck if this doesn't break pagination}
 
 Unless stated otherwise, experiments start from the Integrating paper configuration, written $\mathcal{N}_{\mathrm{ref}}$. It has identically configured hops:
 \[
@@ -34,7 +36,7 @@ Unless stated otherwise, experiments start from the Integrating paper configurat
     p_{\mathrm{in},i}^{X} = p_{\mathrm{in},i}^{Z} = 0\ \ \forall i,\quad c = 2\times 10^{5}\text{ km/s}.
 \end{gathered}
 \]
-The remaining per-hop parameter, $\eta_i$, is computed from $\ell_i$ using attenuation $\alpha=0.2\text{ dB/km}$, giving $\eta_i=10^{-\alpha\ell_i/10}\approx0.912$. The reference configuration leaves $\tau_{\mathrm{emit}}$ unset, so the default evaluator adds no branching-dependent generation offset to the latency. Table~\ref{tab:params} in Chapter~\ref{chap:experiments} restates the reference values above and lists, for each varied parameter, the section in which it is swept\TOFIX{needed? why specifically this one?}{; Section~\ref{sec:exp:timing} in particular explicitly enables and varies $\tau_{\mathrm{emit}}$.}
+The remaining per-hop parameter, $\eta_i$, is computed from $\ell_i$ using attenuation $\alpha=0.2\text{ dB/km}$, giving $\eta_i=10^{-\alpha\ell_i/10}\approx0.912$. The reference configuration leaves $\tau_{\mathrm{emit}}$ unset, so the default evaluator adds no branching-dependent generation offset to the latency. Table~\ref{tab:params} in Chapter~\ref{chap:experiments} restates these reference values and lists the parameters varied in the experiments, including $\tau_{\mathrm{emit}}$ in Section~\ref{sec:exp:timing}.
 
 \section{Representing a Partially-Built Bell Pair}
 \label{sec:model:state}
@@ -43,16 +45,16 @@ Every resource produced while a schedule is evaluated, from a local \Gls{hrgs} t
 \[
     S = \bigl(\mathbf{e},\; s,\; t,\; t_{\mathrm{gen}},\; \kappa,\; r,\; h\bigr).
 \]
-The vector $\mathbf{e}$ is the error vector introduced in Section~\ref{sec:bg:errorvec}, and $s$ is the $Z$ side-effect parity from Section~\ref{sec:bg:sideffects}. The remaining fields are introduced by the scheduling layer:
+The vector $\mathbf{e}$ is the error vector introduced in Section~\ref{sec:bg:errorvec}, and $s$ is the $Z$ side-effect parity from Section~\ref{sec:bg:sideffects}. The remaining fields describe the resource's state within the schedule:
+
 \begin{itemize}
     \item $t$ and $t_{\mathrm{gen}}$ are the current simulated time and the time at which the resource was first generated, respectively. Their difference, $\Delta t_{\mathrm{idle}} = t - t_{\mathrm{gen}}$, records the elapsed waiting time relevant to the decoherence model of Section~\ref{sec:bg:decoherence}.
-    \item $\kappa \in \mathcal{K}$ is the \emph{span} of the resource, where $\mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\}$ is the set of possible stages for a given network configuration (defined formally in Section~\ref{sec:model:dag}): either \texttt{RGSS} for a resource that has not yet crossed a hop, or $\mathrm{Span}(a,b)$ for an edge that already connects station $a$ to station $b$.
+    \item $\kappa \in \mathcal{K}$ is the \emph{span} of the resource, where $\mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\}$ is the set of possible stages for a given network configuration (defined formally in Section~\ref{sec:model:dag}). It is either \texttt{RGSS} for a resource that has not yet crossed a hop, or $\mathrm{Span}(a,b)$ for a resource connecting station $a$ to station $b$.
     \item $r$ counts how many purification rounds have already been applied to this branch.
-    \item $h \in \{\mathit{pending}, \mathit{resolved}\}$ records whether the classical heralding signal for this resource has been received yet.
+    \item $h \in \{\mathit{pending},\mathit{resolved}\}$ records whether the classical heralding signal for this resource has been received yet.
 \end{itemize}
-The field that matters most for what a schedule is allowed to do is $\kappa$: two states can only be combined by a purification circuit if they carry the \emph{same} $\kappa$. Two branches with different histories, one purified twice and the other once for instance, can still be combined as long as both currently have the same span as previously stated in Section~\ref{sec:bg:backbone}. This rule lets the model express schedules that mix purification strategies across different parts of the chain, including the type of schedule illustrated in the source paper's Fig.\,4~\cite{Benchasattabuse2025Integrating}.
 
-% \clearpage
+The field that matters most for what a schedule is allowed to do is $\kappa$: two states can only be combined by a purification circuit if they carry the \emph{same} $\kappa$. Two branches with different histories, one purified twice and the other once for instance, can still be combined as long as both currently have the same span. This rule lets the model express schedules that mix purification strategies across different parts of the chain, including the type of schedule illustrated in the source paper's Fig.\,4~\cite{Benchasattabuse2025Integrating}.
 
 \section{Schedules as Directed Acyclic Graphs}
 \label{sec:model:dag}
@@ -67,7 +69,7 @@ A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted \Gls
     \phi: T \to \mathcal{K}, \qquad
     \mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\},
 \]
-assigning to every node of $T$ the span $\kappa \in \mathcal{K}$ of the state that node produces, using the same $\kappa$ introduced in Section~\ref{sec:model:state}. Each node kind represents a distinct physical or logical action. The colours and shapes below form the legend used in the worked schedule of Figure~\ref{fig:model:dag-example}:
+assigning to every node of $T$ the span $\kappa$ of the state that node produces, using the same $\kappa$ introduced in Section~\ref{sec:model:state}. Each node kind represents a distinct physical or logical action. The colours and shapes below form the legend used in the worked schedule of Figure~\ref{fig:model:dag-example}:
 \begin{itemize}
     \item \cswatch{dagGen}\enspace\texttt{GenNode} (light-blue ellipse): \Gls{hrgs} generation; these nodes are always leaves of $T$ at $\kappa=\mathtt{RGSS}$;
     \item \cswatch{dagJoin}\enspace\texttt{JoinNode} (orange box): the photonic \Gls{bsm} that joins the two \Gls{rgss}-local \Gls{hrgs} resources on either side of one hop into a single-hop edge;
@@ -78,10 +80,10 @@ assigning to every node of $T$ the span $\kappa \in \mathcal{K}$ of the state th
     \item \cswatch{dagRoot}\enspace\texttt{PauliCorrectNode} (red double circle): the root of $T$ at $\kappa=\mathrm{Span}(0,N)$, representing the finished end-to-end pair after final Pauli correction.
 \end{itemize}
 
-\TOFIX{paragraph here used to explain the difference between optimistic and heralded in the context of schedules now, main difference but seemingly smae paragraph as the one at the end of chapter 3 so I think rather more interesting to keep this one as its more connected to the contributions and remove the one in chapter 3 and instead add the explanation on what optimistic vs heralded means quickly in chapter 3 and refer to this one}{\paragraph{Optimistic versus heralded schedules}}
+\paragraph{Optimistic versus heralded schedules}
 A schedule $\Sigma$ is \emph{fully optimistic} when no \texttt{HeraldNode} separates consecutive \texttt{PurifyNode} steps on any branch. In the optimistic schedules used here, all heralding is deferred to one \texttt{HeraldNode} directly below \texttt{PauliCorrectNode} at the root. A schedule is \emph{fully heralded} when a \texttt{HeraldNode} is placed between consecutive purification rounds; each intermediate herald forces a classical round-trip ($2L/c$) before the next round can begin. Optimism is therefore a property of the schedule's timing structure, represented by the placement of \texttt{HeraldNode}s, rather than of an individual purification operation. The \Gls{dag} representation can express mixed timing patterns, but the experiments compare fully optimistic and fully heralded schedules.
 
-\paragraph{Legality Conditions}
+\paragraph{Schedule Legality Conditions}
 \label{sec:model:legality}
 
 A graph $T$ is a \emph{structurally legal} schedule when it has one \texttt{PauliCorrectNode} root, is acyclic, contains no unreachable nodes, and obeys the following stage constraints:
@@ -95,14 +97,13 @@ A graph $T$ is a \emph{structurally legal} schedule when it has one \texttt{Paul
 \end{enumerate}
 The implementation checks the root, graph structure, and stage consistency before evaluation, while the evaluator repeats the physical preconditions on the corresponding resource states.
 
-\TOFIX{add reference to correct part in the chapter 6 section and results in appendix}{This representation was checked against the source paper's own Fig.\,4 schedule~\cite{Benchasattabuse2025Integrating}, which builds one Bell pair from purified individual links, a second from two purified 5-hop segments, and a third with no purification at all, then combines all three with a final purification round at the end nodes. It combines branches purified to different degrees and built up in different ways, and this is exactly the class of schedule this model can express: allowing $\kappa$ to be an arbitrary span, and requiring \texttt{PurifyNode} to check only $\kappa$ and not how each branch was built, is what makes that combination legal.}
+The schedule representation was validated against the source paper's own Fig.\,4 schedule~\cite{Benchasattabuse2025Integrating}. That demonstration schedule builds one Bell pair from purified individual links, a second from two purified 5-hop segments, and a third with no purification, before combining all three with a final purification round at the end nodes. It therefore combines branches purified to different degrees and built up in different ways. The present model can express this structure because $\kappa$ may represent any span, while a \texttt{PurifyNode} requires only matching spans, not matching construction histories.
 
-Section~\ref{sec:exp:validation} confirms that this representation \TOFIX{remove this AI; don't say its not merely soemthing, directly say what it is}{is not merely descriptive}: evaluating the raw, heralded, and optimistic end-node pumping schedules (defined in Section~\ref{sec:alg:bruteforce}) through the same bottom-up pass used elsewhere in this thesis \TOFIX{also isn't this restating the above paragraph exactly? to adjust}{reproduces the source paper's fidelity values to four significant figures.}
+\TOFIX{add reference to correct part in the chapter 6 section and results in appendix}{Section~\ref{sec:exp:validation} verifies the numerical behaviour of this representation by evaluating the raw, heralded, and optimistic end-node pumping schedules defined in Section~\ref{sec:alg:bruteforce}. The resulting fidelity values reproduce the source paper's reported values to four significant figures.}
 
-\TODO{maybe change where figure is placed}
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.85\textwidth]{figures/method/dag_n2_worked_example.png}
+    \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
     \caption{\small%
         $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \textcolor{copyAblue}{\textbf{Copy~A}} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \textcolor{copyBred}{\textbf{Copy~B}} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$ applying the final parity correction. Edges run bottom-to-top.
     }
@@ -118,15 +119,22 @@ A schedule is only meaningful together with a budget
 \[
     B = (n_{\mathrm{pur}},\ E_{\max},\ M_{\max}),
 \]
-where $n_{\mathrm{pur}}$ specifies the number of extra \Gls{hrgs} copies generated for each purification round, $E_{\max}$ is the maximum number of \texttt{Gen} leaves $T$ is allowed to contain, and $M_{\max}$ is the maximum number of branches that may be under construction at the same time.
+where $n_{\mathrm{pur}}$ specifies the number of extra \Gls{hrgs} copies generated for each purification round, $E_{\max}$ is the maximum number of \texttt{GenNode} leaves $T$ is allowed to contain, and $M_{\max}$ is the maximum number of branches that may be under construction at the same time. This tuple $B$ represents the overall resource budget for a given schedule.
 
-\TOFIX{had a paragraph made for a legal schedule, smae with this?}{A schedule $\Sigma$ is \emph{formally feasible}} with respect to $B$ if it uses at most $E_{\max}$ \texttt{Gen} leaves and never holds more than $M_{\max}$ branches open at once. The resource cost $C(\Sigma)$ used throughout Chapter~\ref{chap:experiments} is simply the number of \texttt{Gen} leaves in $T$, and every headline result enforces $C(\Sigma) \le E_{\max}$.
+\paragraph{Schedule Feasibility Conditions}
+\label{sec:model:feasibility}
 
-$M_{\max}$ is enforced separately: since $T$ only fixes a topological partial order on its operations -- not a concrete real-time execution order -- the number of branches simultaneously open depends on which legal execution order a scheduler chooses. \TOFIX{fix length and clarify}{For the tree-shaped candidate schedules considered here, the implementation instead computes $M(\Sigma)$ directly: the \TOFIX{what is the minimum peak number?}{minimum peak number} of concurrently open branches over every legal execution order, via the classical Sethi--Ullman register-allocation recurrence for expression trees~\cite{Sethi1970Generation}.} \TOFIX{a little unclear, maybe split and use bullet points?}{Under this recurrence, a \texttt{Gen} leaf needs one register; \texttt{IdleNode}/\texttt{HeraldNode} inherit their child's register count because they preserve the same physical resource; and a 2-input node (\texttt{JoinNode}/\texttt{SwapNode}/\texttt{PurifyNode}) with children needing $L$ and $R$ registers needs $\max(L,R)$ if $L\neq R$, or $L+1$ if $L=R$ (the classical tie case, where the first-finished side's result must be held while the second side is built)}. This gives the minimum register requirement for a binary expression tree, so $M(\Sigma)$ is exact for the tree-shaped schedules considered here and is computed in a single $O(|T|)$ bottom-up pass without timing information. Unlike \TOFIX{referred in next section,don't reorganize the sections but maybe refer to them just as "the other metrics" and/or refer to next section?}{the other metrics $F$, $R$, and $L$, $M(\Sigma)$ depends only on the schedule structure}. $\Sigma$ is feasible with respect to $M_{\max}$ if and only if $M(\Sigma) \le M_{\max}$, checked directly by the \Gls{dag}-level method and, where requested, used as a constraint on the search objective \TOFIX{remove the semi colon and clarify joining the 2 sentences}{(Section~\ref{sec:model:objectives}); Section~\ref{sec:model:scope} discusses the resulting scope limitation.}
+A schedule $\Sigma$ is \emph{formally feasible} with respect to $B$ if it uses at most $E_{\max}$ \texttt{GenNode} leaves and never holds more than $M_{\max}$ branches open at once. The resource cost $C(\Sigma)$ used throughout Chapter~\ref{chap:experiments} is simply the number of \texttt{GenNode} leaves in $T$, and every headline result enforces $C(\Sigma) \le E_{\max}$. $M_{\max}$ is enforced separately. Since $T$ only fixes a topological partial order on its operations, rather than a concrete real-time execution order, the number of branches simultaneously open depends on which legal execution order a scheduler chooses. For the tree-shaped candidate schedules considered here, the implementation computes $M(\Sigma)$ as the minimum peak number of concurrently open branches over all legal execution orders, using the classical Sethi--Ullman register-allocation recurrence for expression trees~\cite{Sethi1970Generation}. The recurrence is applied bottom-up:
 
-The source paper's own budget proposed convention is $E_{\max} = 10N$: five \Gls{hrgs} copies per side, on both sides, for every hop. This convention is used as the reference budget throughout the experiments and Section~\ref{sec:exp:budget} asks directly whether it remains large enough as $N$ grows.
+\begin{itemize}
+    \item a \texttt{GenNode} leaf needs one register;
+    \item an \texttt{IdleNode} or \texttt{HeraldNode} inherits its child's register count because it preserves the same physical resource;
+    \item a two-input node (\texttt{JoinNode}, \texttt{SwapNode}, or \texttt{PurifyNode}) with children requiring $L$ and $R$ registers needs $\max(L,R)$ when $L\neq R$, and $L+1$ when $L=R$. In the tie case, one completed child must be held while the other is built.
+\end{itemize}
 
-% \vspace{0.8cm}
+\TOFIX{add figure / example / pseudocode in appendix?}{This gives the minimum register requirement for a binary expression tree. Thus, $M(\Sigma)$ is exact for the tree-shaped schedules considered here and can be computed in a single $O(|T|)$ bottom-up pass without timing information. Unlike the other schedule metrics, $M(\Sigma)$ depends only on the schedule structure. A schedule satisfies the concurrency budget when $M(\Sigma) \le M_{\max}$. This constraint can be included in the optimization objective described in Section~\ref{sec:model:objectives}, while Section~\ref{sec:model:scope} discusses the resulting limitation on how it can be used during search.}
+
+The source paper's own budget convention is $E_{\max} = 10N$: five \Gls{hrgs} copies per side, on both sides, for every hop. This convention is used as the reference budget throughout the experiments, and Section~\ref{sec:exp:budget} asks directly whether it remains large enough as $N$ grows.
 
 \section{Objective Functions and the Optimization Problem}
 \label{sec:model:objectives}
@@ -142,16 +150,18 @@ Four metrics can be read from the finished schedule \Gls{dag} by a single bottom
     \item latency $L(\Sigma)$, the makespan of $T$.
 \end{itemize}
 
-% \clearpage TODO recheck if needed
-
 The optimization problem this thesis addresses is then, given a resource budget $B$ (Section~\ref{sec:model:budget}),
 \[
-    \Sigma^{*}(\mathcal{N}, B) = \argmax_{\substack{\Sigma \text{ legal w.r.t. } \mathcal{N} \\ \Sigma \text{ feasible w.r.t. } B}}
-    R(\Sigma;\mathcal{N}) \quad \text{s.t.} \quad F(\Sigma;\mathcal{N}) \ge F_{\min}.
+    \Sigma^{*}(\mathcal{N}, B) =
+    \argmax_{\substack{\Sigma \text{ legal w.r.t. } \mathcal{N}\\
+    \Sigma \text{ feasible w.r.t. } B}}
+    R(\Sigma;\mathcal{N})
+    \quad \text{s.t.} \quad
+    F(\Sigma;\mathcal{N}) \ge F_{\min}.
 \]
-In other words, among the legal schedules that are feasible with respect to $B$ (Section~\ref{sec:model:budget}: use at most $E_{\max}$ \texttt{Gen} leaves and never hold more than $M_{\max}$ branches open at once), find the one with the highest rate that still clears a minimum fidelity requirement. This is the objective used in every headline result in Chapter~\ref{chap:experiments} unless stated otherwise, with $F_{\min}=0.9$ matching the source paper's own threshold and $M_{\max}=\infty$ (no concurrency cap) unless a specific experiment states otherwise (Section~\ref{sec:model:scope}).
+In other words, among the legal schedules that satisfy $B$, find the one with the highest rate while meeting a minimum fidelity requirement. The budget requires at most $E_{\max}$ \texttt{GenNode} leaves and at most $M_{\max}$ simultaneously open branches. This is the objective used in every headline result in Chapter~\ref{chap:experiments} unless stated otherwise, with $F_{\min}=0.9$ matching the source paper's own threshold and $M_{\max}=\infty$ (i.e.\ no concurrency cap) unless a specific experiment states otherwise (Section~\ref{sec:model:scope}).
 
-The same four metrics support other research questions by swapping which one is maximized and which are constrained: maximizing $F$ subject to a rate floor asks for the best achievable quality at a given throughput; minimizing $C$ subject to floors on $F$ and $R$ asks for the cheapest schedule that still meets both requirements. Both variants were implemented as alternative objective presets while exploring these questions. Section~\ref{sec:exp:objectives} shows that switching between all three presets requires no change to the search algorithms of Chapter~\ref{chap:algorithms}: only the scoring function and feasibility constraints need to be swapped.
+The same four metrics support other research questions by changing which metric is maximized and which are constrained. Maximizing $F$ subject to a rate floor asks for the best achievable quality at a given throughput, while minimizing $C$ subject to floors on $F$ and $R$ asks for the cheapest schedule that still meets both requirements. Both variants were implemented as alternative objective presets. Section~\ref{sec:exp:objectives} shows that switching between these three presets requires no change to the search algorithms of Chapter~\ref{chap:algorithms}: only the scoring function and feasibility constraints need to be changed.
 
 \section{Scope and Assumptions}
 \label{sec:model:scope}
@@ -162,6 +172,6 @@ This model rests on three simplifying choices, stated explicitly here before any
 
 First, only \emph{non-adaptive} schedules are represented: $T$ is fixed before execution starts and cannot branch on an intermediate measurement or heralding outcome. A fully adaptive scheme would require a different formulation, most naturally a \Gls{mdp}~\cite{Puterman2009Markov,Sutton2014Reinforcement}. This is left to future work (Section~\ref{sec:conc:future}).
 
-Second, $M_{\max}$ is computed exactly for any concrete $\Sigma$ (Section~\ref{sec:model:budget}) and can be enforced as a feasibility constraint on the search objective, but this constraint is only applied to whole, already-built candidate schedules at the point they are scored -- it is not yet threaded into the recursive span-partition search of Chapter~\ref{chap:algorithms} as an early-pruning criterion in the way $E_{\max}$ is. The reason is that $M(\Sigma)$, unlike $C(\Sigma)$, is not additive across independently searched sub-spans: two sub-schedules built for disjoint spans can be scheduled concurrently or sequentially, so pruning on $M_{\max}$ during search would \TOFIX{unclear, to rephrase / clarify}{require tracking register-count information across sibling spans}, not just within each span's own subtree, risking the removal of a candidate that is only infeasible under a poor execution order. \TOFIX{rewod and remove semi colon. clarify}{Every reported headline result therefore still optimizes without an $M_{\max}$ cap; where a cap is applied (Section~\ref{sec:exp:budget}), it changes which already-generated candidate is selected as best, not how many candidates are generated in the first place.}
+Second, $M_{\max}$ is computed exactly for any valid $\Sigma$ (Section~\ref{sec:model:budget}) and can be enforced as a feasibility constraint on the search objective. However, this constraint is only applied to complete candidate schedules when they are scored; it is not yet used as an early-pruning criterion in the recursive span-partition search of Chapter~\ref{chap:algorithms}, unlike $E_{\max}$. The reason is that $M(\Sigma)$ is not additive across independently searched sub-spans. Two sub-schedules built for disjoint spans can be executed concurrently or sequentially, so determining whether their combination satisfies $M_{\max}$ requires information about how the two sibling spans are scheduled relative to each other. Tracking only the register count of each individual span would therefore be insufficient for safe pruning. Every reported headline result consequently optimizes \emph{\textbf{without}} an $M_{\max}$ cap.
 
-Third, conditional on a successful transmission, the fidelity-noise model throughout this thesis is a Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, following the assumption made by the source papers. Photon loss instead reduces the success probability $P_{\mathrm{success}}$ rather than the fidelity $F$. Comparisons between schedules are therefore made under this specific \TOFIX{repeating}{fidelity-noise model}, so a ranking that holds here is not automatically guaranteed to \TOFIX{don't say transfer}{transfer to a device dominated by a different error channel}. This point is returned to in Section~\ref{sec:disc:limitations}.
+Third, conditional on a successful transmission, the fidelity-noise model throughout this thesis is a Pauli channel~\cite{Nielsen2010Quantum,Jamiolkowski1972Linear,Choi1975Completely}, following the assumption made by the source papers. Photon loss instead reduces the success probability $P_{\mathrm{success}}$ rather than the fidelity $F$. Comparisons between schedules are therefore made under this specific fidelity-noise model. A different physical noise model could lead to different relative schedule performance; this point is returned to in Section~\ref{sec:disc:limitations}.
