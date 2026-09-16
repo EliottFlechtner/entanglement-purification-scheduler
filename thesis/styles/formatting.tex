@@ -95,3 +95,18 @@
 %==============================
 \titlespacing*{\section}{0pt}{2.2ex plus 0.3ex minus 0.2ex}{1.2ex plus 0.2ex}
 \titlespacing*{\subsection}{0pt}{1.8ex plus 0.3ex minus 0.2ex}{1.0ex plus 0.2ex}
+
+%==============================
+% Table of contents: force the same plain page style on every TOC page
+% (otherwise only the first page gets \thispagestyle{plain} while any
+% overflow page falls back to the fancy header rule, giving inconsistent
+% borders across pages), and tighten entry spacing so it fits in 2 pages.
+%==============================
+\usepackage{etoolbox}
+\pretocmd{\tableofcontents}{\cleardoublepage\pagestyle{plain}}{}{}
+
+\usepackage{tocloft}
+\setlength{\cftbeforechapskip}{0.8ex}
+\setlength{\cftbeforesecskip}{0.5ex}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchappagefont}{\bfseries}
