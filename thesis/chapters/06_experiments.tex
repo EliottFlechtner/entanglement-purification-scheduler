@@ -19,7 +19,7 @@ Unless stated otherwise, all experiments use the beam search with width $w_{\mat
 \paragraph{Baselines}
 \label{sec:exp:baselines}
 
-Three fixed non-adaptive baselines, introduced in Section~\ref{sec:alg:bruteforce}, are used throughout: the \emph{raw chain}, with no purification; the \emph{uniform link-level baseline}, which applies the same copy count and circuit sequence at every hop; and the \emph{paper schedule}, the source paper's hand-picked Fig.\,4 example~\cite{Benchasattabuse2025Integrating}. \TOFIX{maybe can be removed}{These are kept as separate baselines because the uniform link-level baseline applies the same purification strategy independently at every hop, whereas the paper schedule combines purification at different spans and stages of the network. The paper itself presents this schedule as a demonstration of scheduling flexibility rather than an optimized design.}
+Three fixed non-adaptive baselines, introduced in Section~\ref{sec:alg:bruteforce}, are used throughout: the \emph{raw chain}, with no purification; the \emph{uniform link-level baseline}, which applies the same copy count and circuit sequence at every hop; and the \emph{paper schedule}, the source paper's hand-picked Fig.\,4 example~\cite{Benchasattabuse2025Integrating}. These are kept as separate baselines because the uniform link-level baseline applies the same purification strategy independently at every hop, whereas the paper schedule combines purification at different spans and stages of the network. The paper itself presents this schedule as a demonstration of scheduling flexibility rather than an optimized design.
 
 \paragraph{Metrics}
 \label{sec:exp:metrics}
