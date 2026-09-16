@@ -95,6 +95,18 @@
     isbn=false
 ]{biblatex}
 
+% Show URLs only for software entries listed in this category.
+\DeclareBibliographyCategory{software}
+\addtocategory{software}{Flechtner2026EliottFlechtner}
+
+% Only show URLs for entries categorized as software.
+\AtEveryBibitem{%
+  \ifcategory{software}{\toggletrue{bbx:url}}{}%
+}
+
+% Suppress "(visited on ...)" access-date clauses ...
+\AtEveryBibitem{\clearfield{urlday}\clearfield{urlmonth}\clearfield{urlyear}}
+
 % Suppress "(visited on ...)" access-date clauses from every @online-type
 % bibliography entry (the ieee style prints these whenever urlyear/month/day
 % are set, regardless of the url=false option above), without editing every
