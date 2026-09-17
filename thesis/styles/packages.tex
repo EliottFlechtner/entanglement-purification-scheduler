@@ -97,12 +97,7 @@
 
 % Show URLs only for software entries listed in this category.
 \DeclareBibliographyCategory{software}
-\addtocategory{software}{Flechtner2026EliottFlechtner}
-
-% Only show URLs for entries categorized as software.
-\AtEveryBibitem{%
-  \ifcategory{software}{\toggletrue{bbx:url}}{}%
-}
+\addtocategory{software}{Flechtner2026Entanglement}
 
 % Suppress "(visited on ...)" access-date clauses ...
 \AtEveryBibitem{\clearfield{urlday}\clearfield{urlmonth}\clearfield{urlyear}}
@@ -112,6 +107,9 @@
 % are set, regardless of the url=false option above), without editing every
 % urldate field in references.bib.
 \AtEveryBibitem{\clearfield{urlday}\clearfield{urlmonth}\clearfield{urlyear}}
+
+% Only show URLs for entries categorized as software.
+\AtEveryBibitem{\ifcategory{software}{\toggletrue{bbx:url}}{}}
 
 % standard.bbx only quotes titles for [article,inbook,incollection,
 % inproceedings,patent,thesis,unpublished]; @misc falls back to italics with
