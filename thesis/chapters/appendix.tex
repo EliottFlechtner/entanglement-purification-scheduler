@@ -13,7 +13,7 @@ This appendix collects material that supports Chapter~\ref{chap:experiments} wit
 \section{Experimental Parameters}
 \label{app:params}
 
-Table~\ref{tab:params} summarizes every parameter varied anywhere in Chapter~\ref{chap:experiments}, alongside the reference value used whenever it is held fixed, and the section in which it is swept. It is referenced throughout Section~\ref{sec:exp:params} and is placed first here since later sections in this appendix assume it as a common reference point.
+Table~\ref{tab:params} summarizes every parameter varied anywhere in Chapter~\ref{chap:experiments}, alongside the reference value used whenever it is held fixed, and the section in which it is swept.
 
 \input{tables/experiment_parameters}
 
@@ -22,7 +22,7 @@ Table~\ref{tab:params} summarizes every parameter varied anywhere in Chapter~\re
 
 Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} and Figure~\ref{fig:app:validation} give the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:experiments}, rather than only at that one point.
 
-The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.
+The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). \TOFIX{address}{The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.}
 
 \input{tables/figures_validation}
 
@@ -98,7 +98,7 @@ This is an optimality-scope result, not a scalability result: it demonstrates th
 \section{Search Algorithm Diagnostics}
 \label{app:sweeps}
 
-These diagnostics justify two implementation choices used throughout Chapter~\ref{chap:experiments}: the default beam width $w_{\text{beam}}=25$ (Section~\ref{sec:alg:beam}) and the claim that beam search scales comparably to the exact dynamic program once same-span pumping is enabled (Section~\ref{sec:alg:pumping}).
+These diagnostics justify two implementation choices used throughout Chapter~\ref{chap:experiments}: the default beam width $w_{\mathrm{beam}}=25$ (Section~\ref{sec:alg:beam}) and the claim that beam search scales comparably to the exact dynamic program once same-span pumping is enabled (Section~\ref{sec:alg:pumping}).
 
 Figure~\ref{fig:app:beamwidth} shows why $w_\text{beam}=25$ was chosen: at $N=10$, wall-clock search time grows mildly up to a beam width of about 16 and then sharply beyond it, while the best rate found is already flat across the entire tested range, so widening the beam past 25 buys no further quality improvement at this configuration. Separately, at $N=6$, where the exact dynamic program (Section~\ref{sec:alg:dp}) remains tractable, beam search matches its exact optimum at every beam width tested from 1 to 32, with zero gap throughout -- confirming that this determinism holds even at the smallest beam widths, not only at the default.
 
