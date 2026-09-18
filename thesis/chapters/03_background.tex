@@ -1,6 +1,8 @@
 \chapter{Background and Preliminaries}
 \label{chap:background}
 
+\TODO{for all figures, recheck that caption isn't restating too much the main text. if restating, cut from the main text and replace with a shorter, less descriptive sentence and make the caption longer \& more detailled}
+
 This chapter introduces the physical operations and mathematical quantities that Chapter~\ref{chap:model} assembles into a searchable formal schedule model. Section~\ref{sec:bg:networks} reviews Bell pairs and the \Gls{hrgs} repeater architecture proposed in the Bridging paper~\cite{Benchasattabuse2026Bridging}, whose fixed protocol-level operations form what Chapter~\ref{chap:model} calls the \emph{backbone layer}. Section~\ref{sec:bg:errors} introduces the two quantities used to track a resource's quality through a schedule: the error vector and the $Z$ side-effect parity, together with the decoherence law that acts on the former while a resource is idle. Section~\ref{sec:bg:purification} then covers the Integrating paper's purification circuits and the distinction between heralded and optimistic execution, which determines their timing cost.
 
 \section{Quantum Networks and Repeaters}
@@ -20,6 +22,15 @@ Its quality is measured by a single scalar, the fidelity $F = \bra{\Phi^+}\rho\k
 
 While Chapter~\ref{chap:relatedwork} surveys why direct photonic transmission cannot distribute such pairs over long distances, we introduce here the elementary operation used to establish and extend links: a two-qubit \Gls{bsm}. A \Gls{bsm} performs a joint measurement on two incoming photons and identifies their Bell state through the measurement outcomes. Realized with passive linear optics and no ancillary photons, a \Gls{bsm} succeeds with probability at most 50\% per attempt, conditional on the photons arriving~\cite{Ewert20143,Benchasattabuse2026Bridging}. This ceiling is why the architecture below builds redundancy into every hop.
 
+\TODO{figure 1 = BSM}
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.5\textwidth]{figures/background/BSM_schematic.png}
+%     \caption{Schematic of a Bell-state measurement (BSM). Two incoming photons/qubits enter the BSM, undergo a joint XX-type measurement, and the possible outcomes determine the resulting surviving entanglement.}
+%     \label{fig:bsm}
+% \end{figure}
+
 % FIGURE 1: Bell-state measurement
 % Show two incoming photons/qubits entering a BSM, the joint XX-type
 % measurement, the possible outcomes, and the resulting surviving
@@ -30,30 +41,36 @@ While Chapter~\ref{chap:relatedwork} surveys why direct photonic transmission ca
 
 A \emph{graph state} associates one qubit with every vertex of a graph $\mathcal{G}=(V,E)$, where $V$ is the set of vertices and $E$ is the set of edges connecting them: each qubit starts in state $\ket{+}$ and a controlled-$Z$ gate is applied along every edge of the graph~\cite{Briegel2001Persistent,Raussendorf2003Measurementbased,Hein2004Multiparty,Hein2006Entanglement}. The result is a multipartite entangled resource whose measurement outcomes at one vertex can be used, with appropriate local single-qubit operations, to establish entanglement between other vertices~\cite{Raussendorf2002oneway,Raussendorf2003Measurementbased,Zwerger2012Measurementbased}. This is the underlying resource of the architectures surveyed in Section~\ref{sec:rw:rgs}, including the one this thesis builds on.
 
-A \emph{repeater graph state} (\Gls{rgs}) is one such graph state, with $2m$ inner qubits and $2m$ outer qubits, where $m$ is the number of outer-qubit arms on each side. It is proposed as the basis for a memory-free all-photonic quantum repeater~\cite{Azuma2015All}. The inner qubits form a complete bipartite (\emph{biclique}) graph and are tree-encoded~\cite{Varnava2006Loss}, allowing the logical measurements required by the protocol to be performed despite photon loss~\cite{Varnava2008How}. Each outer qubit is attached to one inner qubit and is consumed by a \Gls{bsm} with a neighbouring station. Such a network has two station types: \Gls{rgss} nodes, which generate the \Gls{rgs} and hold it only until it is transmitted, and \Gls{absa} nodes, which perform the \Glspl{bsm} between neighbouring stations and forward only the resulting entanglement, never generating anything themselves~\cite{Azuma2015All,Benchasattabuse2026Bridging}.
+A \emph{repeater graph state} (\Gls{rgs}) is one such graph state, with $2m$ inner qubits and $2m$ outer qubits, where $m$ is the number of outer-qubit arms on each side. It is proposed as the basis for a memory-free all-photonic quantum repeater~\cite{Azuma2015All}. The inner qubits form a complete bipartite (\emph{biclique}) graph and are tree-encoded~\cite{Varnava2006Loss}, allowing the logical measurements required by the protocol to be performed despite photon loss~\cite{Varnava2008How}, illustrated in Figure~\ref{fig:bg:rgs-structure}. Each outer qubit is attached to one inner qubit and is consumed by a \Gls{bsm} with a neighbouring station. Such a network has two station types: \Gls{rgss} nodes, which generate the \Gls{rgs} and hold it only until it is transmitted, and \Gls{absa} nodes, which perform the \Glspl{bsm} between neighbouring stations and forward only the resulting entanglement, never generating anything themselves~\cite{Azuma2015All,Benchasattabuse2026Bridging}. Figure~\ref{fig:bg:nhop-network} below shows how these two station types alternate along a full chain.
 
-% FIGURE 2: RGS architecture
-% Main RGS figure for this chapter.
-% Panel (a): full RGS showing inner and outer qubits, bipartite inner
-% graph, tree encoding, and m arms on each side.
-% Panel (b): how RGSs are placed across RGSS and ABSA nodes.
-% Show outer-qubit BSMS between neighbouring stations and identify
-% RGSS and ABSA roles.
-% This replaces the separate RGS/ RGSS / ABSA figures requested in Chapter 2.
+\glsreset{rgs}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/background/RGS_combo.png}
+    \caption{Structure of a \Gls{rgs} with $m$ arms on each side. The inner qubits (yellow) form the two partitions of the \Gls{rgs} and are connected across partitions, while each inner qubit is linked to an outer qubit (red), which is used to establish entanglement with a neighbouring station. The inner qubits are tree-encoded to improve the robustness of their logical measurements against photon loss~\cite{Varnava2006Loss}. The right panel illustrates the corresponding tree encoding for branching vector $\vec b=(3,2,1)$, showing the physical qubits across successive tree levels.}
+    \label{fig:bg:rgs-structure}
+\end{figure}
 
-The Bridging paper's own contribution is the \Gls{hrgs}: half of an \Gls{rgs}, consisting of an \emph{anchor qubit} together with its associated inner and outer qubits, generated and held at a single station rather than requiring the full $2m$-qubit state to exist in one place~\cite{Benchasattabuse2026Bridging}. Two \Glspl{hrgs} are combined into a full \Gls{rgs} by a controlled-phase gate followed by an $XX$ measurement on their two anchor qubits. This realizes entanglement swapping -- called \emph{Swap} in this thesis -- and is treated as a single operation throughout (Section~\ref{sec:bg:backbone}). Because a \Gls{hrgs} only needs to be generated and briefly held, an end node can act as its own source: it generates a \Gls{hrgs} using its stationary anchor and emits the photonic qubits toward its neighbouring \Gls{absa}, rather than requiring a separate \Gls{rgss}. This is what lets end-node memory scale additively with the number of hops instead of multiplicatively, the central resource-saving claim of the Bridging paper~\cite{Benchasattabuse2026Bridging}.
+The Bridging paper's own contribution is the \Gls{hrgs}: half of an \Gls{rgs}, consisting of an \emph{anchor qubit} together with its associated inner and outer qubits, generated and held at a single station rather than requiring the full $2m$-qubit state to exist in one place~\cite{Benchasattabuse2026Bridging} (\TOFIX{fix ref}{Figure~\ref{fig:bg:hrgs-combo}}). Two \Glspl{hrgs} are combined into a full \Gls{rgs} by a controlled-phase gate followed by an $XX$ measurement on their two anchor qubits, shown in \TOFIX{fix ref}{Figure~\ref{fig:bg:hrgs-combo}}. This realizes entanglement swapping -- called \emph{Swap} in this thesis -- and is treated as a single operation throughout (Section~\ref{sec:bg:backbone}). Because a \Gls{hrgs} only needs to be generated and briefly held, an end node can act as its own source: it generates a \Gls{hrgs} using its stationary anchor and emits the photonic qubits toward its neighbouring \Gls{absa}, rather than requiring a separate \Gls{rgss}. This is what lets end-node memory scale additively with the number of hops instead of multiplicatively, the central resource-saving claim of the Bridging paper~\cite{Benchasattabuse2026Bridging}.
 
-% FIGURE 3: HRGS construction and joining
-% Show an isolated HRGS on the left with the anchor qubit clearly
-% distinguished from inner/outer qubits. On the right, show two HRGSs
-% being joined: controlled-phase between anchors, XX measurement,
-% resulting full RGS. Include a small label showing that this
-% operation is treated as one Swap in the model.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/background/HRGS_combo.png}
+    \caption{\TOFIX{extend a little bit}{An isolated \Gls{hrgs} is shown on the left, with its anchor qubit and associated inner and outer qubits. On the right, two \Glspl{hrgs} are combined into a full \Gls{rgs} via a controlled-phase ($CZ$) gate and an $XX$ measurement on the anchor qubits.}}
+    \label{fig:bg:hrgs-combo}
+\end{figure}
 
-An $N$-hop chain between two end nodes has $N+1$ stations numbered $0,\dots,N$: stations $0$ and $N$ are the end nodes (Alice and Bob), and stations $1,\dots,N-1$ are \Gls{rgss} nodes. Every \Gls{rgss} generates a full \Gls{rgs} and distributes its two halves to the \Gls{absa} on each side; an end node generates only the one \Gls{hrgs} it needs and sends its photonic qubits to its single neighbouring \Gls{absa}. Each hop $i$, the link between stations $i-1$ and $i$, has one \Gls{absa} that receives outer qubits from both sides and performs the requisite \Glspl{bsm}, so that entanglement is established one hop at a time until it spans the whole chain~\cite{Benchasattabuse2026Bridging}.
+An $N$-hop chain between two end nodes has $N+1$ stations numbered $0,\dots,N$: stations $0$ and $N$ are the end nodes (Alice and Bob), and stations $1,\dots,N-1$ are \Gls{rgss} nodes. Every \Gls{rgss} generates a full \Gls{rgs} and distributes its two halves to the \Gls{absa} on each side; an end node generates only the one \Gls{hrgs} it needs and sends its photonic qubits to its single neighbouring \Gls{absa}. Each hop $i$, the link between stations $i-1$ and $i$, has one \Gls{absa} that receives outer qubits from both sides and performs the requisite \Glspl{bsm}, so that entanglement is established one hop at a time until it spans the whole chain~\cite{Benchasattabuse2026Bridging} (Figure~\ref{fig:bg:nhop-network}).
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{figures/background/Nhop_network.png}
+    \caption{\TOFIX{extend a little bit}{An $N$-hop network between Alice (station 0) and Bob (station $N$). Each hop's \Gls{absa} receives outer qubits from the \Gls{hrgs}/\Gls{rgs} generated at its two neighbouring stations and performs the corresponding \Glspl{bsm} (grey crossing lines).}}
+    \label{fig:bg:nhop-network}
+\end{figure}
 
 % FIGURE 4: N-hop network / resource progression
-% Show an example 4- or 5-hop chain with Alice, intermediate RGSS and
+% Show an example of N-hop chain with Alice, intermediate RGSS and
 % ABSA stations, and Bob. Use arrows or numbered stages to show how
 % local HRGS/RGS resources become longer-span resources after BSM/Swap
 % operations. This figure is useful for introducing "span" visually.
@@ -61,7 +78,7 @@ An $N$-hop chain between two end nodes has $N+1$ stations numbered $0,\dots,N$: 
 \subsection{Backbone Operations and Spans}
 \label{sec:bg:backbone}
 
-Because the \Gls{bsm}'s success probability is capped at 50\% (Section~\ref{sec:bg:bellpairs}), each hop provisions $k_i$ redundant outer-qubit arms rather than a single pair. Chapter~\ref{chap:model} uses $k_i$ to denote the arm count at hop $i$. At every \Gls{absa}, once one arm's \Gls{bsm} succeeds, that arm's inner qubits are \emph{kept}: the station \emph{discards} the redundancy by measuring every other arm's inner qubits in the $Z$ basis~\cite{Azuma2015All,Benchasattabuse2026Bridging}. This \emph{backbone selection} is forced by the protocol at every hop, on every trial.
+Because the \Gls{bsm}'s success probability is capped at 50\% (Section~\ref{sec:bg:bellpairs}), each hop provisions $k_i$ redundant outer-qubit arms rather than a single pair. Chapter~\ref{chap:model} uses $k_i$ to denote the arm count at hop $i$. At every \Gls{absa}, once one arm's \Gls{bsm} succeeds, that arm's inner qubits are \emph{kept}: the station \emph{discards} the redundancy by measuring every other arm's inner qubits in the $Z$ basis~\cite{Azuma2015All,Benchasattabuse2026Bridging}. This \emph{backbone selection} is forced by the protocol at every hop, on every trial. Figure~\ref{fig:app:backbone-selection} in Appendix~\ref{app:relatedwork-figures} works through a worked 3-hop example of this process.
 
 A resource that has not yet crossed any hop -- a freshly generated \Gls{hrgs} anchor or two such anchors combined by a Swap at the same station, for instance -- is still \emph{local} to its station of origin. Once a chain of \Glspl{bsm} and Swap operations connects stations across one or more hops, it forms a resource connecting stations $a$ and $b$. Its \emph{span} is written $\mathrm{Span}(a,b)$, or simply $(a,b)$ where no ambiguity arises. The symbol $\kappa$ denotes the current stage of a resource, either local to a single station or spanning some interval of the chain; Chapter~\ref{chap:model} gives this notation a full formal treatment. Two properties of spans matter for everything that follows:
 
@@ -136,10 +153,21 @@ How much idle time a resource accumulates depends entirely on how a schedule is 
 \section{Entanglement Purification}
 \label{sec:bg:purification}
 
+\TODO{Design a conceptual purification figure for this section (not yet designed -- do not treat the block below as final). It should show purification as a $2\to1$ transformation (two lower-fidelity Bell pairs consumed, one higher-fidelity Bell pair produced), not reproduce circuit-level detail, and should situate the operation within the \Gls{rgs}/\Gls{hrgs} architecture of Section~\ref{sec:bg:hrgs} (e.g.\ two same-span resources between a pair of stations being purified into one). The circuit-level diagrams for $\mathcal C_\mathrm{YY}, \mathcal C_\mathrm{ZX}, \mathcal C_\mathrm{XZ}$ (Figure placeholder in Section~\ref{sec:bg:circuits} below) are kept separate from this conceptual figure and are deferred to Appendix~\ref{app:relatedwork-figures}/the unrestricted thesis version.}
+
+% \begin{figure}[tb]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{figures/background/purification_concept.png}
+%     \caption{Purification as a $2\to1$ transformation: two resources of equal span $\kappa$ (Section~\ref{sec:bg:backbone}) and lower fidelity are consumed by a probabilistic LOCC measurement, producing one resource of the same span with higher fidelity on success.}
+%     \label{fig:bg:purification-concept}
+% \end{figure}
+
 \subsection{Purification Circuits: \texorpdfstring{$\mathcal C_\mathrm{YY}$, $\mathcal C_\mathrm{ZX}$, and $\mathcal C_\mathrm{XZ}$}{CYY, CZX, and CXZ}}
 \label{sec:bg:circuits}
 
 Purification trades copies for quality, as surveyed in Section~\ref{sec:rw:purification}. In the \Gls{rgs} architecture considered here, a purification circuit acts on two resources at the same span $\kappa$ (Section~\ref{sec:bg:backbone}) through a probabilistic \gls{locc} measurement. On success, it consumes the two inputs and leaves one output resource with an updated error vector; on failure, both inputs are discarded. The Integrating paper adapts this idea to the graph-state resources used here~\cite{Benchasattabuse2025Integrating}. Three such circuits are available, distinguished by the stabilizer they jointly measure across the two input pairs: $\mathcal C_\mathrm{ZX}$ detects a $Z$ error on the second qubit of the pair, $\mathcal C_\mathrm{XZ}$ detects a $Z$ error on the first qubit~\cite{Deutsch1996Quantum,Bennett1996Purification}, and $\mathcal C_\mathrm{YY}$ detects the corresponding parity of $Z$ errors across the four qubits involved~\cite{Benchasattabuse2025Integrating}.
+
+\TODO{figure 5: purification circuits (cf commented desc) -- reserved for Appendix~\ref{app:relatedwork-figures} or the unrestricted thesis version, not the main text (Section~\ref{sec:bg:purification} intro above)}
 
 % FIGURE 5: Purification circuits
 % Show the three circuits side by side: C_ZX, C_XZ, C_YY.
@@ -203,4 +231,11 @@ In the \emph{heralded} model, each purification round waits for a full classical
 
 Crucially, \emph{optimistic} is not a property of an individual purification operation. It follows from the placement of heralding steps relative to purification steps in the complete schedule. Section~\ref{sec:model:dag} states this criterion precisely in the formal \Gls{dag} representation.
 
-\TODO{figures here}
+
+%%%%%%%% to include somewhere? %%
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/background/entanglement_estab_SbS.png}
+%     \caption{Step-by-step execution of entanglement swapping across a repeater chain. Each intermediate node performs a Bell-state measurement (BSM) on its local qubits, extending entanglement between the end nodes.}
+%     \label{fig:entanglement-swapping}
+% \end{figure}
