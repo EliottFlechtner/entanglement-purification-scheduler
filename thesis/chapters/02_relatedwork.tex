@@ -37,6 +37,16 @@ Purification addresses noise, not photon loss. Tree encoding~\cite{Varnava2006Lo
 
 The \Gls{rgs} was proposed as the resource state for the first all-photonic quantum repeater~\cite{Azuma2015All}: a graph state whose outer qubits form entangling links to neighbouring stations while its inner qubits are tree-encoded~\cite{Varnava2006Loss}, allowing the logical connection to survive photon loss~\cite{Azuma2015All}, as illustrated in Figure~\ref{fig:bg:rgs-structure}. Later work has focused on efficient \Gls{rgs} generation and tolerance to photon loss and operational errors. The original proposal generates the graph state by fusing small entangled photon sets using linear optics~\cite{Azuma2015All,Pant2017Ratedistance}. Deterministic emitter-based schemes instead build it directly from a small number of photon emitters, reducing the physical device count per station~\cite{Borregaard2020OneWay,Li2022Photonic,Ghanbari2024Optimization}. These approaches have also been demonstrated experimentally at small scale~\cite{Thomas2024Fusion}. For loss and error tolerance, alternative graph topologies and adaptive measurement strategies can improve entanglement rates for a fixed loss and error budget~\cite{Patil2024Improved,Li2025Generalized,Zhan2023Performance}. Code-concatenated variants instead address both through two specialized codes rather than a single tree code~\cite{Wo2023Resourceefficient}.
 
+\TODO{recheck if RGS complete shouldn't be here}
+% \glsreset{rgs}
+% \begin{figure}[!htb]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/background/combined_RGS.png}
+%     \caption{Structure of a \Gls{rgs} with $m$ arms on each side. The inner qubits (yellow) form the two partitions of the \Gls{rgs} and are connected across partitions, while each inner qubit is linked to an outer qubit (red), which is used to establish entanglement with a neighbouring station. The inner qubits are tree-encoded to improve the robustness of their logical measurements against photon loss~\cite{Varnava2006Loss}. The right panel illustrates the corresponding tree encoding for branching vector $\vec b=(3,2,1)$, showing the physical qubits across successive tree levels.}
+%     \label{fig:bg:rgs-structure2}
+% \end{figure}
+% \FloatBarrier
+
 The Bridging and Integrating papers, discussed in Section~\ref{sec:intro:gap} and formalised in Chapter~\ref{chap:background}, provide the starting point for this thesis. The former introduces the \Gls{hrgs} building block~\cite{Benchasattabuse2026Bridging,Benchasattabuse2026Resource,Benchasattabuse2024Architecture}, while the latter shows that purification can be incorporated using \emph{optimistic} (blind) execution~\cite{Mobayenjarihani2023Optimistic,Benchasattabuse2025Integrating}. This establishes that purification can be integrated, but not how it should be scheduled: where and how often to purify across a full chain remains an open problem, as discussed in Section~\ref{sec:rw:positioning}.
 
 \section{Schedule Optimisation in Quantum Networks}
