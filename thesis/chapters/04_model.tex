@@ -89,9 +89,9 @@ A schedule $\Sigma$ is \emph{fully optimistic} when no \texttt{HeraldNode} separ
 A graph $T$ is a \emph{structurally legal} schedule when it has one \texttt{PauliCorrectNode} root, is acyclic, contains no unreachable nodes, and obeys the following stage constraints:
 \begin{enumerate}
     \item[(i)] \texttt{GenNode}s may only appear at $\kappa = \mathtt{RGSS}$;
-    \item[(ii)] a \texttt{JoinNode} consumes two \Gls{rgss}-local resources associated with one hop and produces $\mathrm{Span}(i,i+1)$;
-    \item[(iii)] a \texttt{PurifyNode}'s two children must share the same $\kappa$, i.e.\ the span-matching rule stated informally in Section~\ref{sec:model:state};
-    \item[(iv)] a \texttt{SwapNode}'s two children must be either two \Gls{rgss}-local resources or spans that share an endpoint. For the latter, i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$, the two spans need not come from neighbouring hops, only meet at station $b$, and the resulting resource has span $(a,c)$;
+    \item[(ii)] \TOFIX{fix +1 at new lign}{\texttt{JoinNode}s consume two \Gls{rgss}-local resources associated with one hop and produce $\mathrm{Span}(i,i+1)$;}
+    \item[(iii)] \texttt{PurifyNode}s' children must share the same $\kappa$, i.e.\ the span-matching rule stated informally in Section~\ref{sec:model:state};
+    \item[(iv)] \texttt{SwapNode}s' children must be either two \Gls{rgss}-local resources or spans sharing an endpoint. For the latter, i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$, the two spans need not come from neighbouring hops, only meet at station $b$, and the resulting resource has span $(a,c)$;
     \item[(v)] \texttt{IdleNode} and \texttt{HeraldNode} are single-child pass-through operations: neither an explicit wait nor resolving a heralding signal changes which stations a resource spans, so both copy their child's $\kappa$ unchanged;
     \item[(vi)] the root must receive a state with $h=\mathit{resolved}$ (Section~\ref{sec:model:state}) at $\kappa=\mathrm{Span}(0,N)$.
 \end{enumerate}

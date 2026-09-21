@@ -1,19 +1,35 @@
 \chapter{Additional Figures}
 
+\TODO{separate figures by chapter}
+\TODO{add all descriptions of subfigures}
+
 \section{Supplementary Figures (chapters 2,3,4,5)}
-\label{app:relatedwork-figures}
+\label{app:figures}
 
 Section~\ref{sec:bg:backbone} describes \emph{backbone selection}: at every \Gls{absa}, the first arm whose \Gls{bsm} succeeds is kept and every other arm at that hop is discarded, regardless of which arm that turns out to be. Figure~\ref{fig:app:backbone-selection} works through a concrete 3-hop chain to make this concrete: each \Gls{absa} independently keeps whichever of its arms first succeeds, and the surviving entanglement (bottom row) connects Alice to Bob only through the chain of kept arms, one hop at a time, regardless of which specific arm succeeded at each hop.
 
+%% add more details but BSM
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/background/BSM_combo.png}
+    \caption{\TOFIX{extend / clarify from figure}{Schematic of a Bell-state measurement (BSM). Two incoming photons/qubits enter the BSM, undergo a joint XX-type measurement, and the possible outcomes determine the resulting surviving entanglement.}}
+    \label{fig:bsm}
+\end{figure}
+
+\TODO{add (a), (b), ... for multiple subfigures if needed and refer to it in the caption}
+
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/background/entanglement_estab_SbS.png}
+    \includegraphics[width=0.95\textwidth]{figures/background/ES_process.png}
     \caption{Backbone selection across a 3-hop chain (Alice--\Gls{absa}--\Gls{rgss}--\Gls{absa}--\Gls{rgss}--\Gls{absa}--Bob). \emph{Top}: every \Gls{absa} initially holds outer/inner qubit pairs (red/yellow) for all provisioned arms of both its neighbouring hops. \emph{Middle}: at each \Gls{absa}, one arm's \Gls{bsm} succeeds (green) while the others fail (red), independently per \Gls{absa}; the successful arm's inner qubits are kept and every other arm is discarded. \emph{Bottom}: the resulting entanglement (green line) spans Alice to Bob only through the chain of kept arms, one hop at a time, as described in Section~\ref{sec:bg:backbone}.}
     \label{fig:app:backbone-selection}
 \end{figure}
-\FloatBarrier
 
 \TOFIX{populate once remaining figures are designed}{This section is also reserved for further illustrative figures supporting Chapters~\ref{chap:relatedwork}--\ref{chap:algorithms} as they are designed (e.g.\ a schematic comparing first-, second-, and third-generation repeater protocols like the one in~\cite{Muralidharan2016Efficient}, or the conceptual purification figure and circuit-level diagrams noted in Section~\ref{sec:bg:purification}).}
+
+\input{figures/appendix/circuits/circuits.tex}
+
 
 \chapter{Additional Experimental Results and Supplementary Figures}
 \label{app:results}
