@@ -32,7 +32,7 @@ The Bridging paper's own contribution is the \emph{half repeater graph state} (\
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/background/HRGS_combo.png}
-    \caption{\emph{Left}: an isolated \Gls{hrgs}, generated and held by a single station (an \Gls{rgss}, or an end node acting as its own source); its anchor qubit is the surviving qubit after the swap on the right, while its tree-encoded inner qubits and outer qubits follow the same labelling as Figure~\ref{fig:rw:rgs-combo}. \emph{Right}: two such \Glspl{hrgs}, generated independently and possibly at different stations, are combined into one full \Gls{rgs} by a controlled-phase ($CZ$) gate between their two anchor qubits followed by a joint $XX$ measurement on those same qubits. The outcome of this measurement realizes entanglement swapping between the two \Glspl{hrgs}' remaining qubits, the same effect a \Gls{bsm} (Figure~\ref{fig:bsm}) has on two independent Bell pairs, but applied here to two graph-state anchors instead.}
+    \caption{\TOFIX{fix temporary text in figure, refer to a b in caption, adjust CZ/MXMX in figure}{\emph{Left}: an isolated \Gls{hrgs}, generated and held by a single station (an \Gls{rgss}, or an end node acting as its own source); its anchor qubit is the surviving qubit after the swap on the right, while its tree-encoded inner qubits and outer qubits follow the same labelling as Figure~\ref{fig:rw:rgs-combo}. \emph{Right}: two such \Glspl{hrgs}, generated independently and possibly at different stations, are combined into one full \Gls{rgs} by a controlled-phase ($CZ$) gate between their two anchor qubits followed by a joint $XX$ measurement on those same qubits. The outcome of this measurement realizes entanglement swapping between the two \Glspl{hrgs}' remaining qubits, the same effect a \Gls{bsm} (Figure~\ref{fig:bsm}) has on two independent Bell pairs, but applied here to two graph-state anchors instead.}}
     \label{fig:bg:hrgs-combo}
 \end{figure}
 
@@ -130,10 +130,13 @@ Purification trades copies for quality, as surveyed in Section~\ref{sec:rw:purif
 
 The measurement outcomes from the two parties are compared to determine whether the purification succeeds. Section~\ref{sec:bg:optimistic} describes how this confirmation can be performed immediately or deferred. Because the inner-qubit noise term biases accumulated error toward independent single-sided errors ($x$, $z$) rather than correlated ones ($y$), purification sequences can exploit this bias by applying $\mathcal C_\mathrm{YY}$ first, before switching to $\mathcal C_\mathrm{ZX}$ or $\mathcal C_\mathrm{XZ}$~\cite{Benchasattabuse2025Integrating} (Section~\ref{sec:bg:errorvec}).
 
+\vspace{0.8cm}
+
 \subsection{Success Probabilities and Output States}
 \label{sec:bg:purmath}
 
 The success probability and purified output vector for each circuit~\cite{Benchasattabuse2025Integrating} are:
+
 \begin{align}
     P_{\mathcal C_\mathrm{ZX}}(\mathbf{e}_1,\mathbf{e}_2)
         &= (w_1+x_1)(w_2+x_2)+(z_1+y_1)(z_2+y_2), \label{eq:pzx}\\
@@ -177,4 +180,4 @@ The success probability and purified output vector for each circuit~\cite{Bencha
 
 In the \emph{heralded} model, each purification round waits for a full classical round-trip ($2L/c$, where $L$ is the end-to-end fiber length and $c$ is the signal propagation speed) to confirm the previous round's success before the next round begins. The \emph{optimistic} (or blind) model~\cite{Mobayenjarihani2023Optimistic,Benchasattabuse2025Integrating} instead runs generation and purification back-to-back without intermediate confirmation: operations are executed speculatively, and their classical outcomes are compared only in a deferred communication phase at the end. This replaces the $n_{\mathrm{pur}}$ round-trip heraldings that heralded execution would otherwise require with a single final heralding phase, which is the main source of the rate advantage reported in~\cite{Benchasattabuse2025Integrating}.
 
-Crucially, \emph{optimistic} is not a property of an individual purification operation. It follows from the placement of heralding steps relative to purification steps in the complete schedule. Section~\ref{sec:model:dag} states this criterion precisely in the formal \Gls{dag} representation.
+\TOFIX{reread}{Crucially, \emph{optimistic} is not a property of an individual purification operation. It follows from the placement of heralding steps relative to purification steps in the complete schedule. Section~\ref{sec:model:dag} states this criterion precisely in the formal \Gls{dag} representation.}

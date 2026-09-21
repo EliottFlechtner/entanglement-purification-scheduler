@@ -1,6 +1,6 @@
 \chapter{Additional Figures}
 
-\section{Chapter 3 Figures: Repeater Backbone and Purification}
+\section{Repeater Backbone and Purification}
 \label{app:figures}
 
 This section collects illustrative figures supporting Chapter~\ref{chap:background} that are too detailed to place inline without interrupting its narrative: the elementary Bell-state measurement, a worked example of backbone selection across a full chain, and the circuit-level implementation of the three purification circuits.
@@ -32,3 +32,33 @@ Section~\ref{sec:bg:backbone} describes \emph{backbone selection}: at every \Gls
 Section~\ref{sec:bg:circuits} introduces the three purification circuits $\mathcal C_\mathrm{ZX}$, $\mathcal C_\mathrm{XZ}$, and $\mathcal C_\mathrm{YY}$ by the stabilizer each one measures. Figure~\ref{fig:app:circuits} below gives their circuit-level implementation.
 
 \input{figures/appendix/circuits/circuits.tex}
+
+\clearpage
+
+\section{Pseudocode and Concurrency Analysis}
+\label{app:concurrency}
+
+Section~\ref{sec:model:budget} defines the concurrency requirement $M(\Sigma)$ and its Sethi--Ullman recurrence~\cite{Sethi1970Generation}. This appendix gives the pseudocode implementing that recurrence as well as a complexity analysis.
+
+The following pseudocode implements this recurrence. It assumes that the schedule is a binary tree and that each node exposes its children through $\texttt{children}(v)$.
+
+\begin{algorithm}[ht]
+\DontPrintSemicolon
+\SetKwFunction{FRegReq}{RegisterRequirement}
+\SetKwProg{Fn}{Function}{:}{}
+\Fn{\FRegReq{$v$}}{
+    \If{$v$ is \textup{\texttt{GenNode}}}{\Return $1$\;}
+    \If{$v$ is \textup{\texttt{IdleNode}} or $v$ is \textup{\texttt{HeraldNode}}}{
+        $c \gets \texttt{child}(v)$\;
+        \Return \FRegReq{$c$}\;
+    }
+    $(c_1,c_2) \gets \texttt{children}(v)$\;
+    $L \gets$ \FRegReq{$c_1$}\;
+    $R \gets$ \FRegReq{$c_2$}\;
+    \eIf{$L \neq R$}{\Return $\max(L,R)$\;}{\Return $L+1$\;}
+}
+\caption{Minimum concurrency requirement of a tree-shaped schedule}
+\label{alg:concurrency}
+\end{algorithm}
+
+The procedure is evaluated recursively from the root, so every node is visited exactly once. Consequently, the computation takes $O(|T|)$ time and $O(h)$ auxiliary space for a tree of $|T|$ nodes and height $h$. The resulting value is thus the concurrency requirement $M(\Sigma)=\textsc{RegisterRequirement}(\mathrm{root}(T))$. The schedule satisfies the concurrency budget when $M(\Sigma)\leq M_{\max}$.

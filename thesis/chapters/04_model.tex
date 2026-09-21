@@ -56,6 +56,8 @@ The vector $\mathbf{e}$ is the error vector introduced in Section~\ref{sec:bg:er
 
 The field that matters most for what a schedule is allowed to do is $\kappa$: two states can only be combined by a purification circuit if they carry the \emph{same} $\kappa$. Two branches with different histories, one purified twice and the other once for instance, can still be combined as long as both currently have the same span. This rule lets the model express schedules that mix purification strategies across different parts of the chain, including the type of schedule illustrated in the source paper's Fig.\,4~\cite{Benchasattabuse2025Integrating}.
 
+\vspace{0.8cm}
+
 \section{Schedules as Directed Acyclic Graphs}
 \label{sec:model:dag}
 
@@ -64,12 +66,18 @@ The field that matters most for what a schedule is allowed to do is $\kappa$: tw
 
 \glsreset{dag}
 
+\vspace{0.5cm}
+
 A schedule is written as a pair $\Sigma = (T, \phi)$, where $T$ is a rooted \Gls{dag} and $\phi$ is a labeling function
+
 \[
-    \phi: T \to \mathcal{K}, \qquad
-    \mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\},
+\phi: T \to \mathcal{K}, \quad \mathcal{K} = \{\mathtt{RGSS}\} \cup \{\mathrm{Span}(a,b) : 0 \le a < b \le N\},
 \]
+
 assigning to every node of $T$ the span $\kappa$ of the state that node produces, using the same $\kappa$ introduced in Section~\ref{sec:model:state}. Each node kind represents a distinct physical or logical action. The colours and shapes below form the legend used in the worked schedule of Figure~\ref{fig:model:dag-example}:
+
+\clearpage
+
 \begin{itemize}
     \item \cswatch{dagGen}\enspace\texttt{GenNode} (light-blue ellipse): \Gls{hrgs} generation; these nodes are always leaves of $T$ at $\kappa=\mathtt{RGSS}$;
     \item \cswatch{dagJoin}\enspace\texttt{JoinNode} (orange box): the photonic \Gls{bsm} that joins the two \Gls{rgss}-local \Gls{hrgs} resources on either side of one hop into a single-hop edge;
@@ -80,8 +88,12 @@ assigning to every node of $T$ the span $\kappa$ of the state that node produces
     \item \cswatch{dagRoot}\enspace\texttt{PauliCorrectNode} (red double circle): the root of $T$ at $\kappa=\mathrm{Span}(0,N)$, representing the finished end-to-end pair after final Pauli correction.
 \end{itemize}
 
+\vspace{0.5cm}
+
 \paragraph{Optimistic versus heralded schedules}
 A schedule $\Sigma$ is \emph{fully optimistic} when no \texttt{HeraldNode} separates consecutive \texttt{PurifyNode} steps on any branch. In the optimistic schedules used here, all heralding is deferred to one \texttt{HeraldNode} directly below \texttt{PauliCorrectNode} at the root. A schedule is \emph{fully heralded} when a \texttt{HeraldNode} is placed between consecutive purification rounds; each intermediate herald forces a classical round-trip ($2L/c$) before the next round can begin. Optimism is therefore a property of the schedule's timing structure, represented by the placement of \texttt{HeraldNode}s, rather than of an individual purification operation. The \Gls{dag} representation can express mixed timing patterns, but the experiments compare fully optimistic and fully heralded schedules.
+
+\vspace{0.5cm}
 
 \paragraph{Schedule Legality Conditions}
 \label{sec:model:legality}
@@ -89,7 +101,7 @@ A schedule $\Sigma$ is \emph{fully optimistic} when no \texttt{HeraldNode} separ
 A graph $T$ is a \emph{structurally legal} schedule when it has one \texttt{PauliCorrectNode} root, is acyclic, contains no unreachable nodes, and obeys the following stage constraints:
 \begin{enumerate}
     \item[(i)] \texttt{GenNode}s may only appear at $\kappa = \mathtt{RGSS}$;
-    \item[(ii)] \TOFIX{fix +1 at new lign}{\texttt{JoinNode}s consume two \Gls{rgss}-local resources associated with one hop and produce $\mathrm{Span}(i,i+1)$;}
+    \item[(ii)] \texttt{JoinNode}s consume two \Gls{rgss}-local resources associated with one hop and produce $\mathrm{Span}(i,i{+}1)$;
     \item[(iii)] \texttt{PurifyNode}s' children must share the same $\kappa$, i.e.\ the span-matching rule stated informally in Section~\ref{sec:model:state};
     \item[(iv)] \texttt{SwapNode}s' children must be either two \Gls{rgss}-local resources or spans sharing an endpoint. For the latter, i.e.\ $(a,b)$ and $(b,c)$ for some $a<b<c$, the two spans need not come from neighbouring hops, only meet at station $b$, and the resulting resource has span $(a,c)$;
     \item[(v)] \texttt{IdleNode} and \texttt{HeraldNode} are single-child pass-through operations: neither an explicit wait nor resolving a heralding signal changes which stations a resource spans, so both copy their child's $\kappa$ unchanged;
@@ -99,16 +111,18 @@ The implementation checks the root, graph structure, and stage consistency befor
 
 The schedule representation was validated against the source paper's own Fig.\,4 schedule~\cite{Benchasattabuse2025Integrating}. That demonstration schedule builds one Bell pair from purified individual links, a second from two purified 5-hop segments, and a third with no purification, before combining all three with a final purification round at the end nodes. It therefore combines branches purified to different degrees and built up in different ways. The present model can express this structure because $\kappa$ may represent any span, while a \texttt{PurifyNode} requires only matching spans, not matching construction histories.
 
-\TOFIX{add reference to correct part in the chapter 6 section and results in appendix}{Section~\ref{sec:exp:validation} verifies the numerical behaviour of this representation by evaluating the raw, heralded, and optimistic end-node pumping schedules defined in Section~\ref{sec:alg:bruteforce}. The resulting fidelity values reproduce the source paper's reported values to four significant figures.}
+\vspace{1.3cm}
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/method/dag_n2_worked_example.png}
+    \includegraphics[width=\textwidth]{figures/method/dag_n2_worked_example.png}
     \caption{\small%
         $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \textcolor{copyAblue}{\textbf{Copy~A}} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \textcolor{copyBred}{\textbf{Copy~B}} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$ applying the final parity correction. Edges run bottom-to-top.
     }
     \label{fig:model:dag-example}
 \end{figure}
+
+\clearpage
 
 \section{Resource Budget}
 \label{sec:model:budget}
@@ -124,15 +138,19 @@ where $n_{\mathrm{pur}}$ specifies the number of extra \Gls{hrgs} copies generat
 \paragraph{Schedule Feasibility Conditions}
 \label{sec:model:feasibility}
 
-A schedule $\Sigma$ is \emph{formally feasible} with respect to $B$ if it uses at most $E_{\max}$ \texttt{GenNode} leaves and never holds more than $M_{\max}$ branches open at once. The resource cost $C(\Sigma)$ used throughout Chapter~\ref{chap:experiments} is simply the number of \texttt{GenNode} leaves in $T$, and every headline result enforces $C(\Sigma) \le E_{\max}$. $M_{\max}$ is enforced separately. Since $T$ only fixes a topological partial order on its operations, rather than a concrete real-time execution order, the number of branches simultaneously open depends on which legal execution order a scheduler chooses. For the tree-shaped candidate schedules considered here, the implementation computes $M(\Sigma)$ as the minimum peak number of concurrently open branches over all legal execution orders, using the classical Sethi--Ullman register-allocation recurrence for expression trees~\cite{Sethi1970Generation}. The recurrence is applied bottom-up:
+A schedule $\Sigma$ is \emph{formally feasible} with respect to $B$ if it uses at most $E_{\max}$ \texttt{GenNode} leaves and never holds more than $M_{\max}$ branches open at once. The resource cost $C(\Sigma)$ used throughout Chapter~\ref{chap:experiments} is simply the number of \texttt{GenNode} leaves in $T$, and every headline result enforces $C(\Sigma) \le E_{\max}$. $M_{\max}$ is enforced separately.
 
-\begin{itemize}
-    \item a \texttt{GenNode} leaf needs one register;
-    \item an \texttt{IdleNode} or \texttt{HeraldNode} inherits its child's register count because it preserves the same physical resource;
-    \item a two-input node (\texttt{JoinNode}, \texttt{SwapNode}, or \texttt{PurifyNode}) with children requiring $L$ and $R$ registers needs $\max(L,R)$ when $L\neq R$, and $L+1$ when $L=R$. In the tie case, one completed child must be held while the other is built.
-\end{itemize}
-
-\TOFIX{add figure / example / pseudocode in appendix?}{This gives the minimum register requirement for a binary expression tree. Thus, $M(\Sigma)$ is exact for the tree-shaped schedules considered here and can be computed in a single $O(|T|)$ bottom-up pass without timing information. Unlike the other schedule metrics, $M(\Sigma)$ depends only on the schedule structure. A schedule satisfies the concurrency budget when $M(\Sigma) \le M_{\max}$. This constraint can be included in the optimization objective described in Section~\ref{sec:model:objectives}, while Section~\ref{sec:model:scope} discusses the resulting limitation on how it can be used during search.}
+The implementation computes $M(\Sigma)$ as the minimum peak number of concurrently open branches over all legal execution orders, using the classical Sethi--Ullman recurrence for expression trees~\cite{Sethi1970Generation}. A \emph{register} is interpreted here as an open branch: a resource that has been constructed but must remain available while another part of the schedule is evaluated. For each node $v$, let $r(v)$ denote the minimum number of registers required to evaluate the subtree rooted at $v$:
+\[
+    r(v) =
+    \begin{cases}
+        1, & v\text{ is a \texttt{GenNode}},\\
+        r(c), & v\text{ is an \texttt{IdleNode} or \texttt{HeraldNode} with child }c,\\
+        \max\{r(c_1),r(c_2)\}, & r(c_1)\neq r(c_2),\\
+        r(c_1)+1, & r(c_1)=r(c_2),
+    \end{cases}
+\]
+where the last two cases apply to binary nodes such as \texttt{JoinNode}, \texttt{SwapNode}, and \texttt{PurifyNode}. When the two child subtrees have different requirements, the smaller one can be evaluated first and its completed result held in a single register while the larger is evaluated, so the peak requirement is simply the larger of the two; when the requirements are equal, one subtree must be completed and held while the other is built, giving the additional $+1$. Thus $M(\Sigma)=r(\mathrm{root}(T))$, computed in a single $O(|T|)$ bottom-up pass without any timing information. The pseudocode and complexity analysis are given in Appendix~\ref{app:concurrency}.
 
 The source paper's own budget convention is $E_{\max} = 10N$: five \Gls{hrgs} copies per side, on both sides, for every hop. This convention is used as the reference budget throughout the experiments, and Section~\ref{sec:exp:budget} asks directly whether it remains large enough as $N$ grows.
 

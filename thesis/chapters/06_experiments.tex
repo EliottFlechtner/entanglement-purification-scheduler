@@ -56,6 +56,8 @@ At the reference configuration, the optimizer improves on the paper schedule bot
 
 The optimizer was also evaluated under non-ideal inner-qubit errors and different numbers of redundant \Gls{bsm} arms. While the headline comparison uses the source paper's idealized network configuration, the non-ideal configurations introduce physical constraints that can change which schedules remain feasible. At the same generation budget, the paper's schedule falls below the fidelity threshold in both non-ideal configurations tested, whereas rerunning the optimizer under the corresponding physical parameters identifies \emph{feasible schedules}. Figure~\ref{fig:netgen} summarizes the resulting comparisons for the two \Gls{bsm} arm counts; the full numeric comparison is given in Table~\ref{tab:netgen} (Appendix~\ref{app:netgen}).
 
+\TODO{fix as a little too small; maybe move legend in box / single column somewhere?}
+
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/results/fidelity_by_config.png}
@@ -93,7 +95,7 @@ Sweeping $e_d$ from 0 to 0.02 at $N=10$ shows that the optimizer's rate advantag
         \label{fig:edsweep:rate}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.53\textwidth}
+    \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/results/fidelity_vs_ed.png}
         \caption{Fidelity vs.\ $e_d$}
