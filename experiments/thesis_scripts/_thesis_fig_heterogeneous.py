@@ -54,7 +54,7 @@ def make_weak_link_figure() -> None:
     )
     ax.set_xticks(hops)
     ax.set_xticklabels([f"hop {h}" for h in hops])
-    ax.set_ylabel("Gen-node count spent at this hop")
+    ax.set_ylabel("GenNode count spent at this hop")
     ax.grid(alpha=0.3, axis="y")
 
     ax2 = ax.twinx()
