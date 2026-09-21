@@ -1,0 +1,49 @@
+% Circuit-level diagrams for the three purification circuits of
+% Section~\ref{sec:bg:circuits}/\ref{sec:bg:purmath}. Each circuit acts on
+% one retained and one measured qubit per party (Alice/Bob); the retained
+% qubit survives as the purified output on success, the measured qubit is
+% consumed by the local measurement whose outcome is compared between
+% parties to determine success.
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \begin{quantikz}[row sep=0.32cm, column sep=0.34cm]
+            \lstick[2]{Alice} & \ctrl{1}  & \qw      & \qw      & \qw \\
+                              & \targ{}   & \meter{} & \qw      & \qw \\
+            \lstick[2]{Bob}   & \targ{}   & \qw      & \qw      & \qw \\
+                              & \ctrl{-1} & \gate{H} & \meter{} & \qw
+        \end{quantikz}
+        \caption{$\mathcal C_\mathrm{ZX}$}
+        \label{fig:app:circuit-zx}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \begin{quantikz}[row sep=0.32cm, column sep=0.34cm]
+            \lstick[2]{Alice} & \targ{}   & \qw      & \qw      & \qw \\
+                              & \ctrl{-1} & \gate{H} & \meter{} & \qw \\
+            \lstick[2]{Bob}   & \ctrl{1}  & \qw      & \qw      & \qw \\
+                              & \targ{}   & \meter{} & \qw      & \qw
+        \end{quantikz}
+        \caption{$\mathcal C_\mathrm{XZ}$}
+        \label{fig:app:circuit-xz}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.36\textwidth}
+        \centering
+        \begin{quantikz}[row sep=0.32cm, column sep=0.22cm]
+            \lstick[2]{Alice} & \gate{H}         & \gate{S^\dagger} & \ctrl{1} & \gate{S} & \qw      & \qw \\
+                              & \gate{H}         & \gate{S^\dagger} & \targ{}  & \gate{H} & \meter{} & \qw \\
+            \lstick[2]{Bob}   & \gate{S^\dagger} & \ctrl{1}         & \gate{S} & \qw      & \qw      & \qw \\
+                              & \gate{S^\dagger} & \targ{}          & \gate{H} & \meter{} & \qw      & \qw
+        \end{quantikz}
+        \caption{$\mathcal C_\mathrm{YY}$}
+        \label{fig:app:circuit-yy}
+    \end{subfigure}
+
+    \caption{Circuit-level implementation of the three purification circuits introduced in Section~\ref{sec:bg:circuits}. Each circuit consumes two same-span resources, one held by Alice and one by Bob (top/bottom wire per party is the retained/measured qubit respectively), and produces one purified resource on the retained wires when the two parties' measurement outcomes agree. \textbf{(a)} $\mathcal C_\mathrm{ZX}$: Alice measures the $Z$-parity of her pair (\textsc{cnot} into her measured qubit, then measurement) while Bob measures the $X$-parity of his (\textsc{cnot} into his retained qubit, Hadamard, then measurement); success probability and output error vector in Eqs.~\eqref{eq:pzx} and~\eqref{eq:purzx}. \textbf{(b)} $\mathcal C_\mathrm{XZ}$: the same construction with Alice and Bob's local circuits exchanged, so Alice measures the $X$-parity and Bob the $Z$-parity (Eqs.~\eqref{eq:pxz}, \eqref{eq:purxz}). \textbf{(c)} $\mathcal C_\mathrm{YY}$: both parties apply a local $H$--$S^\dagger$ basis change before their \textsc{cnot}, so the compared parity is a joint $Y$-type stabilizer across all four qubits (Eqs.~\eqref{eq:pyy}, \eqref{eq:puryy}).}
+    \label{fig:app:circuits}
+\end{figure}
