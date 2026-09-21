@@ -1,36 +1,3 @@
-\chapter{Additional Figures}
-
-\TODO{separate figures by chapter}
-\TODO{add all descriptions of subfigures}
-
-\section{Supplementary Figures (chapters 2,3,4,5)}
-\label{app:figures}
-
-Section~\ref{sec:bg:backbone} describes \emph{backbone selection}: at every \Gls{absa}, the first arm whose \Gls{bsm} succeeds is kept and every other arm at that hop is discarded, regardless of which arm that turns out to be. Figure~\ref{fig:app:backbone-selection} works through a concrete 3-hop chain to make this concrete: each \Gls{absa} independently keeps whichever of its arms first succeeds, and the surviving entanglement (bottom row) connects Alice to Bob only through the chain of kept arms, one hop at a time, regardless of which specific arm succeeded at each hop.
-
-%% add more details but BSM
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\textwidth]{figures/background/BSM_combo.png}
-    \caption{\TOFIX{extend / clarify from figure}{Schematic of a Bell-state measurement (BSM). Two incoming photons/qubits enter the BSM, undergo a joint XX-type measurement, and the possible outcomes determine the resulting surviving entanglement.}}
-    \label{fig:bsm}
-\end{figure}
-
-\TODO{add (a), (b), ... for multiple subfigures if needed and refer to it in the caption}
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.95\textwidth]{figures/background/ES_process.png}
-    \caption{Backbone selection across a 3-hop chain (Alice--\Gls{absa}--\Gls{rgss}--\Gls{absa}--\Gls{rgss}--\Gls{absa}--Bob). \emph{Top}: every \Gls{absa} initially holds outer/inner qubit pairs (red/yellow) for all provisioned arms of both its neighbouring hops. \emph{Middle}: at each \Gls{absa}, one arm's \Gls{bsm} succeeds (green) while the others fail (red), independently per \Gls{absa}; the successful arm's inner qubits are kept and every other arm is discarded. \emph{Bottom}: the resulting entanglement (green line) spans Alice to Bob only through the chain of kept arms, one hop at a time, as described in Section~\ref{sec:bg:backbone}.}
-    \label{fig:app:backbone-selection}
-\end{figure}
-
-\TOFIX{populate once remaining figures are designed}{This section is also reserved for further illustrative figures supporting Chapters~\ref{chap:relatedwork}--\ref{chap:algorithms} as they are designed (e.g.\ a schematic comparing first-, second-, and third-generation repeater protocols like the one in~\cite{Muralidharan2016Efficient}, or the conceptual purification figure and circuit-level diagrams noted in Section~\ref{sec:bg:purification}).}
-
-\input{figures/appendix/circuits/circuits.tex}
-
-
 \chapter{Additional Experimental Results and Supplementary Figures}
 \label{app:results}
 
@@ -48,7 +15,7 @@ Table~\ref{tab:params} summarizes every parameter varied anywhere in Chapter~\re
 
 Section~\ref{sec:exp:validation} reports the evaluator's agreement with the source paper's Fig.\,5 at its single published headline point, $e_d=0.01$. Table~\ref{tab:app:validation} and Figure~\ref{fig:app:validation} give the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full $e_d \in [0, 0.01]$ grid used throughout Chapter~\ref{chap:experiments}, rather than only at that one point.
 
-The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). \TOFIX{address}{The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.}
+The source paper publishes numeric reference values at only two points on this grid, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both to at least three significant figures, and to four at $e_d=0.010$ (the values already quoted in Section~\ref{sec:exp:validation}). The nine intermediate rows have no corresponding published value to compare against, since the source paper's own Fig.\,5 does not report numeric values between its two published points; they are included here as the exact evaluator output behind every noise-swept result in this thesis, not as a further reproduction check.
 
 \input{tables/figures_validation}
 
@@ -75,8 +42,6 @@ Section~\ref{sec:exp:netgen} summarizes the network-generalization result; Table
 \subsection{Heterogeneous Weak-Link Contrast}
 \label{app:weaklink}
 
-\TODO{re generate figure to say GenNode not Gen-node}
-
 Section~\ref{sec:exp:heterogeneous} summarizes both the designed five-hop weak-link case and the 100-network random sample. Table~\ref{tab:weaklink} gives the full numeric comparison for the designed case: one hop with a $12\times$ higher inner-qubit error rate than its neighbours. Figure~\ref{fig:app:weaklink-allocation} shows how the two schedules allocate resources across that chain.
 
 \input{tables/weak_link_contrast.tex}
@@ -84,7 +49,7 @@ Section~\ref{sec:exp:heterogeneous} summarizes both the designed five-hop weak-l
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/weak_link_allocation.png}
-    \caption{Per-hop \texttt{GenNode}-node allocation for the optimizer's schedule and the best uniform link-level recipe, against the per-hop inner-qubit error rate, for the weak-link network of Table~\ref{tab:weaklink}. The optimizer spends less at hop 3 and reallocates the saved cost to the noisier hop 2, while the uniform recipe cannot vary its allocation across hops by construction.}
+    \caption{Per-hop \texttt{GenNode} allocation for the optimizer's schedule and the best uniform link-level recipe, against the per-hop inner-qubit error rate, for the weak-link network of Table~\ref{tab:weaklink}. The optimizer spends less at hop 3 and reallocates the saved cost to the noisier hop 2, while the uniform recipe cannot vary its allocation across hops by construction.}
     \label{fig:app:weaklink-allocation}
 \end{figure}
 \FloatBarrier

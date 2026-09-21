@@ -1,0 +1,34 @@
+\chapter{Additional Figures}
+
+\section{Chapter 3 Figures: Repeater Backbone and Purification}
+\label{app:figures}
+
+This section collects illustrative figures supporting Chapter~\ref{chap:background} that are too detailed to place inline without interrupting its narrative: the elementary Bell-state measurement, a worked example of backbone selection across a full chain, and the circuit-level implementation of the three purification circuits.
+
+\subsection{Bell-State Measurement}
+
+Section~\ref{sec:bg:bellpairs} introduces the Bell-state measurement (\Gls{bsm}) as the elementary operation used to establish and extend entanglement links. Figure~\ref{fig:bsm} illustrates it in more detail than the main text.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/background/BSM_combo.png}
+    \caption{Two incoming photonic qubits, one from each neighbouring resource, enter a linear-optical Bell-state measurement: a beamsplitter interferes the two qubits before both are measured in the computational basis. The four possible joint outcomes each identify one of the four Bell states shared with the two qubits' original partners, but only two of the four are experimentally distinguishable this way, capping the success probability at 50\% per attempt (Section~\ref{sec:bg:bellpairs}). A successful outcome projects the two remaining, undetected qubits into an entangled pair, realizing entanglement swapping.}
+    \label{fig:bsm}
+\end{figure}
+
+\subsection{Backbone Selection Example}
+
+Section~\ref{sec:bg:backbone} describes \emph{backbone selection}: at every \Gls{absa}, the first arm whose \Gls{bsm} succeeds is kept and every other arm at that hop is discarded, regardless of which arm that turns out to be. Figure~\ref{fig:app:backbone-selection} works through a concrete 3-hop chain to make this concrete: each \Gls{absa} independently keeps whichever of its arms first succeeds, and the surviving entanglement (bottom row) connects Alice to Bob only through the chain of kept arms, one hop at a time, regardless of which specific arm succeeded at each hop.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/background/ES_process.png}
+    \caption{Backbone selection across a 3-hop chain (Alice--\Gls{absa}--\Gls{rgss}--\Gls{absa}--\Gls{rgss}--\Gls{absa}--Bob). \emph{Top}: every \Gls{absa} initially holds outer/inner qubit pairs (red/yellow) for all provisioned arms of both its neighbouring hops. \emph{Middle}: at each \Gls{absa}, one arm's \Gls{bsm} succeeds (green) while the others fail (red), independently per \Gls{absa}; the successful arm's inner qubits are kept and every other arm is discarded. \emph{Bottom}: the resulting entanglement (green line) spans Alice to Bob only through the chain of kept arms, one hop at a time, as described in Section~\ref{sec:bg:backbone}.}
+    \label{fig:app:backbone-selection}
+\end{figure}
+
+\subsection{Purification Circuits}
+
+Section~\ref{sec:bg:circuits} introduces the three purification circuits $\mathcal C_\mathrm{ZX}$, $\mathcal C_\mathrm{XZ}$, and $\mathcal C_\mathrm{YY}$ by the stabilizer each one measures. Figure~\ref{fig:app:circuits} below gives their circuit-level implementation.
+
+\input{figures/appendix/circuits/circuits.tex}
