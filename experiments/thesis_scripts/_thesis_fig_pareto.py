@@ -159,11 +159,11 @@ def make_fidelity_vs_cost(rows: list[dict]) -> None:
     ax.tick_params(labelsize=9.5)
     ax.grid(alpha=0.3)
     ax.legend(
-        fontsize=8.5,
-        ncol=2,
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.16),
-        frameon=False,
+        fontsize=9,
+        ncol=1,
+        loc="lower left",
+        frameon=True,
+        framealpha=0.9,
     )
     fig.tight_layout()
     for fmt in ("png", "svg"):
@@ -230,11 +230,11 @@ def make_fidelity_vs_rate(rows: list[dict]) -> None:
     ax.tick_params(labelsize=9.5)
     ax.grid(alpha=0.3)
     ax.legend(
-        fontsize=8.5,
-        ncol=2,
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.16),
-        frameon=False,
+        fontsize=9,
+        ncol=1,
+        loc="lower right",
+        frameon=True,
+        framealpha=0.9,
     )
     fig.tight_layout()
     for fmt in ("png", "svg"):

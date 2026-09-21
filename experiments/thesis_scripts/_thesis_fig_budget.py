@@ -143,7 +143,7 @@ def main() -> None:
     ax.set_ylabel("Minimum feasible resource cost $E_{max}$", fontsize=11)
     ax.tick_params(labelsize=9.5)
     ax.grid(alpha=0.3)
-    ax.legend(fontsize=8.5, loc="upper left")
+    ax.legend(fontsize=11, loc="upper left")
     fig.tight_layout()
     for fmt in ("png",):
         fig.savefig(OUT_DIR / f"min_budget_vs_n.{fmt}", dpi=DPI, bbox_inches="tight")
