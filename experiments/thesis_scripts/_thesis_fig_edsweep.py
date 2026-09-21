@@ -1,6 +1,8 @@
 """
 experiments/_thesis_fig_edsweep.py
+
 ====================================
+
 One-off regeneration of the Chapter 6 e_d-sweep figures (Figure 6.1) for
 thesis placement (two 0.48\\textwidth subfigures side by side), matching
 the sizing/legend conventions used by `_thesis_fig_pareto.py`.
@@ -19,6 +21,7 @@ half the thesis text width.
 
 Usage
 -----
+
     .venv/bin/python3 experiments/_thesis_fig_edsweep.py
 """
 
@@ -33,6 +36,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter, MultipleLocator
 
 OUT_DIR = _PROJECT_ROOT / "thesis" / "figures" / "results"
 CSV_PATH = _PROJECT_ROOT / "outputs" / "sweep_ed_n10" / "results_extended.csv"
@@ -42,36 +46,67 @@ DPI = 200
 
 STYLE = {
     "paper_baseline": dict(
-        color="#7f7f7f", marker="s", linestyle="--", label="Paper schedule"
+        color="#7f7f7f",
+        marker="s",
+        linestyle="--",
+        label="Paper schedule",
     ),
     "optimizer_matched_cost": dict(
-        color="#1f77b4", marker="o", linestyle="-", label="Optimizer (matched cost)"
+        color="#1f77b4",
+        marker="o",
+        linestyle="-",
+        label="Optimizer (matched cost)",
     ),
     "optimizer_budget_relaxed": dict(
-        color="#d62728", marker="^", linestyle="-", label="Optimizer (budget-relaxed)"
+        color="#d62728",
+        marker="^",
+        linestyle="-",
+        label="Optimizer (budget-relaxed)",
     ),
 }
-VARIANT_ORDER = ["paper_baseline", "optimizer_matched_cost", "optimizer_budget_relaxed"]
+
+VARIANT_ORDER = [
+    "paper_baseline",
+    "optimizer_matched_cost",
+    "optimizer_budget_relaxed",
+]
 
 
 def _read_series() -> dict[str, list[tuple[float, float, float]]]:
     """variant -> [(e_d, fidelity, rate), ...], sorted by e_d."""
     series: dict[str, list[tuple[float, float, float]]] = defaultdict(list)
+
     with CSV_PATH.open() as f:
         for row in csv.DictReader(f):
             v = row["variant"]
             if v not in STYLE:
                 continue
+
             series[v].append(
-                (float(row["e_d"]), float(row["fidelity"]), float(row["rate"]))
+                (
+                    float(row["e_d"]),
+                    float(row["fidelity"]),
+                    float(row["rate"]),
+                )
             )
+
     for v in series:
         series[v].sort(key=lambda t: t[0])
+
     return series
 
 
-def make_rate_plot(series: dict[str, list[tuple[float, float, float]]]) -> None:
+def _format_x_axis(ax) -> None:
+    """Use 0.005 spacing and three decimal places on the e_d axis."""
+    ax.xaxis.set_major_locator(MultipleLocator(0.005))
+    ax.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
+
+
+def make_rate_plot(
+    series: dict[str, list[tuple[float, float, float]]],
+) -> None:
     fig, ax = plt.subplots(figsize=FIGSIZE)
+
     for variant in VARIANT_ORDER:
         pts = series[variant]
         ax.plot(
@@ -81,18 +116,37 @@ def make_rate_plot(series: dict[str, list[tuple[float, float, float]]]) -> None:
             linewidth=1.6,
             **STYLE[variant],
         )
+
     ax.set_xlabel("Depolarizing error $e_d$", fontsize=11)
     ax.set_ylabel("Rate $R$", fontsize=11)
     ax.tick_params(labelsize=9.5)
+
+    # X-axis: ticks every 0.005, formatted as 0.000, 0.005, ...
+    _format_x_axis(ax)
+
     ax.grid(alpha=0.3)
-    ax.legend(fontsize=8.5, ncol=1, loc="lower left", framealpha=0.9)
+    ax.legend(
+        fontsize=8.5,
+        ncol=1,
+        loc="lower left",
+        framealpha=0.9,
+    )
+
     fig.tight_layout()
+
     for fmt in ("png", "svg"):
-        fig.savefig(OUT_DIR / f"rate_vs_ed.{fmt}", dpi=DPI, bbox_inches="tight")
+        fig.savefig(
+            OUT_DIR / f"rate_vs_ed.{fmt}",
+            dpi=DPI,
+            bbox_inches="tight",
+        )
+
     plt.close(fig)
 
 
-def make_fidelity_plot(series: dict[str, list[tuple[float, float, float]]]) -> None:
+def make_fidelity_plot(
+    series: dict[str, list[tuple[float, float, float]]],
+) -> None:
     fig, ax = plt.subplots(figsize=FIGSIZE)
     for variant in VARIANT_ORDER:
         pts = series[variant]
@@ -104,30 +158,32 @@ def make_fidelity_plot(series: dict[str, list[tuple[float, float, float]]]) -> N
             **STYLE[variant],
         )
     ax.axhline(
-        0.9, color="black", linestyle=":", linewidth=1.1, label="$F_{\\min}=0.9$"
-    )
-    ax.axvline(
-        0.01,
+        0.9,
         color="black",
-        linestyle="--",
-        linewidth=0.9,
-        alpha=0.6,
-        label="Paper's tested range ends",
+        linestyle=":",
+        linewidth=1.1,
+        label="$F_{\\min}=0.9$",
     )
     ax.set_xlabel("Depolarizing error $e_d$", fontsize=11)
     ax.set_ylabel("Fidelity $F$", fontsize=11)
     ax.tick_params(labelsize=9.5)
+    # X-axis: ticks every 0.005, formatted as 0.000, 0.005, ...
+    _format_x_axis(ax)
     ax.grid(alpha=0.3)
     ax.legend(
         fontsize=8.5,
-        ncol=2,
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.16),
-        frameon=False,
+        ncol=1,
+        loc="lower left",
+        framealpha=0.9,
     )
     fig.tight_layout()
     for fmt in ("png", "svg"):
-        fig.savefig(OUT_DIR / f"fidelity_vs_ed.{fmt}", dpi=DPI, bbox_inches="tight")
+        fig.savefig(
+            OUT_DIR / f"fidelity_vs_ed.{fmt}",
+            dpi=DPI,
+            bbox_inches="tight",
+        )
+
     plt.close(fig)
 
 
