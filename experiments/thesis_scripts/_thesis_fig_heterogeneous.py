@@ -25,7 +25,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = _PROJECT_ROOT / "thesis" / "figures" / "results"
 DATA_DIR = _PROJECT_ROOT / "outputs" / "random_network_adaptation" / "100 seeds"
 
-FIGSIZE = (7.2, 4.2)
+FIGSIZE = (8.5, 5.2)
 DPI = 200
 
 
@@ -54,7 +54,8 @@ def make_weak_link_figure() -> None:
     )
     ax.set_xticks(hops)
     ax.set_xticklabels([f"hop {h}" for h in hops])
-    ax.set_ylabel("GenNode count spent at this hop")
+    ax.set_ylabel("GenNode count spent at this hop", fontsize=14)
+    ax.tick_params(axis="both", labelsize=12)
     ax.grid(alpha=0.3, axis="y")
 
     ax2 = ax.twinx()
@@ -66,7 +67,8 @@ def make_weak_link_figure() -> None:
         linestyle=":",
         label="Inner-qubit error rate (this hop)",
     )
-    ax2.set_ylabel("Inner-qubit error rate per hop")
+    ax2.set_ylabel("Inner-qubit error rate per hop", fontsize=14)
+    ax2.tick_params(axis="y", labelsize=12)
 
     ax.set_ylim(0, 9.5)
     h1, l1 = ax.get_legend_handles_labels()
@@ -74,15 +76,17 @@ def make_weak_link_figure() -> None:
     ax.legend(
         h1 + h2,
         l1 + l2,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.22),
-        ncol=2,
-        fontsize=8.5,
+        loc="upper right",
+        ncol=1,
+        fontsize=11,
     )
+
     fig.tight_layout()
     for fmt in ("png", "svg"):
         fig.savefig(
-            OUT_DIR / f"weak_link_allocation.{fmt}", dpi=DPI, bbox_inches="tight"
+            OUT_DIR / f"weak_link_allocation.{fmt}",
+            dpi=DPI,
+            bbox_inches="tight",
         )
 
 
@@ -92,19 +96,57 @@ def make_random_sweep_figure() -> None:
     hets = [float(r["heterogeneity_cv"]) for r in comparable]
     imps = [float(r["rate_improvement_pct"]) for r in comparable]
 
+    tie_pts = [(h, i) for h, i in zip(hets, imps) if i < 1e-6]
+    high_pts = [(h, i) for h, i in zip(hets, imps) if i > 40.0]
+    mid_pts = [(h, i) for h, i in zip(hets, imps) if 1e-6 <= i <= 40.0]
+
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax.scatter(
-        hets,
-        imps,
-        color="#1f77b4",
-        alpha=0.8,
-        label="Optimizer's rate improvement over the\nbest feasible uniform recipe",
-    )
+
+    if mid_pts:
+        ax.scatter(
+            *zip(*mid_pts),
+            color="#1f77b4",
+            alpha=0.8,
+            label="Optimizer's rate improvement\nover the best feasible\nuniform recipe",
+        )
+
+    if high_pts:
+        ax.scatter(
+            *zip(*high_pts),
+            color="#d62728",
+            alpha=0.9,
+            zorder=3,
+            label="Improvement above 40%",
+        )
+
+    if tie_pts:
+        ax.scatter(
+            *zip(*tie_pts),
+            color="#7f7f7f",
+            marker="x",
+            alpha=0.8,
+            label="Tie (no improvement)",
+        )
+
     ax.axhline(0.0, color="black", linewidth=0.8)
-    ax.set_xlabel("Per-hop noise heterogeneity (coefficient of variation)")
-    ax.set_ylabel("Optimizer rate improvement over\nuniform baseline (%)")
+    ax.set_xlabel(
+        "Per-hop noise heterogeneity (coefficient of variation)",
+        fontsize=14,
+    )
+    ax.set_ylabel(
+        "Optimizer rate improvement over\nuniform baseline (%)",
+        fontsize=14,
+    )
+    ax.tick_params(axis="both", labelsize=12)
     ax.grid(alpha=0.3)
-    ax.legend(fontsize=9, loc="upper right")
+
+    # Keep the legend inside the plot.
+    ax.legend(
+        fontsize=11,
+        loc="upper right",
+        frameon=True,
+    )
+
     fig.tight_layout()
     for fmt in ("png", "svg"):
         fig.savefig(
