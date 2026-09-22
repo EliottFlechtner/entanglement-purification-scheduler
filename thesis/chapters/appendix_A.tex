@@ -9,10 +9,11 @@ This section collects illustrative figures supporting Chapter~\ref{chap:backgrou
 
 Section~\ref{sec:bg:bellpairs} introduces the Bell-state measurement (\Gls{bsm}) as the elementary operation used to establish and extend entanglement links. Figure~\ref{fig:bsm} illustrates it in more detail than the main text.
 
+\glsreset{bsm}
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{figures/background/BSM_combo.png}
-    \caption{Two incoming photonic qubits, one from each neighbouring resource, enter a linear-optical Bell-state measurement: a beamsplitter interferes the two qubits before both are measured in the computational basis. The four possible joint outcomes each identify one of the four Bell states shared with the two qubits' original partners, but only two of the four are experimentally distinguishable this way, capping the success probability at 50\% per attempt (Section~\ref{sec:bg:bellpairs}). A successful outcome projects the two remaining, undetected qubits into an entangled pair, realizing entanglement swapping.}
+    \caption{Entanglement swapping via a linear-optical \Gls{bsm}. \textbf{(a)} Two incoming photonic qubits from neighbouring resources interfere at a beamsplitter and are measured in the computational basis. Only two of the four Bell states are distinguishable, limiting the success probability to 50\% per attempt (Section~\ref{sec:bg:bellpairs}). \textbf{(b)} Graph-state representation of a successful \Gls{bsm}, equivalent to a $CZ$ gate followed by $X$-basis measurements ($M_X$) on the measured qubits. \textbf{(c)} The resulting edge (green) directly connects the two remaining qubits, establishing entanglement between the neighbouring resources.}
     \label{fig:bsm}
 \end{figure}
 
@@ -23,7 +24,7 @@ Section~\ref{sec:bg:backbone} describes \emph{backbone selection}: at every \Gls
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/background/ES_process.png}
-    \caption{Backbone selection across a 3-hop chain (Alice--\Gls{absa}--\Gls{rgss}--\Gls{absa}--\Gls{rgss}--\Gls{absa}--Bob). \emph{Top}: every \Gls{absa} initially holds outer/inner qubit pairs (red/yellow) for all provisioned arms of both its neighbouring hops. \emph{Middle}: at each \Gls{absa}, one arm's \Gls{bsm} succeeds (green) while the others fail (red), independently per \Gls{absa}; the successful arm's inner qubits are kept and every other arm is discarded. \emph{Bottom}: the resulting entanglement (green line) spans Alice to Bob only through the chain of kept arms, one hop at a time, as described in Section~\ref{sec:bg:backbone}.}
+    \caption{Backbone selection across a $N=3$-hop chain. \textbf{(a)} The network configuration before entanglement generation. Each \Gls{absa} initially holds outer/inner qubit pairs (red/yellow) for all provisioned arms connecting it to each of its two neighbouring stations. \textbf{(b)} At each \Gls{absa}, a \Gls{bsm} is attempted for every available arm. Multiple attempts may succeed, but once at least one successful \Gls{bsm} is obtained (green), one successful arm is selected and its corresponding inner qubits are retained, while the remaining arms are discarded. As this selection is performed independently at each \Gls{absa}, the retained arms need not correspond to the same arm index across the different hops. \textbf{(c)} The selected inner qubits form the backbone used to establish end-to-end entanglement. The resulting entanglement (green line) connects Alice to Bob through one retained arm at each hop, as described in Section~\ref{sec:bg:backbone}.}
     \label{fig:app:backbone-selection}
 \end{figure}
 
