@@ -27,8 +27,6 @@ where, for each hop $i$, $\ell_i$ is its length; $\vec{b}^{(i)}$ is the list of 
 
 An \emph{idealized network configuration} is one with identical hop parameters ($\ell_i=\ell$, $\vec b^{(i)}=\vec b$, $k_i=k$ for all $i$) and noiseless inner-qubit measurements ($p_{\mathrm{in},i}^{X}=p_{\mathrm{in},i}^{Z}=0$ for all $i$). Section~\ref{sec:exp:netgen} relaxes the noiseless-inner-qubit assumption specifically and refers back to this definition.
 
-% \clearpage %\TODO{recheck if this doesn't break pagination}
-
 Unless stated otherwise, experiments start from the Integrating paper configuration, written $\mathcal{N}_{\mathrm{ref}}$. It has identically configured hops:
 \[
 \begin{gathered}
@@ -115,7 +113,7 @@ The schedule representation was validated against the source paper's own Fig.\,4
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=\textwidth]{figures/method/dag_n2_worked_example.png}
+    \includegraphics[width=\textwidth]{figures/model/dag_n2_worked_example.png}
     \caption{\small%
         $N=2$ example schedule $\Sigma$ illustrating all seven node types ($C(\Sigma)=10$ \texttt{GenNode} leaves). \textcolor{copyAblue}{\textbf{Copy~A}} (left subtree): hop~0 applies \texttt{PurifyNode-YY} at $\kappa=\mathrm{RGSS}$ before the outer-photon \texttt{JoinNode}; hop~1 is raw. \textcolor{copyBred}{\textbf{Copy~B}} (right subtree): identical except the right-side hop-1 \texttt{GenNode} is wrapped in an \texttt{IdleNode} (grey, dashed) modelling a synchronisation wait before the \texttt{JoinNode}. The two copies are first combined into $\kappa=(0,2)$ by a \texttt{SwapNode}, then purified together by \texttt{PurifyNode-XZ}. The single \texttt{HeraldNode} placed after (not before) \texttt{PurifyNode-XZ} makes this an optimistic schedule (Section~\ref{sec:model:dag}). \texttt{PauliCorrectNode} is the root at $\kappa=(0,2)$ applying the final parity correction. Edges run bottom-to-top.
     }
