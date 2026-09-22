@@ -4,12 +4,6 @@ Quantifies how much the two previously-inert `NetworkConfig` fields `gamma` and 
 
 Network shape: N=10, l=2 km/hop, branching=(16,14,1), arm_count=18, e_d=0.01, c=2e5 -- the paper's own config, only gamma/tau_emit varied one at a time (the other held at its inert default: gamma=0.0 / tau_emit=None).
 
-## Key findings
-
-- **gamma "how bad it gets"**: `baseline_end_node_pumping`'s fidelity collapses from 0.9168 (gamma=0, matches historical) to 0.2500 (maximally mixed) as gamma sweeps 0 -> 1e5, entirely from the sacrificial copies' in-memory wait during heralded round-trips. `raw_chain`/`flexible_paper_schedule` are bit-for-bit flat across the whole sweep -- confirming gamma only fires where the schedule actually has an asymmetric-timing combine.
-- **`beam_search` never picks the gamma-sensitive schedule here**: at every gamma value tested, `optimizer_matched_cost`/`optimizer_budget_relaxed` both land on `end_optimistic.*` candidates (no intermediate Heralds -- the same optimistic/no-wait family as `flexible_paper`), never on a heralded-pumping candidate. So the optimizer's own headline numbers are unaffected by gamma in this configuration -- not because gamma doesn't matter, but because the search was already avoiding the schedule shape gamma penalizes (optimistic pumping strictly dominates heralded pumping here even before gamma is considered). This is a reassuring result, not a null one.
-- **tau_emit hits the lowest-baseline-latency schedule hardest, in relative terms**: rate for all three canonical schedules falls monotonically as tau_emit grows, but `flexible_optimistic` (1x L/c baseline latency) and `baseline_heralded_pumping` (9x L/c) cross over around tau_emit=0.01 -- above that point the heralded schedule's *larger* fixed latency actually makes it *less* sensitive to the added generation delay, matching `timing.py`'s documented canonical-timing insight.
-
 ## Part 1: gamma sweep
 
 Three fixed canonical schedules, re-evaluated at each gamma (no search): `raw_chain` (no purification, no waits), `flexible_paper_schedule` (optimistic pumping, no intermediate Heralds between Purify rounds -> no asymmetric waits anywhere), and `baseline_end_node_pumping` (heralded pumping, n_pur=5 -> sacrificial copies wait for the primary branch's accumulated round-trip Herald confirmations before being purified).
@@ -45,25 +39,25 @@ Three fixed canonical schedules, re-evaluated at each gamma (no search): `raw_ch
 | gamma | Variant | Label | Cost | Fidelity | Rate | Meets floor? |
 |---|---|---|---|---|---|---|
 | 0 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 0 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 0 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 0 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 1 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 1 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 1 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 1 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 10 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 10 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 10 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 10 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 100 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 100 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 100 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 100 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 1000 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 1000 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 1000 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 1000 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 10000 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 10000 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 10000 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 10000 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 100000 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 100000 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 100000 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 100000 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 
 Full per-point data: [`gamma_canonical.csv`](gamma_canonical.csv), [`gamma_optimizer.csv`](gamma_optimizer.csv).
@@ -103,25 +97,25 @@ Same three canonical schedules and `beam_search` framing, varying `tau_emit` ins
 | tau_emit | Variant | Label | Cost | Fidelity | Rate | Meets floor? |
 |---|---|---|---|---|---|---|
 | 0 | paper_baseline | flexible_paper | 100 | 0.9295 | 4055.92 | yes |
-| 0 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4158.14 | yes |
+| 0 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4158.14 | yes |
 | 0 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6195.95 | yes |
 | 1e-07 | paper_baseline | flexible_paper | 100 | 0.9295 | 4024.50 | yes |
-| 1e-07 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 4125.93 | yes |
+| 1e-07 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 4125.93 | yes |
 | 1e-07 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 6147.95 | yes |
 | 1e-06 | paper_baseline | flexible_paper | 100 | 0.9295 | 3762.20 | yes |
-| 1e-06 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 3857.01 | yes |
+| 1e-06 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 3857.01 | yes |
 | 1e-06 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 5747.24 | yes |
 | 1e-05 | paper_baseline | flexible_paper | 100 | 0.9295 | 2277.67 | yes |
-| 1e-05 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 2335.07 | yes |
+| 1e-05 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 2335.07 | yes |
 | 1e-05 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 3479.43 | yes |
 | 0.0001 | paper_baseline | flexible_paper | 100 | 0.9295 | 460.52 | yes |
-| 0.0001 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 472.12 | yes |
+| 0.0001 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 472.12 | yes |
 | 0.0001 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 703.50 | yes |
 | 0.001 | paper_baseline | flexible_paper | 100 | 0.9295 | 51.29 | yes |
-| 0.001 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 52.59 | yes |
+| 0.001 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 52.59 | yes |
 | 0.001 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 78.36 | yes |
 | 0.01 | paper_baseline | flexible_paper | 100 | 0.9295 | 5.19 | yes |
-| 0.01 | optimizer_matched_cost | end_optimistic.n5.XZ_XZ_XZ_XZ | 100 | 0.9168 | 5.32 | yes |
+| 0.01 | optimizer_matched_cost | end_optimistic.n5.ZX_ZX_ZX_ZX | 100 | 0.9168 | 5.32 | yes |
 | 0.01 | optimizer_budget_relaxed | end_optimistic.n3.YY_ZX | 60 | 0.9063 | 7.93 | yes |
 
 Full per-point data: [`tau_emit_canonical.csv`](tau_emit_canonical.csv), [`tau_emit_optimizer.csv`](tau_emit_optimizer.csv).
@@ -131,9 +125,9 @@ Figures: [`tau_emit_rate.png`](tau_emit_rate.png) (canonical schedules, log-log)
 ## Reproducing
 
 ```bash
-cd /home/shark/Documents/entanglement-purification-scheduler
+cd /home/shark/Documents/entanglement-purification-scheduler/experiments
 source .venv/bin/activate
 python3 experiments/sweep_gamma_and_tau_emit.py
 ```
 
-Total wall-clock time: ~201s (14 `beam_search` calls total, plus cheap direct evaluator calls for the canonical schedules).
+Total wall-clock time: ~189s (14 `beam_search` calls total, plus cheap direct evaluator calls for the canonical schedules).

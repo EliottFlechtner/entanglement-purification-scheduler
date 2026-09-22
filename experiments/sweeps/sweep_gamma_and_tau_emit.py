@@ -350,7 +350,11 @@ def make_gamma_plots(
         linestyle=":",
         label="Maximally mixed (F=0.25)",
     )
-    ax.legend()
+    ax.set_xlabel(ax.get_xlabel(), fontsize=16)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=16)
+    ax.set_title(ax.get_title(), fontsize=17)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.legend(fontsize=13)
     save_figure(fig, OUTPUT_DIR / "gamma_fidelity")
 
     by_variant: dict[str, list[OptimizerRow]] = {}
@@ -369,6 +373,11 @@ def make_gamma_plots(
         title=f"beam_search rate vs. $\\gamma$ (N={N_HOPS}, e_d={E_D}, e_max={E_MAX})",
     )
     ax.set_xscale("log")
+    ax.set_xlabel(ax.get_xlabel(), fontsize=16)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=16)
+    ax.set_title(ax.get_title(), fontsize=17)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.legend(fontsize=13)
     save_figure(fig, OUTPUT_DIR / "gamma_optimizer_rate")
 
 
@@ -401,6 +410,11 @@ def make_tau_emit_plots(
     )
     ax.set_xscale("log")
     ax.set_yscale("log")
+    ax.set_xlabel(ax.get_xlabel(), fontsize=16)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=16)
+    ax.set_title(ax.get_title(), fontsize=17)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.legend(fontsize=13)
     save_figure(fig, OUTPUT_DIR / "tau_emit_rate")
 
     by_variant: dict[str, list[OptimizerRow]] = {}
@@ -419,6 +433,11 @@ def make_tau_emit_plots(
         title=f"beam_search rate vs. $\\tau_{{emit}}$ (N={N_HOPS}, e_d={E_D}, e_max={E_MAX})",
     )
     ax.set_xscale("log")
+    ax.set_xlabel(ax.get_xlabel(), fontsize=16)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=16)
+    ax.set_title(ax.get_title(), fontsize=17)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.legend(fontsize=13)
     save_figure(fig, OUTPUT_DIR / "tau_emit_optimizer_rate")
 
 
