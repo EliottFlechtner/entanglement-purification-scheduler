@@ -57,7 +57,7 @@ These effects reinforce each other under the tested conditions: the timing struc
 \begin{enumerate}
     \item \textit{Non-adaptive schedules.} Only non-adaptive schedules are evaluated: the schedule is fixed before execution and cannot condition a later purification step on an intermediate outcome (Section~\ref{sec:model:scope}). A fully adaptive strategy would require a different formulation, so the results bound only the non-adaptive schedule space.
 
-    \item \textit{Memory footprint.} The search does not prune on memory footprint. $M_{\max}$, the number of branches held in memory at once, is computed exactly for every candidate (Section~\ref{sec:model:scope}; quantified in Appendix~\ref{app:mmax}), but only the generation-cost budget $E_{\max}$ constrains the search. A schedule feasible under $E_{\max}$ may therefore still require more simultaneously held branches than a deployment with a strict memory limit could support.
+    \item \textit{Memory footprint.} The search does not prune on memory footprint. $M_{\max}$, the number of branches held in memory at once, is computed exactly for every candidate (Section~\ref{sec:model:scope}), but only the generation-cost budget $E_{\max}$ constrains the search. A schedule feasible under $E_{\max}$ may therefore still require more simultaneously held branches than a deployment with a strict memory limit could support.
 
     \item \textit{Noise model.} The fidelity model assumes Pauli-channel noise, consistent with the source papers. Schedule comparisons are therefore internally consistent, but their relative performance could change under hardware dominated by different error processes. In particular, coupled loss, gate-error, and memory effects are not represented.
 
