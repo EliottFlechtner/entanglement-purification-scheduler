@@ -44,12 +44,12 @@ Section~\ref{sec:exp:heterogeneous} considers both a deliberately constructed fi
 
 \input{tables/weak_link_contrast}
 
-Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample. Each point gives the optimizer's rate improvement over the best feasible uniform link-level recipe as a function of the network's per-hop noise heterogeneity (measured by the coefficient of variation (i.e.\ the standard deviation divided by the mean inner-qubit error rate across hops). The largest improvements occur in networks with relatively modest noise dispersion, where a single noisier hop leaves the remaining hops sufficiently inexpensive for the optimizer to reallocate resources towards the weak link.
+Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample. Each point gives the optimizer's rate improvement over the best feasible uniform link-level recipe as a function of the network's per-hop noise heterogeneity, measured by the coefficient of variation (i.e.\ the standard deviation divided by the mean inner-qubit error rate across hops). The largest improvements occur in networks with relatively modest noise dispersion, where a single noisier hop leaves the remaining hops sufficiently inexpensive for the optimizer to reallocate resources towards the weak link. The largest improvements and the exact ties (Section~\ref{sec:disc:synthesis}) are marked separately.
 
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/random_sweep_improvement_vs_heterogeneity.png}
-    \caption{Optimizer rate improvement over the best feasible uniform link-level recipe vs.\ per-hop noise heterogeneity, across the 100 random $N=6$ networks of Section~\ref{sec:exp:heterogeneous}. Points on the zero line represent ties rather than losses (Section~\ref{sec:disc:synthesis}).}
+    \caption{Optimizer rate improvement over the best feasible uniform link-level recipe vs.\ per-hop noise heterogeneity, across the 100 random $N=6$ networks of Section~\ref{sec:exp:heterogeneous}. Grey crosses on the zero line are exact ties, where the optimizer's own best schedule coincides with the uniform recipe; these represent no advantage, not a loss (Section~\ref{sec:disc:synthesis}). Red points mark the networks where the improvement exceeds 40\%, the upper end of the observed range.}
     \label{fig:app:heterogeneity}
 \end{figure*}
 
@@ -109,10 +109,9 @@ Increasing $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate for all schedul
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/results/tau_emit_rate.png}
-        \caption{Rate vs.\ $\tau_{\mathrm{emit}}$ (log-log)}
+        \includegraphics[width=\textwidth]{figures/results/gamma_rate.png}
+        \caption{Rate vs.\ $\gamma$ (log-log)}
     \end{subfigure}
-    \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping at $N=10$ and $e_d=0.01$.}
+    \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping at $N=10$ and $e_d=0.01$. \textbf{(a)} Fidelity as a function of the memory dephasing rate $\gamma$ for the three schedules, showing the strong degradation of heralded pumping at large $\gamma$. \textbf{(b)} Corresponding rate as a function of $\gamma$ on a log-log scale; the raw chain and optimistic pumping remain constant, while the rate of heralded pumping decreases as memory dephasing increases.}
     \label{fig:timing}
 \end{figure*}
-\FloatBarrier
