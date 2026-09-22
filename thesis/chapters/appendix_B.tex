@@ -1,97 +1,80 @@
 \chapter{Additional Experimental Results}
 \label{app:results}
 
-This appendix collects material that supports Chapter~\ref{chap:experiments}: extended numeric tables and figures behind results shown in the main text, and supplementary diagnostics for the search algorithms of Chapter~\ref{chap:algorithms}.
+This appendix collects material supporting Chapter~\ref{chap:experiments}: extended numeric tables and figures behind results shown in the main text, together with supplementary diagnostics for the search algorithms of Chapter~\ref{chap:algorithms}.
 
 \section{Experimental Parameters}
 \label{app:params}
 
-Table~\ref{tab:params} summarizes every parameter varied anywhere in Chapter~\ref{chap:experiments}, alongside the reference value used whenever it is held fixed, and the section in which it is swept.
+Table~\ref{tab:params} lists every parameter varied in Chapter~\ref{chap:experiments}, together with the reference value used when it is held fixed and the section in which it is varied.
 
 \input{tables/experiment_parameters}
 
 \section{Extended Physics Validation}
 \label{app:validation}
 
-Section~\ref{sec:exp:validation} reports the evaluator's \TOFIX{find another phrasing}{agreement with the Integrating paper's Fig.\,5}~\cite{Benchasattabuse2025Integrating} when varying the decoherence parameter $e_d$. Table~\ref{tab:app:validation} and Figure~\ref{fig:app:validation} show the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full swept range $e_d \in [0, 0.01]$ used throughout Chapter~\ref{chap:experiments}.
+Section~\ref{sec:exp:validation} reports the evaluator's agreement with the fidelity results of the Integrating paper's Fig.~5~\cite{Benchasattabuse2025Integrating} when varying the decoherence parameter $e_d$. Table~\ref{tab:app:validation} and Figure~\ref{fig:app:validation} provide the evaluator's fidelity output for the raw, heralded-pumping, and optimistic-pumping canonical schedules (Section~\ref{sec:bg:decoherence}) across the full range $e_d \in [0, 0.01]$ used throughout Chapter~\ref{chap:experiments}.
 
-Fig.\,5 in the source paper is itself a plot over this same $e_d$ range, and Figure~\ref{fig:app:validation} reproduces its shape throughout. The paper's text only states numeric fidelity values at two points on that plot, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$ respectively, for the same three schedules in the same order. The evaluator matches both published points to at least three significant figures, and to four at $e_d=0.010$ (already quoted in Section~\ref{sec:exp:validation}, shown in bold in Table~\ref{tab:app:validation}). The remaining nine rows lie on the same reproduced curve and are included here for completeness.
+The source paper's Fig.~5 also covers this full $e_d$ range, and Figure~\ref{fig:app:validation} reproduces its shape throughout. The paper reports numeric fidelity values at only two points on the curve, $e_d=0.000$ and $e_d=0.010$: approximately $\{1.000, 1.000, 1.000\}$ and $\{0.823, 0.917, 0.929\}$, respectively, for the same three schedules in the same order. The evaluator matches both published points to at least three significant figures, and to four at $e_d=0.010$ (already reported in Section~\ref{sec:exp:validation} and shown in bold in Table~\ref{tab:app:validation}). The remaining nine rows trace the same reproduced curve and are included for completeness.
 
 \input{tables/figures_validation}
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/appendix/fidelity_vs_ed_validation.png}
-    \caption{Evaluator fidelity vs.\ $e_d$ for the three canonical schedules of Table~\ref{tab:app:validation}, $N=10$, reproducing the shape of the source paper's Fig.\,5~\cite{Benchasattabuse2025Integrating}. The raw chain degrades fastest. Both pumping variants track closely, with the optimistic variant consistently slightly ahead of the heralded one over the whole range (Section~\ref{sec:disc:optimistic}).}
+    \caption{Evaluator fidelity vs.\ $e_d$ for the three canonical schedules of Table~\ref{tab:app:validation}, $N=10$, reproducing the shape of the source paper's Fig.~5~\cite{Benchasattabuse2025Integrating}. The raw chain degrades fastest. Both pumping variants remain close, with the optimistic variant consistently slightly above the heralded variant over the full range (Section~\ref{sec:disc:optimistic}).}
     \label{fig:app:validation}
-\end{figure}
+\end{figure*}
 
 \section{Extended Network and Heterogeneity Comparisons}
-\label{app:networks}
 
-This section gives the full numeric backing for the two network-generalization experiments of Section~\ref{sec:exp:comparison}: uniformly applied non-ideal parameters (Section~\ref{sec:exp:netgen}) and per-hop heterogeneous networks (Section~\ref{sec:exp:heterogeneous}).
+This section provides the full numeric results for the two network-generalization experiments of Section~\ref{sec:exp:comparison}: uniformly applied non-ideal parameters (Section~\ref{sec:exp:netgen}) and per-hop heterogeneous networks (Section~\ref{sec:exp:heterogeneous}).
 
 \subsection{Network Generalization, Full Comparison}
 \label{app:netgen}
 
-Section~\ref{sec:exp:netgen} summarizes the network-generalization result. Table~\ref{tab:netgen} gives the full numeric comparison (cost, fidelity, and rate) behind Figure~\ref{fig:netgen} in the main text, across both tested \Gls{bsm} arm counts.
+The network-generalization experiment of Section~\ref{sec:exp:netgen} is reported in full in Table~\ref{tab:netgen}, which gives the cost, fidelity, and rate values underlying Figure~\ref{fig:netgen} in the main text for both tested \Gls{bsm} arm counts.
 
 \input{tables/network_generalization}
 
 \subsection{Heterogeneous Weak-Link Contrast}
 \label{app:weaklink}
 
-Section~\ref{sec:exp:heterogeneous} summarizes both the designed five-hop weak-link case and the 100-network random sample. Table~\ref{tab:weaklink} gives the full numeric comparison for the designed case: one hop with a $12\times$ higher inner-qubit error rate than its neighbours.
+Section~\ref{sec:exp:heterogeneous} considers both a deliberately constructed five-hop weak-link network and a sample of 100 randomly generated networks. Table~\ref{tab:weaklink} gives the complete numeric comparison for the designed case, in which one hop has an inner-qubit error rate $12$ times higher than those of its neighbours.
 
 \input{tables/weak_link_contrast}
 
-Figure~\ref{fig:app:heterogeneity} gives the entire 100-network random sample. It plots the optimizer's rate improvement over the best feasible uniform recipe against each network's per-hop noise heterogeneity, measured as the coefficient of variation (the standard deviation divided by the mean) of the inner-qubit error rate across hops. The improvement is largest among networks with modest noise dispersion, where a single noisier hop still leaves the other hops cheap enough for the optimizer to reallocate resources towards it.
+Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample. Each point gives the optimizer's rate improvement over the best feasible uniform link-level recipe as a function of the network's per-hop noise heterogeneity (measured by the coefficient of variation (i.e.\ the standard deviation divided by the mean inner-qubit error rate across hops). The largest improvements occur in networks with relatively modest noise dispersion, where a single noisier hop leaves the remaining hops sufficiently inexpensive for the optimizer to reallocate resources towards the weak link.
 
-\TODO{regen figure, make legend's font bigger; rephrase the legends content maybe also color some points that are "performing" better? maybe not idk}
-
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/random_sweep_improvement_vs_heterogeneity.png}
-    \caption{Optimizer rate improvement over the best feasible uniform link-level recipe vs.\ per-hop noise heterogeneity, across the 100 random $N=6$ networks of Section~\ref{sec:exp:heterogeneous}. Points on the zero line are ties, not losses (Section~\ref{sec:disc:synthesis}).}
+    \caption{Optimizer rate improvement over the best feasible uniform link-level recipe vs.\ per-hop noise heterogeneity, across the 100 random $N=6$ networks of Section~\ref{sec:exp:heterogeneous}. Points on the zero line represent ties rather than losses (Section~\ref{sec:disc:synthesis}).}
     \label{fig:app:heterogeneity}
-\end{figure}
+\end{figure*}
 
 \section{Extended Cost-Quality and Optimality Results}
-\label{app:costquality}
 
 \subsection{Alternative Objectives, Full Comparison}
 \label{app:objectives}
 
-Section~\ref{sec:exp:objectives} summarizes the objective-substitution result. Table~\ref{tab:app:objectives} gives the full five-objective comparison it draws from, at $N=10$ and $e_d=0.01$.
+The objective-substitution experiment of Section~\ref{sec:exp:objectives} is detailed in Table~\ref{tab:app:objectives}, which reports the full five-objective comparison at $N=10$ and $e_d=0.01$.
 
 \input{tables/alternative_objectives}
 
 \section{Search Algorithm Diagnostics}
 \label{app:searchalgos}
 
-This section justifies two implementation choices used throughout Chapter~\ref{chap:experiments}: the default beam width $w_{\mathrm{beam}}=25$ (Section~\ref{sec:alg:beam}) and the claim that beam search scales comparably to the exact dynamic program once same-span pumping is enabled (Section~\ref{sec:alg:pumping}).
-
-
-\subsection{Beam Width Justification}
-Figure~\ref{fig:app:beamwidth} shows why $w_{\mathrm{beam}}=25$ was chosen as the default. At $N=10$, wall-clock search time grows mildly up to a beam width of about $w_{\mathrm{beam}}=16$ and then sharply beyond it. The best rate found is already flat across the entire tested range, so widening the beam past 25 buys no further quality improvement at this configuration.
-
-\TODO{regenerate figure to fix position and size of legend (to be bigger and not positioned middle left but top left in a box with larger font.) the blue line is also literally just a straight line on the graph so it looks weird. overall that graph is unreadable with 3 different axes. make blue line more varied than just a straight line by changing scale or something? unsure}
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.75\textwidth]{figures/appendix/runtime_and_quality_vs_beam_width.png}
-    \caption{Beam search wall-clock time and best rate found vs.\ beam width, at $N=10$, $e_d=0.01$.}
-    \label{fig:app:beamwidth}
-\end{figure}
+This section first provides additional evidence for the comparable scaling of the exact dynamic program once same-span pumping is enabled (Section~\ref{sec:alg:pumping}). Second, it presents runtime benchmarks for representative chain lengths, highlighting cases where the pumping-enabled exact dynamic program does not provide a strict upper bound on beam-search runtime.
 
 \subsection{Runtime vs.\ Chain Length}
 
-Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:benchmarks} (Section~\ref{app:runtime}) to every tested $N$. Both the exact dynamic program and the beam search scale similarly with $N$ once the same-span pumping move is enabled, with the beam search consistently the faster of the two.
+Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:benchmarks} (Section~\ref{app:runtime}) to every tested $N$. Once the same-span pumping move is enabled, the exact dynamic program and beam search exhibit similar scaling with $N$, while beam search remains consistently faster.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/appendix/runtime_vs_n_pumping.png}
-    \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and the beam search, same-span pumping move enabled throughout.}
+    \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and beam search, with the same-span pumping move enabled throughout.}
     \label{fig:app:runtimen}
 \end{figure}
 \FloatBarrier
@@ -99,27 +82,21 @@ Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:b
 \subsection{Runtime Benchmarks}
 \label{app:runtime}
 
-Table~\ref{tab:benchmarks} gives the wall-clock time and returned score underlying Figure~\ref{fig:app:runtimen} and the beam-width discussion above, at representative chain lengths, together with the two cases (footnoted in the table) where the pumping-enabled exact dynamic program is not a strict upper bound on beam search (Section~\ref{sec:alg:pumping}).
+Table~\ref{tab:benchmarks} reports the wall-clock time and returned score underlying Figure~\ref{fig:app:runtimen} and the beam-width analysis above for representative chain lengths. It also identifies the two cases, footnoted in the table, where the pumping-enabled exact dynamic program does not provide a strict upper bound on beam-search runtime (Section~\ref{sec:alg:pumping}).
 
 \input{tables/runtime_benchmarks}
 
 \section{Timing Sensitivity, Full Sweeps}
-\label{app:timing}
 
-% Source: outputs/sweep_gamma_and_tau_emit/README.md
-
-Section~\ref{sec:exp:timing} discusses the effect of memory dephasing and generation latency on schedule rate and fidelity. Figure~\ref{fig:timing} gives both sweeps in full, at $N=10$ and $e_d=0.01$.
+Section~\ref{sec:exp:timing} examines the effects of memory dephasing and generation latency on schedule rate and fidelity. Figure~\ref{fig:timing} shows both sweeps in full at $N=10$ and $e_d=0.01$.
 
 \paragraph{Memory dephasing ($\gamma$)}
 
-Sweeping $\gamma$ from 0 to $10^5$ leaves the raw chain and paper schedule's fidelity unchanged across the tested range. Neither contain a resource that waits for another branch to become ready, so the simulated execution introduces no additional memory-decoherence interval for these schedules. By contrast, heralded end-node pumping falls from $F=0.92$ at $\gamma=0$ to $F=0.25$, i.e. maximally mixed, at $\gamma=10^5$. This happens because its sacrificial copies \emph{remain stored} while each round-trip heralding delay accumulates. The schedules selected by the optimizer remain flat across the tested values of $\gamma$. \TOFIX{very AI, to change}{This does not mean memory dephasing is generally harmless:} the search instead favours optimistic schedules whose relevant intermediate heralding delays are deferred, avoiding the specific waiting pattern that causes the collapse of the heralded pumping schedule (Section~\ref{sec:disc:optimistic}).
+Increasing $\gamma$ from 0 to $10^5$ leaves the raw chain and paper schedule unchanged, as neither requires resources to wait for another branch. In contrast, heralded end-node pumping drops from $F=0.92$ to $F=0.25$ as its sacrificial copies accumulate dephasing during repeated heralding delays. The optimizer's schedules remain stable across the sweep, favouring optimistic schedules that avoid these storage intervals (Section~\ref{sec:disc:optimistic}).
 
 \paragraph{Generation latency ($\tau_{\mathrm{emit}}$)}
 
-Sweeping $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate monotonically for every schedule. The relative rate loss is largest for the optimistic pumping family, whose baseline latency is approximately $1\times L/c$, and smallest for heralded end-node pumping, whose baseline latency is approximately $9\times L/c$: a schedule that already has a larger fixed latency is proportionally less affected by the same additional per-photon generation delay. The two schedules cross near $\tau_{\mathrm{emit}}\approx0.01$. Above this value, the larger fixed latency of heralded pumping makes it less sensitive, in relative terms, to further increases in generation latency.
-
-
-\TODO{increase font in both figures (to regenerate)}
+Increasing $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate for all schedules. The relative loss is largest for optimistic pumping, with a baseline latency of about $1\times L/c$, and smallest for heralded pumping, with about $9\times L/c$. The two cross near $\tau_{\mathrm{emit}}\approx0.01$, above which the larger fixed latency of heralded pumping makes it less sensitive to further increases.
 
 \begin{figure*}[ht]
     \centering
@@ -134,14 +111,7 @@ Sweeping $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate monotonically for
         \includegraphics[width=\textwidth]{figures/results/tau_emit_rate.png}
         \caption{Rate vs.\ $\tau_{\mathrm{emit}}$ (log-log)}
     \end{subfigure}
-    \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping, at $N=10$ and $e_d=0.01$.}
+    \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping at $N=10$ and $e_d=0.01$.}
     \label{fig:timing}
 \end{figure*}
 \FloatBarrier
-
-\TOFIX{maybe don't keep this section as a little long and not super useful}{\section{Schedule DAGs of Selected Optima}}
-\label{app:dags}
-
-The schedules found in Chapter~\ref{chap:experiments}, such as the budget-relaxed optimum at $N=10$ (Section~\ref{sec:exp:headline}), are automatically constructed \Glspl{dag} with 50 to 100 \texttt{GenNode} leaves and several hundred nodes once every backbone and purification step is counted. Rendered at a scale where individual node labels stay legible, such a diagram does not fit within a single printed page: the same rendering tooling used for the worked $N=2$ example of Figure~\ref{fig:model:dag-example} produces images several thousand pixels wide once applied to these larger, automatically-constructed schedules, since node count, not page size, is the limiting factor.
-
-Reproducing one of these diagrams here at a reduced scale would not add information beyond what Chapter~\ref{chap:experiments}'s tables and the Pareto frontier of Figure~\ref{fig:pareto} already convey, namely each schedule's cost, fidelity, rate, and overall shape family (e.g.\ end-node pumping vs.\ a span-partition structure), while making every individual node illegible. Figure~\ref{fig:model:dag-example} therefore remains the representative illustration of the \Gls{dag} representation itself, at a size deliberately chosen to exercise every node type from Section~\ref{sec:model:dag} while staying legible. The full artifacts for every optimum discussed in this thesis are reproducible directly from the search calls and parameters documented in Chapter~\ref{chap:algorithms} and Table~\ref{tab:params}.
