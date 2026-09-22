@@ -1,4 +1,4 @@
-\chapter{Additional Figures}
+\chapter{\TOFIX{fix? merge with app B?}{Additional Figures}}
 
 \section{Repeater Backbone and Purification}
 \label{app:figures}
@@ -63,3 +63,12 @@ The following pseudocode implements this recurrence. It assumes that the schedul
 \end{algorithm}
 
 The procedure is evaluated recursively from the root, so every node is visited exactly once. Consequently, the computation takes $O(|T|)$ time and $O(h)$ auxiliary space for a tree of $|T|$ nodes and height $h$. The resulting value is thus the concurrency requirement $M(\Sigma)=\textsc{RegisterRequirement}(\mathrm{root}(T))$. The schedule satisfies the concurrency budget when $M(\Sigma)\leq M_{\max}$.
+
+% \subsection{Measured Concurrency Across Schedules}
+% \label{app:mmax}
+
+% Section~\ref{sec:model:scope} notes that $M_{\max}$ is computed exactly for every schedule but is not used to prune the search. Table~\ref{tab:app:mmax} gives $M(\Sigma)$ for the fixed schedule families and the optimizer's own budget-relaxed best schedule across $N=2$ to $N=18$ at $e_d=0.01$. No family shows $M(\Sigma)$ growing with $N$, since the recurrence above is governed by \Gls{dag} depth and branching shape rather than hop count.
+
+% \input{tables/mmax_vs_n}
+
+% Bisecting $m_{\max}$ downward from the unconstrained optimum at $N=10$, $E_{\max}=100$ shows that the budget-relaxed optimum ($M=4$) remains selectable down to $m_{\max}=4$. No candidate in the beam-searched frontier clears both the rate objective and $m_{\max}=3$. At that point, $M_{\max}$ becomes the actual binding constraint rather than $E_{\max}$ or $F_{\min}$.
