@@ -90,7 +90,7 @@ def main() -> None:
     ax.set_ylabel("Fidelity $F$", fontsize=11)
     ax.set_ylim(0.6, 1.0)
     ax.grid(alpha=0.3, axis="y")
-    ax.tick_params(labelsize=9.5)
+    ax.tick_params(labelsize=12)
     hatch_patch = mpatches.Patch(
         facecolor="white",
         edgecolor="black",
@@ -103,7 +103,7 @@ def main() -> None:
     ax.legend(
         handles,
         labels,
-        fontsize=9,
+        fontsize=13,
         ncol=2,
         loc="upper center",
         bbox_to_anchor=(0.5, -0.18),
