@@ -22,7 +22,7 @@ The source paper's Fig.~5 also covers this full $e_d$ range, and Figure~\ref{fig
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/appendix/fidelity_vs_ed_validation.png}
-    \caption{Evaluator fidelity vs.\ $e_d$ for the three canonical schedules of Table~\ref{tab:app:validation}, $N=10$, reproducing the shape of the source paper's Fig.~5~\cite{Benchasattabuse2025Integrating}. The raw chain degrades fastest. Both pumping variants remain close, with the optimistic variant consistently slightly above the heralded variant over the full range (Section~\ref{sec:disc:optimistic}).}
+    \caption[Evaluator fidelity vs.\ $e_d$ (full sweep)]{Evaluator fidelity vs.\ $e_d$ for the three canonical schedules of Table~\ref{tab:app:validation}, $N=10$, reproducing the shape of the source paper's Fig.~5~\cite{Benchasattabuse2025Integrating}. The raw chain degrades fastest. Both pumping variants remain close, with the optimistic variant consistently slightly above the heralded variant over the full range (Section~\ref{sec:disc:optimistic}).}
     \label{fig:app:validation}
 \end{figure*}
 
@@ -49,7 +49,7 @@ Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample.
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/results/random_sweep_improvement_vs_heterogeneity.png}
-    \caption{Optimizer rate improvement over the best feasible uniform link-level recipe vs.\ per-hop noise heterogeneity, across the 100 random $N=6$ networks of Section~\ref{sec:exp:heterogeneous}. Grey crosses on the zero line are exact ties, where the optimizer's own best schedule coincides with the uniform recipe; these represent no advantage, not a loss (Section~\ref{sec:disc:synthesis}). Red points mark the networks where the improvement exceeds 40\%, the upper end of the observed range.}
+    \caption[Rate improvement vs.\ network heterogeneity]{Optimizer rate improvement over the best feasible uniform link-level recipe vs.\ per-hop noise heterogeneity, across the 100 random $N=6$ networks of Section~\ref{sec:exp:heterogeneous}. Grey crosses on the zero line are exact ties, where the optimizer's own best schedule coincides with the uniform recipe; these represent no advantage, not a loss (Section~\ref{sec:disc:synthesis}). Red points mark the networks where the improvement exceeds 40\%, the upper end of the observed range.}
     \label{fig:app:heterogeneity}
 \end{figure*}
 
@@ -81,7 +81,7 @@ Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:b
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/appendix/runtime_vs_n_pumping.png}
-    \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and beam search, with the same-span pumping move enabled throughout.}
+    \caption[Search runtime vs.\ chain length]{Search wall-clock time vs.\ $N$ for the exact dynamic program and beam search, with the same-span pumping move enabled throughout.}
     \label{fig:app:runtimen}
 \end{figure}
 \FloatBarrier
@@ -112,6 +112,6 @@ Increasing $\tau_{\mathrm{emit}}$ at $\gamma=0$ reduces the rate for all schedul
         \includegraphics[width=\textwidth]{figures/results/gamma_rate.png}
         \caption{Rate vs.\ $\gamma$ (log-log)}
     \end{subfigure}
-    \caption{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping at $N=10$ and $e_d=0.01$. \textbf{(a)} Fidelity as a function of the memory dephasing rate $\gamma$ for the three schedules, showing the strong degradation of heralded pumping at large $\gamma$. \textbf{(b)} Corresponding rate as a function of $\gamma$ on a log-log scale; the raw chain and optimistic pumping remain constant, while the rate of heralded pumping decreases as memory dephasing increases.}
+    \caption[Timing sensitivity to $\gamma$: fidelity and rate]{Timing sensitivity of the raw chain, the paper schedule, and heralded end-node pumping at $N=10$ and $e_d=0.01$. \textbf{(a)} Fidelity as a function of the memory dephasing rate $\gamma$ for the three schedules, showing the strong degradation of heralded pumping at large $\gamma$. \textbf{(b)} Corresponding rate as a function of $\gamma$ on a log-log scale; the raw chain and optimistic pumping remain constant, while the rate of heralded pumping decreases as memory dephasing increases.}
     \label{fig:timing}
 \end{figure*}

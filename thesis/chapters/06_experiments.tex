@@ -57,7 +57,7 @@ The optimizer was also evaluated under non-ideal inner-qubit errors and differen
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/results/fidelity_by_config.png}
-    \caption{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$. Hatched bars fall below $F_{\min}=0.9$. The paper schedule is infeasible under both non-ideal configurations; the schedules found by search remain feasible at the same budget.}
+    \caption[Fidelity by network configuration and schedule]{Fidelity by network configuration and schedule at $N=10$, $e_d=0.01$, $E_{\max}=100$, $\gamma=0$. Hatched bars fall below $F_{\min}=0.9$. The paper schedule is infeasible under both non-ideal configurations; the schedules found by search remain feasible at the same budget.}
     \label{fig:netgen}
 \end{figure*}
 
@@ -97,7 +97,7 @@ Sweeping $e_d$ from 0 to 0.02 at $N=10$ shows that the optimizer's rate advantag
         \caption{Fidelity vs.\ $e_d$}
         \label{fig:edsweep:fidelity}
     \end{subfigure}
-    \caption{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate that the optimizer instead reallocates.}
+    \caption[Rate and fidelity vs.\ depolarizing error $e_d$]{Rate and fidelity versus depolarizing error $e_d$ at $N=10$ and $E_{\max}=100$ for the paper baseline, the optimizer at matched cost, and the budget-relaxed optimizer. The paper baseline's higher fidelity in the right panel reflects unused surplus above the $F_{\min}=0.9$ floor, purchased with cost and rate that the optimizer instead reallocates.}
     \label{fig:edsweep}
 \end{figure*}
 % \FloatBarrier
@@ -129,7 +129,7 @@ In the fidelity-cost projection, the paper schedule lies inside the frontier, wh
         \caption{Fidelity vs.\ rate}
         \label{fig:pareto:rate}
     \end{subfigure}
-    \caption{Pareto frontiers at $N=10$, $e_d=0.01$, $E_{\max}=150$, over candidates evaluated under a permissive objective ($F_{\min}=0$). Grey points are dominated; connected points form the non-dominated frontier, with the paper schedule and uniform link-level baseline marked for reference.}
+    \caption[Pareto frontiers of searched schedules]{Pareto frontiers at $N=10$, $e_d=0.01$, $E_{\max}=150$, over candidates evaluated under a permissive objective ($F_{\min}=0$). Grey points are dominated; connected points form the non-dominated frontier, with the paper schedule and uniform link-level baseline marked for reference.}
     \label{fig:pareto}
 \end{figure*}
 % \FloatBarrier
@@ -156,7 +156,7 @@ with an exponent greater than one over the measured range. The paper's budget is
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/results/min_budget_vs_n.png}
-    \caption{Minimum feasible $E_{\max}$ to reach $F_{\min}=0.9$ vs.\ $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the fitted power law $E_{\max}^{\min}\approx1.192\,N^{1.666}$. Solid markers and the solid fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range, not additional data.}
+    \caption[Minimum feasible budget vs.\ chain length]{Minimum feasible $E_{\max}$ to reach $F_{\min}=0.9$ vs.\ $N$ at $e_d=0.01$, compared with the paper's linear $E_{\max}=10N$ budget and the fitted power law $E_{\max}^{\min}\approx1.192\,N^{1.666}$. Solid markers and the solid fit cover the measured range ($N=10$--$28$); the dotted extension is the same fit evaluated beyond that range, not additional data.}
     \label{fig:budget}
 \end{figure*}
 \FloatBarrier

@@ -32,7 +32,7 @@ The Bridging paper introduces the \emph{half repeater graph state} (\Gls{hrgs}),
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/background/HRGS_combo.png}
-    \caption{\textbf{(a)} An isolated \Gls{hrgs}, generated and held by a single station (an \Gls{rgss}, or an end node acting as its own source). \textbf{(b)} Two such \Glspl{hrgs}, generated independently and possibly at different stations, combined into one full \Gls{rgs} by a controlled-phase ($CZ$) gate between their anchor qubits followed by a joint $XX$ measurement on those same qubits. The measurement realizes entanglement swapping between the two \Glspl{hrgs}' remaining qubits, analogous to the effect of a \Gls{bsm} (Figure~\ref{fig:bsm}) on two independent Bell pairs, but applied here to graph-state anchors.}
+    \caption[Combining two HRGS halves into a full RGS]{\textbf{(a)} An isolated \Gls{hrgs}, generated and held by a single station (an \Gls{rgss}, or an end node acting as its own source). \textbf{(b)} Two such \Glspl{hrgs}, generated independently and possibly at different stations, combined into one full \Gls{rgs} by a controlled-phase ($CZ$) gate between their anchor qubits followed by a joint $XX$ measurement on those same qubits. The measurement realizes entanglement swapping between the two \Glspl{hrgs}' remaining qubits, analogous to the effect of a \Gls{bsm} (Figure~\ref{fig:bsm}) on two independent Bell pairs, but applied here to graph-state anchors.}
     \label{fig:bg:hrgs-combo}
 \end{figure}
 
@@ -41,7 +41,7 @@ An $N$-hop chain between two end nodes has $N+1$ stations numbered $0,\dots,N$: 
 \begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{figures/background/Nhop_network.png}
-    \caption{An $N$-hop network between Alice (station~0) and Bob (station~$N$). Interior stations $1,\dots,N-1$ are \Gls{rgss} nodes, each generating a full \Gls{rgs} and sending one half toward each neighbouring \Gls{absa}; the two end nodes instead generate only the single \Gls{hrgs} each needs (Section~\ref{sec:bg:hrgs}). Every hop's \Gls{absa} receives outer qubits from both neighbouring stations and performs the corresponding \Glspl{bsm}; a successful \Gls{bsm} extends the established entanglement by one more hop, giving rise to the notion of \emph{span} introduced next (Section~\ref{sec:bg:backbone}).}
+    \caption[An $N$-hop repeater network]{An $N$-hop network between Alice (station~0) and Bob (station~$N$). Interior stations $1,\dots,N-1$ are \Gls{rgss} nodes, each generating a full \Gls{rgs} and sending one half toward each neighbouring \Gls{absa}; the two end nodes instead generate only the single \Gls{hrgs} each needs (Section~\ref{sec:bg:hrgs}). Every hop's \Gls{absa} receives outer qubits from both neighbouring stations and performs the corresponding \Glspl{bsm}; a successful \Gls{bsm} extends the established entanglement by one more hop, giving rise to the notion of \emph{span} introduced next (Section~\ref{sec:bg:backbone}).}
     \label{fig:bg:nhop-network}
 \end{figure}
 
