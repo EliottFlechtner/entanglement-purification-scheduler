@@ -1,16 +1,5 @@
 \begin{abstract}
 
-
-
-
-\TODO{add AI acknoledgment; how it was used and how much it contributed to either the work presented in this thesis and the writing of the abstract}
-
-\TODO{add glossary like the paul hilaire/azuma's quantum survey}
-
-\TODO{if glossary is added maybe don't reset gls as much? to recheck}
-
-\TODO{do the powerpoint presentation to present at the defense presenting this work}
-
 Long-distance quantum networks require repeaters that distribute high-fidelity Bell pairs despite photon loss and operational noise. In all-photonic quantum repeaters built from \Gls{hrgs-long}, entanglement purification can be applied at different stages, from resource generation to individual hops and end-to-end entanglement. The number of copies and circuit used may also vary between stages, making the choice of where and how to purify a combinatorial scheduling problem. The source papers demonstrate the potential of such scheduling through a single hand-picked example, but do not systematically explore the space of possible schedules.
 
 This thesis represents each fixed non-adaptive purification schedule as a \Gls{dag} and evaluates it with a single bottom-up pass computing fidelity, success probability, latency, rate, and generation cost. The evaluator reproduces the source paper's three canonical fidelity benchmarks to four significant figures. Three search tiers then construct and compare candidate schedules under a shared generation-cost budget $E_{\max}$: structured baseline enumeration, an exact span-partition dynamic program, and beam search with an additional same-span pumping operation. All candidates are structurally validated and evaluated using the same physical model throughout the protocol.
