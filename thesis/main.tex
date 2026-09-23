@@ -32,10 +32,24 @@
 \pagestyle{plain}
 \clearpage
 
-% ---- Notation and conventions ----
-%\glsaddall[types={notation}]
-%\printglossary[type=notation, style=long, nonumberlist]
+{
+  \hypersetup{linkcolor=contentsblack}
+  \small\setstretch{1.2}
+  \listoffigures
+  \clearpage
+  \listoftables
+}
+\pagestyle{plain}
 \clearpage
+
+% % ---- Acronyms ----
+% \printglossary[type=\acronymtype, style=long, nonumberlist, title={List of Acronyms}]
+% \clearpage
+
+% % ---- Notation and conventions ----
+% \glsaddall[types={notation}]
+% \printglossary[type=notation, style=long, nonumberlist, title={Notation and Conventions}]
+% \clearpage
 
 % ---- Main matter: arabic numerals, running headers ----
 \pagenumbering{arabic}
