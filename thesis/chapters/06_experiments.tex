@@ -4,9 +4,7 @@
 % Sources: outputs/*/README.md, experiments/*.py,
 %          docs/Design Principles.md
 
-This chapter validates the evaluator against the Integrating paper's~\cite{Benchasattabuse2025Integrating} fidelity results, compares its schedule with schedules found by search under several network conditions, and evaluates cost-quality trade-offs, chain-length scaling, and timing sensitivity. Section~\ref{sec:exp:validation} validates the physical evaluator against the source paper. Section~\ref{sec:exp:comparison} compares the paper schedule with schedules found by search, while Section~\ref{sec:exp:tradeoffs} examines cost-quality trade-offs and alternative objectives. Section~\ref{sec:exp:scaling} studies how the required generation budget changes with chain length, and Section~\ref{sec:exp:timing} evaluates memory dephasing and generation latency. Additional runtime, beam-width, and sweep results are reported in Appendix~\ref{app:results}. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' refers to the Integrating paper throughout this chapter.
-
-Throughout this chapter and the rest of this thesis, \emph{the optimizer} denotes the software implementing the three search tiers of Chapter~\ref{chap:algorithms} that produces the reported search results.
+This chapter validates the evaluator against the Integrating paper's~\cite{Benchasattabuse2025Integrating} fidelity results, compares its schedule with schedules found by search under several network conditions, and evaluates cost-quality trade-offs, chain-length scaling, and timing sensitivity. Section~\ref{sec:exp:validation} validates the physical evaluator against the source paper. Section~\ref{sec:exp:comparison} compares the paper schedule with schedules found by search, while Section~\ref{sec:exp:tradeoffs} examines cost-quality trade-offs and alternative objectives. Section~\ref{sec:exp:scaling} studies how the required generation budget changes with chain length, and Section~\ref{sec:exp:timing} evaluates memory dephasing and generation latency. Additional runtime, beam-width, and sweep results are reported in Appendix~\ref{app:results}. Unless the Bridging paper~\cite{Benchasattabuse2026Bridging} is named explicitly, ``the source paper'' refers to the Integrating paper throughout this chapter. Additionally, \emph{the optimizer} denotes the developed software~\cite{Flechtner2026Entanglement} that implements the three search tiers of Chapter~\ref{chap:algorithms} and produces the reported search results.
 
 \section{Experimental Setup}
 \label{sec:exp:setup}
@@ -32,7 +30,7 @@ As defined in Section~\ref{sec:model:objectives}, fidelity $F$ is the Bell-pair 
 % Source: experiments/fig5_fidelity_vs_noise.py,
 %          outputs/headline_experiment_n10/README.md
 
-The evaluator of Section~\ref{sec:alg:evaluator} reproduces the source paper's Fig.\,5~\cite{Benchasattabuse2025Integrating} to four significant figures. At $e_d=0.01$, the raw chain, heralded end-node pumping, and optimistic end-node pumping give fidelities consistent with the corresponding values reported by the paper. This agreement validates the physical model used by the search tiers, but does not establish search optimality. Appendix~\ref{app:validation} gives the corresponding comparison across the swept range of $e_d$.
+The evaluator of Section~\ref{sec:alg:evaluator} reproduces the source paper's Fig.\,5~\cite{Benchasattabuse2025Integrating} to four significant figures. At $e_d=0.01$, the raw chain, heralded end-node pumping, and optimistic end-node pumping give fidelities consistent with the corresponding values reported by the paper. This agreement validates the physical model used by the search tiers but does not establish search optimality. Appendix~\ref{app:validation} gives the corresponding comparison across the swept range of $e_d$.
 
 \section{Optimizer versus the Paper Schedule}
 \label{sec:exp:comparison}
