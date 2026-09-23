@@ -63,12 +63,16 @@ For every span $\mathrm{Span}(a,b)$, the second tier memoizes a Pareto frontier~
 
 The frontier retained at each span is multi-objective over $(C,F,P_{\mathrm{success}})$ (Pareto dominance, Section~\ref{sec:alg:prelims}). Only non-dominated candidates are retained, following the standard Pareto-pruning rule~\cite{Ehrgott2005Multicriteria}. This pruning is exact with respect to the three quantities tracked by the frontier but does not make the search exhaustive. The caps and heuristic retention rules introduced in the next two sections can still discard a non-dominated candidate before it reaches the end-to-end span.
 
+\vspace{0.7cm}
+
 \paragraph{Same-Span Entanglement Pumping}
 \label{sec:alg:pumping}
 
 The span-partition recurrence described above only builds a resource by swapping two \emph{different} spans, so it cannot represent purifying a resource against a fresh, independently generated candidate at the \emph{same} span $\kappa$. The second-tier extension allows this operation with limits on the number of copies and circuits used. The uncapped mode is used only for targeted validation, as it becomes impractical even at small $N$ for large budgets (see Table~\ref{tab:benchmarks} in Appendix~\ref{app:searchalgos}).
 
 Pumping candidates and ordinary Swap candidates share the same fixed-size frontier. As a result, adding pumping candidates can remove Swap candidates from the frontier before those candidates can be extended to a complete end-to-end schedule. Disabling pumping entirely reproduces pumping-free search behaviour; Section~\ref{sec:exp:headline} reports both settings at the reference configuration since they can return different top-ranked schedules.
+
+\vspace{0.6cm}
 
 \section{Beam Search}
 \label{sec:alg:beam}
