@@ -26,11 +26,11 @@ The source paper's Fig.~5 also covers this full $e_d$ range, and Figure~\ref{fig
     \label{fig:app:validation}
 \end{figure*}
 
-\section{Extended Network and Heterogeneity Comparisons}
+\section{Extended Network and Heterogeneity Results}
 
 This section provides the full numeric results for the two network-generalization experiments of Section~\ref{sec:exp:comparison}: uniformly applied non-ideal parameters (Section~\ref{sec:exp:netgen}) and per-hop heterogeneous networks (Section~\ref{sec:exp:heterogeneous}).
 
-\subsection{Network Generalization, Full Comparison}
+\subsection{Network Generalization Comparison}
 \label{app:netgen}
 
 The network-generalization experiment of Section~\ref{sec:exp:netgen} is reported in full in Table~\ref{tab:netgen}, which gives the cost, fidelity, and rate values underlying Figure~\ref{fig:netgen} in the main text for both tested \Gls{bsm} arm counts.
@@ -44,7 +44,7 @@ Section~\ref{sec:exp:heterogeneous} considers both a deliberately constructed fi
 
 \input{tables/weak_link_contrast}
 
-Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample. Each point gives the optimizer's rate improvement over the best feasible uniform link-level recipe as a function of the network's per-hop noise heterogeneity, measured by the coefficient of variation (i.e.\ the standard deviation divided by the mean inner-qubit error rate across hops). The largest improvements occur in networks with relatively modest noise dispersion, where a single noisier hop leaves the remaining hops sufficiently inexpensive for the optimizer to reallocate resources towards the weak link. The largest improvements and the exact ties (Section~\ref{sec:disc:synthesis}) are marked separately.
+Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample. Each point gives the optimizer's rate improvement over the best feasible uniform link-level recipe as a function of the network's per-hop noise heterogeneity, measured by the coefficient of variation (i.e.\ the standard deviation divided by the mean inner-qubit error rate across hops). The largest improvements occur in networks with relatively modest noise dispersion, where a single noisier hop leaves the remaining hops sufficiently inexpensive for the optimizer to reallocate resources towards the weak link.
 
 \begin{figure*}[ht]
     \centering
@@ -53,25 +53,32 @@ Figure~\ref{fig:app:heterogeneity} shows the complete 100-network random sample.
     \label{fig:app:heterogeneity}
 \end{figure*}
 
-\section{Extended Cost-Quality and Optimality Results}
+\section{Extended Objective and Optimality Results}
 
-\subsection{Alternative Objectives, Full Comparison}
+\subsection{Alternative Objectives Comparison}
 \label{app:objectives}
 
 The objective-substitution experiment of Section~\ref{sec:exp:objectives} is detailed in Table~\ref{tab:app:objectives}, which reports the full five-objective comparison at $N=10$ and $e_d=0.01$.
 
 \input{tables/alternative_objectives}
 
-\section{Search Algorithm Diagnostics}
+\section{Search Algorithm Benchmarks}
 \label{app:searchalgos}
 
 This section first provides additional evidence for the comparable scaling of the exact dynamic program once same-span pumping is enabled (Section~\ref{sec:alg:pumping}). Second, it presents runtime benchmarks for representative chain lengths, highlighting cases where the pumping-enabled exact dynamic program does not provide a strict upper bound on beam-search runtime.
+
+\subsection{Runtime Benchmarks}
+\label{app:runtime}
+
+Table~\ref{tab:benchmarks} reports the wall-clock time and returned score underlying Figure~\ref{fig:app:runtimen} and the beam-width analysis for representative chain lengths. It also identifies the two cases, footnoted in the table, where the pumping-enabled exact dynamic program does not provide a strict upper bound on beam-search runtime (Section~\ref{sec:alg:pumping}).
+
+\input{tables/runtime_benchmarks}
 
 \subsection{Runtime vs.\ Chain Length}
 
 Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:benchmarks} (Section~\ref{app:runtime}) to every tested $N$. Once the same-span pumping move is enabled, the exact dynamic program and beam search exhibit similar scaling with $N$, while beam search remains consistently faster.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/appendix/runtime_vs_n_pumping.png}
     \caption{Search wall-clock time vs.\ $N$ for the exact dynamic program and beam search, with the same-span pumping move enabled throughout.}
@@ -79,14 +86,7 @@ Figure~\ref{fig:app:runtimen} extends the runtime comparison of Table~\ref{tab:b
 \end{figure}
 \FloatBarrier
 
-\subsection{Runtime Benchmarks}
-\label{app:runtime}
-
-Table~\ref{tab:benchmarks} reports the wall-clock time and returned score underlying Figure~\ref{fig:app:runtimen} and the beam-width analysis above for representative chain lengths. It also identifies the two cases, footnoted in the table, where the pumping-enabled exact dynamic program does not provide a strict upper bound on beam-search runtime (Section~\ref{sec:alg:pumping}).
-
-\input{tables/runtime_benchmarks}
-
-\section{Timing Sensitivity, Full Sweeps}
+\section{Timing Sensitivity Sweeps}
 \label{app:timing}
 
 Section~\ref{sec:exp:timing} examines the effects of memory dephasing and generation latency on schedule rate and fidelity. Figure~\ref{fig:timing} shows both sweeps in full at $N=10$ and $e_d=0.01$.
