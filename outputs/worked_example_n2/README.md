@@ -6,26 +6,38 @@ as a `ScheduleDAG` built from first principles using the node API.
 
 ## Schedule structure
 
-Two independent trials (A and B) are built and then combined by
-end-node purification (optimistic: Herald follows Purify).
+Two independent copies (A and B) are built with deliberately
+different internal structure, then combined by end-node
+purification (optimistic: Herald follows Purify).
 
-Each trial:
-- **Hop 0** (RGSS-level purification): two same-side Gen nodes are
-  purified with a YY circuit at κ=RGSS before the outer-photon Join.
-  The purified anchor is then combined with a raw right-side anchor
-  at the ABSA to produce a Span(0,1) edge.
-- **Hop 1** (raw): two Gen nodes combined directly by Join → Span(1,2).
-- **Swap** of both hop edges → Span(0,2).
+Copy A:
+- **Join hop 1 (0, 1)** (RGSS-level purification): two Gen nodes at
+  Station 0 are purified with a YY circuit at κ=RGSS before the
+  outer-photon Join. The purified anchor is then combined with a
+  raw Gen at Station 1 at the ABSA to produce a (0, 1) edge.
+- **Join hop 2 (1, 2)** (raw): Gen@Station 1 and Gen@Station 2
+  combined directly by Join → (1, 2).
+- **Swap** of both hop edges → (0, 2).
+
+Copy B:
+- **Join hop 1 (0, 1)** (raw, synchronized): Gen@Station 0 and
+  Gen@Station 1 combined by Join → (0, 1); the Station-1 Gen idles
+  until t=1 to model a synchronization wait.
+- **Join hop 2 (1, 2)** (RGSS-level purification): two Gen nodes at
+  Station 1 are purified with an XZ circuit at κ=RGSS before the
+  outer-photon Join. The purified anchor is then combined with a
+  raw Gen at Station 2 at the ABSA to produce a (1, 2) edge.
+- **Swap** of both hop edges → (0, 2).
 
 End-node combination:
-- **Purify-XZ**(trial_A, trial_B) at κ=Span(0,2)
+- **Purify-XZ**(Copy A, Copy B) at κ=(0, 2)
 - **Herald** (optimistic placement: after Purify, not before)
 - **PauliCorrect** (root)
 
 ## Resource cost
 
 C(Σ) = 10 Gen nodes
-(3 per trial for hop 0 × 2 trials + 2 per trial for hop 1 × 2 trials = 10).
+(3 per copy for the purified hop + 2 per copy for the raw hop, ×2 copies = 10).
 
 ## Evaluation (N=2 paper config, e_d=0.01)
 

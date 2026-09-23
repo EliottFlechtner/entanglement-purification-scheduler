@@ -11,25 +11,33 @@ The example is chosen to exercise every mechanism in the formal model
 
 Structure
 ---------
-Two independent trials (trial_A, trial_B), each built the same way:
+Two independent trials (Copy A, Copy B), asymmetric by construction:
 
-  Hop 0 — RGSS-level purification on the left side:
-    Gen(hop=0) ×2 → Purify-YY [κ=RGSS] → purified left-side anchor
-    Gen(hop=0)    → raw right-side anchor
-    Join(purified_left, raw_right, hop=0) → edge [κ=(0,1)]
+  Copy A:
+    Hop 1 — RGSS-level purification (YY circuit):
+      Gen@Station 0 ×2 → Purify-YY [κ=RGSS] → purified anchor
+      Gen@Station 1    → raw far-side anchor
+      Join(purified, raw_far, hop=0) → edge [κ=(0,1)]
+    Hop 2 — raw (no purification):
+      Gen@Station 1 → Gen@Station 2 → Join(hop=1) → edge [κ=(1,2)]
 
-  Hop 1 — raw (no purification):
-    Gen(hop=1) ×2 → Join(hop=1) → edge [κ=(1,2)]
+  Copy B:
+    Hop 1 — raw, far-side Gen idles until t=1 (sync wait):
+      Gen@Station 0 → Gen@Station 1 → Idle(until=1) → Join(hop=0) → edge [κ=(0,1)]
+    Hop 2 — RGSS-level purification (XZ circuit):
+      Gen@Station 1 ×2 → Purify-XZ [κ=RGSS] → purified anchor
+      Gen@Station 2    → raw far-side anchor
+      Join(purified, raw_far, hop=1) → edge [κ=(1,2)]
 
-  Swap(hop0_edge, hop1_edge) → trial [κ=(0,2)]
+  Swap(hop1_edge, hop2_edge) → trial [κ=(0,2)]
 
 End-node purification (optimistic — Herald comes after Purify):
-  Purify-XZ(trial_A, trial_B) → merged [κ=(0,2)]
+  Purify-XZ(Copy A, Copy B) → merged [κ=(0,2)]
   Herald(merged)
   PauliCorrect → root
 
-Resource cost C(Σ) = 10 Gen nodes (3 per trial for hop 0, 2 per trial
-for hop 1, ×2 trials), matching the §9 formula.
+Resource cost C(Σ) = 10 Gen nodes (3 per copy for the purified hop, 2 per
+copy for the raw hop, ×2 copies), matching the §9 formula.
 
 Outputs
 -------
@@ -91,14 +99,22 @@ PNG_EXPORT = True
 SVG_EXPORT = False
 
 
+# Gen node id -> physical station index (0..N), populated per-build so
+# labels can read "Gen @ Station k" instead of the less-physical hop index.
+_GEN_STATION: dict[NodeId, int] = {}
+
+
 def _thesis_label(node: object) -> str:
     """Simplified node label: no ID, no redundant timing fields."""
     if isinstance(node, GenNode):
-        return f"Gen\\nhop {node.hop_index}"
+        station = _GEN_STATION.get(node.node_id)
+        if station is not None:
+            return f"Gen\\n at S{station}"
+        return f"Gen hop {node.hop_index}"
     if isinstance(node, JoinNode):
         s = node.output_stage
-        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
-        return f"Join\\nhop {node.hop_index}\\nκ={stage}"
+        stage = "RGSS" if isinstance(s, RGSSStage) else f"{s.a}, {s.b}"
+        return f"Join hop {node.hop_index + 1}\\n({stage})"
     if isinstance(node, SwapNode):
         s = node.output_stage
         stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
@@ -232,117 +248,152 @@ N = 2
 def _build_trial(
     nodes: dict[NodeId, ScheduleNode],
     nid: int,
-    idle_until: float = 0.0,
-) -> tuple[NodeId, int]:
+    *,
+    purify_hop: int = 0,
+    purify_circuit: PurificationCircuit = PurificationCircuit.YY,
+    idle_hop: int | None = None,
+    idle_until: float = 1.0,
+) -> tuple[NodeId, int, dict[NodeId, int], set[NodeId]]:
     """Build one independent trial of the N=2 example.
 
-    Returns (join_node_id, next_free_nid).
+    Returns (swap_node_id, next_free_nid, station_labels, ordered_ids).
+    ``ordered_ids`` are this trial's JoinNode ids, whose children are
+    always built (lower station, higher station) and so need their
+    child order pinned at render time to keep that left-to-right.
 
-    Hop 0: RGSS-level purification (3 Gen nodes)
-      Gen(hop=0) ×2 → Purify-YY [κ=RGSS]
-      Gen(hop=0)    → raw right
-      Join(purified, raw_right, hop=0) → Span(0,1)
+    Exactly one hop (``purify_hop``) gets RGSS-level purification
+    (3 Gen nodes: two same-side Gens purified, combined with a raw
+    Gen from the far station); the other hop is raw (2 Gen nodes) and,
+    if ``idle_hop`` names it, has its far-side Gen wrapped in an
+    IdleNode modelling a synchronization wait:
 
-    Hop 1: raw (2 Gen nodes)
-      Gen(hop=1) ×2 [→ optional IdleNode] → Join(hop=1) → Span(1,2)
+      Hop h == purify_hop:
+        Gen@station h ×2 → Purify-{purify_circuit} [κ=RGSS]
+        Gen@station h+1  → raw far anchor
+        Join(purified, raw_far, hop=h) → Span(h, h+1)
+
+      Hop h != purify_hop:
+        Gen@station h → Gen@station h+1 [→ optional IdleNode] → Join(hop=h) → Span(h,h+1)
 
     Swap(hop0_edge, hop1_edge) → Span(0,2)
-
-    If idle_until > 0, the right-side hop-1 Gen is wrapped in an IdleNode
-    modelling a synchronization wait (e.g. waiting for the left side to arrive).
     """
-    # --- Hop 0: RGSS-level purification ---
-    g0a = GenNode(node_id=nid, hop_index=0)
-    nid += 1
-    g0b = GenNode(node_id=nid, hop_index=0)
-    nid += 1
-    nodes[g0a.node_id] = g0a
-    nodes[g0b.node_id] = g0b
+    station_labels: dict[NodeId, int] = {}
 
-    pur_rgss = PurifyNode(
-        node_id=nid,
-        children=(g0a.node_id, g0b.node_id),
-        circuit=PurificationCircuit.YY,
-        output_stage=RGSS,
-    )
-    nid += 1
-    nodes[pur_rgss.node_id] = pur_rgss
+    def _build_hop(h: int) -> NodeId:
+        nonlocal nid
+        left_station, right_station = h, h + 1
+        if h == purify_hop:
+            ga = GenNode(node_id=nid, hop_index=h)
+            nid += 1
+            gb = GenNode(node_id=nid, hop_index=h)
+            nid += 1
+            nodes[ga.node_id] = ga
+            nodes[gb.node_id] = gb
+            station_labels[ga.node_id] = left_station
+            station_labels[gb.node_id] = left_station
 
-    g0c = GenNode(node_id=nid, hop_index=0)  # raw right-side anchor
-    nid += 1
-    nodes[g0c.node_id] = g0c
+            pur_rgss = PurifyNode(
+                node_id=nid,
+                children=(ga.node_id, gb.node_id),
+                circuit=purify_circuit,
+                output_stage=RGSS,
+            )
+            nid += 1
+            nodes[pur_rgss.node_id] = pur_rgss
 
-    bsm0 = JoinNode(
-        node_id=nid,
-        children=(pur_rgss.node_id, g0c.node_id),
-        hop_index=0,
-    )
-    nid += 1
-    nodes[bsm0.node_id] = bsm0
+            gc = GenNode(node_id=nid, hop_index=h)  # raw far-side anchor
+            nid += 1
+            nodes[gc.node_id] = gc
+            station_labels[gc.node_id] = right_station
 
-    # --- Hop 1: raw ---
-    g1a = GenNode(node_id=nid, hop_index=1)
-    nid += 1
-    g1b = GenNode(node_id=nid, hop_index=1)
-    nid += 1
-    nodes[g1a.node_id] = g1a
-    nodes[g1b.node_id] = g1b
+            left_feed, right_feed = pur_rgss.node_id, gc.node_id
+        else:
+            ga = GenNode(node_id=nid, hop_index=h)
+            nid += 1
+            gb = GenNode(node_id=nid, hop_index=h)
+            nid += 1
+            nodes[ga.node_id] = ga
+            nodes[gb.node_id] = gb
+            station_labels[ga.node_id] = left_station
+            station_labels[gb.node_id] = right_station
+            left_feed, right_feed = ga.node_id, gb.node_id
 
-    # Optional synchronization wait on the right-side Gen of hop 1
-    if idle_until > 0.0:
-        idle = IdleNode(
+            if idle_hop == h and idle_until > 0.0:
+                idle = IdleNode(
+                    node_id=nid,
+                    children=(right_feed,),
+                    until=idle_until,
+                )
+                nid += 1
+                nodes[idle.node_id] = idle
+                right_feed = idle.node_id
+
+        bsm = JoinNode(
             node_id=nid,
-            children=(g1b.node_id,),
-            until=idle_until,
+            children=(left_feed, right_feed),
+            hop_index=h,
         )
         nid += 1
-        nodes[idle.node_id] = idle
-        g1b_feed = idle.node_id
-    else:
-        g1b_feed = g1b.node_id
+        nodes[bsm.node_id] = bsm
+        return bsm.node_id
 
-    bsm1 = JoinNode(
-        node_id=nid,
-        children=(g1a.node_id, g1b_feed),
-        hop_index=1,
-    )
-    nid += 1
-    nodes[bsm1.node_id] = bsm1
+    bsm0_id = _build_hop(0)
+    bsm1_id = _build_hop(1)
 
     # --- Swap the two hop edges ---
     swap_node = SwapNode(
         node_id=nid,
-        children=(bsm0.node_id, bsm1.node_id),
+        children=(bsm0_id, bsm1_id),
         output_stage=Span(0, 2),
     )
     nid += 1
     nodes[swap_node.node_id] = swap_node
 
-    return swap_node.node_id, nid
+    return swap_node.node_id, nid, station_labels, {bsm0_id, bsm1_id}
 
 
 def build_n2_worked_example() -> (
-    tuple[ScheduleDAG, dict[str, tuple[set[NodeId], str]], NodeId]
+    tuple[ScheduleDAG, dict[str, tuple[set[NodeId], str]], set[NodeId]]
 ):
     """Construct the N=2 worked-example DAG from §9.
 
     Also returns ``highlight_groups`` (Copy A / Copy B node-id sets) for
     ``to_dot_thesis``, so the thesis figure visually circles each copy's
-    subtree to match the caption's bold callouts, and ``trial_b_id`` (Copy
-    B's Swap(0,2) node), so its child order (hop0 left, hop1 right) can be
-    pinned while Copy A's Swap keeps its own independently laid-out order.
+    subtree to match the caption's bold callouts, and ``force_child_order``
+    (both copies' Swap(0,2) nodes), so Join hop 1 renders left of Join
+    hop 2 consistently in both copies, matching the physical Alice(0) ->
+    Bob(2) path.
+
+    Copy A and Copy B are deliberately structured differently rather than
+    being mirror copies: A purifies hop 1 (Gen@0/1) with a YY circuit and
+    is idle-free; B purifies hop 2 (Gen@1/2) with an XZ circuit and instead
+    idles hop 1's far-side Gen until t=1, illustrating that either hop may
+    carry the RGSS-level purification and the synchronization wait.
     """
     nodes: dict[NodeId, ScheduleNode] = {}
     nid = 0
+    global _GEN_STATION
+    _GEN_STATION = {}
 
     _before = set(nodes)
-    trial_a_id, nid = _build_trial(nodes, nid)
+    trial_a_id, nid, station_a, order_a = _build_trial(
+        nodes, nid, purify_hop=0, purify_circuit=PurificationCircuit.YY
+    )
     trial_a_ids = set(nodes) - _before
-    # Trial B: same structure but hop-1 right-side Gen waits (IdleNode)
-    # to illustrate timing synchronisation between the two arms.
+    # Trial B: purification moved to hop 2 (XZ circuit), and the
+    # synchronization wait moved to hop 1's far-side Gen instead.
     _before = set(nodes)
-    trial_b_id, nid = _build_trial(nodes, nid, idle_until=1.0)
+    trial_b_id, nid, station_b, order_b = _build_trial(
+        nodes,
+        nid,
+        purify_hop=1,
+        purify_circuit=PurificationCircuit.XZ,
+        idle_hop=0,
+        idle_until=1.0,
+    )
     trial_b_ids = set(nodes) - _before
+    _GEN_STATION.update(station_a)
+    _GEN_STATION.update(station_b)
 
     # End-node purification: Purify-XZ(trial_A, trial_B)
     pur_end = PurifyNode(
@@ -378,7 +429,7 @@ def build_n2_worked_example() -> (
         "Copy A": (trial_a_ids, "#1f77b4"),
         "Copy B": (trial_b_ids, "#d62728"),
     }
-    return dag, groups, trial_b_id
+    return dag, groups, {trial_a_id, trial_b_id} | order_a | order_b
 
 
 def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
@@ -392,26 +443,38 @@ def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
         "",
         "## Schedule structure",
         "",
-        "Two independent trials (A and B) are built and then combined by",
-        "end-node purification (optimistic: Herald follows Purify).",
+        "Two independent copies (A and B) are built with deliberately",
+        "different internal structure, then combined by end-node",
+        "purification (optimistic: Herald follows Purify).",
         "",
-        "Each trial:",
-        "- **Hop 0** (RGSS-level purification): two same-side Gen nodes are",
-        "  purified with a YY circuit at κ=RGSS before the outer-photon Join.",
-        "  The purified anchor is then combined with a raw right-side anchor",
-        "  at the ABSA to produce a Span(0,1) edge.",
-        "- **Hop 1** (raw): two Gen nodes combined directly by Join → Span(1,2).",
-        "- **Swap** of both hop edges → Span(0,2).",
+        "Copy A:",
+        "- **Join hop 1 (0, 1)** (RGSS-level purification): two Gen nodes at",
+        "  Station 0 are purified with a YY circuit at κ=RGSS before the",
+        "  outer-photon Join. The purified anchor is then combined with a",
+        "  raw Gen at Station 1 at the ABSA to produce a (0, 1) edge.",
+        "- **Join hop 2 (1, 2)** (raw): Gen@Station 1 and Gen@Station 2",
+        "  combined directly by Join → (1, 2).",
+        "- **Swap** of both hop edges → (0, 2).",
+        "",
+        "Copy B:",
+        "- **Join hop 1 (0, 1)** (raw, synchronized): Gen@Station 0 and",
+        "  Gen@Station 1 combined by Join → (0, 1); the Station-1 Gen idles",
+        "  until t=1 to model a synchronization wait.",
+        "- **Join hop 2 (1, 2)** (RGSS-level purification): two Gen nodes at",
+        "  Station 1 are purified with an XZ circuit at κ=RGSS before the",
+        "  outer-photon Join. The purified anchor is then combined with a",
+        "  raw Gen at Station 2 at the ABSA to produce a (1, 2) edge.",
+        "- **Swap** of both hop edges → (0, 2).",
         "",
         "End-node combination:",
-        "- **Purify-XZ**(trial_A, trial_B) at κ=Span(0,2)",
+        "- **Purify-XZ**(Copy A, Copy B) at κ=(0, 2)",
         "- **Herald** (optimistic placement: after Purify, not before)",
         "- **PauliCorrect** (root)",
         "",
         "## Resource cost",
         "",
         f"C(Σ) = {dag.gen_node_count} Gen nodes",
-        "(3 per trial for hop 0 × 2 trials + 2 per trial for hop 1 × 2 trials = 10).",
+        "(3 per copy for the purified hop + 2 per copy for the raw hop, ×2 copies = 10).",
         "",
         "## Evaluation (N=2 paper config, e_d=0.01)",
         "",
@@ -453,7 +516,7 @@ def write_readme(dag: ScheduleDAG, network: NetworkConfig) -> None:
 
 def main() -> None:
     print("Building N=2 worked-example DAG ...", flush=True)
-    dag, groups, trial_b_id = build_n2_worked_example()  # type: ignore
+    dag, groups, swap_ids = build_n2_worked_example()  # type: ignore
     print(
         f"DAG built and validated: {len(dag.nodes)} nodes, "
         f"{dag.gen_node_count} Gen nodes (C={dag.gen_node_count})",
@@ -480,16 +543,16 @@ def main() -> None:
 
     # Thesis-quality version: simplified labels, no IDs, larger font,
     # with Copy A/Copy B subtrees circled to match the caption's callouts.
-    # Only Copy B's Swap(0,2) child order is pinned (hop0 left, hop1
-    # right); Copy A's Swap is left to the layout engine's own choice,
-    # keeping the two copies' rendering deliberately asymmetric.
+    # Both copies' Swap(0,2) child order is pinned (hop 1 left, hop 2
+    # right) so the left-to-right topology matches the physical
+    # Alice(0) -> Bob(2) path consistently across both copies.
     thesis_png_path = str(OUTPUT_DIR / "dag_thesis.png")
     render_thesis_png(
         dag,
         thesis_png_path,
         dpi=300,
         highlight_groups=groups,
-        force_child_order={trial_b_id},
+        force_child_order=swap_ids,
     )
     print(f"Thesis PNG rendered: {thesis_png_path}", flush=True)
 
