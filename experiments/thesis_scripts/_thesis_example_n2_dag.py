@@ -113,8 +113,8 @@ def _thesis_label(node: object) -> str:
         return f"Gen hop {node.hop_index}"
     if isinstance(node, JoinNode):
         s = node.output_stage
-        stage = "RGSS" if isinstance(s, RGSSStage) else f"{s.a}, {s.b}"
-        return f"Join hop {node.hop_index + 1}\\n({stage})"
+        stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a}, {s.b})"
+        return f"Join hop {node.hop_index + 1}\\nκ={stage}"
     if isinstance(node, SwapNode):
         s = node.output_stage
         stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
@@ -122,7 +122,7 @@ def _thesis_label(node: object) -> str:
     if isinstance(node, PurifyNode):
         s = node.output_stage
         stage = "RGSS" if isinstance(s, RGSSStage) else f"({s.a},{s.b})"
-        return f"Purify-{node.circuit.name}\\n\u03ba={stage}"
+        return f"Purify-{node.circuit.name}\\nκ={stage}"
     if isinstance(node, IdleNode):
         return f"Idle\\nuntil={node.until:g}"
     if isinstance(node, HeraldNode):
