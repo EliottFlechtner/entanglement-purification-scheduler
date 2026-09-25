@@ -1,0 +1,528 @@
+\documentclass[aspectratio=169, 10pt]{beamer}
+
+% --- Typography and Encoding ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% --- Math & Tables ---
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+
+% --- Graphics & TikZ ---
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+% --- Color Palette (Keio Navy, Slate, Academic Accents) ---
+\definecolor{keioblue}{RGB}{0, 32, 91}       % #00205B
+\definecolor{darkslate}{RGB}{30, 41, 59}     % #1E293B
+\definecolor{accentred}{RGB}{185, 28, 28}    % #B91C1C
+\definecolor{softgrey}{RGB}{241, 245, 249}   % #F1F5F9
+\definecolor{linegrey}{RGB}{203, 213, 225}   % #CBD5E1
+\definecolor{textgrey}{RGB}{100, 116, 139}   % #64748B
+
+% --- Beamer Theme Customization ---
+\setbeamercolor{title}{fg=keioblue}
+\setbeamercolor{frametitle}{fg=keioblue, bg=white}
+\setbeamercolor{structure}{fg=keioblue}
+\setbeamercolor{normal text}{fg=darkslate}
+\setbeamercolor{block title}{fg=white, bg=keioblue}
+\setbeamercolor{block body}{fg=darkslate, bg=softgrey}
+\setbeamercolor{item}{fg=keioblue}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+
+% --- Clean Header Rule ---
+\setbeamertemplate{frametitle}{%
+    \vspace*{0.3cm}
+    \bfseries\insertframetitle
+    \par\vspace*{0.1cm}
+    {\color{linegrey}\hrule height 0.5pt}
+}
+
+% --- Custom Footline (Current / Total strictly for main deck) ---
+\setbeamertemplate{footline}{%
+    \leavevmode%
+    \hbox{%
+        \begin{beamercolorbox}[wd=0.32\paperwidth, ht=2.5ex, dp=1.1ex, left]{}%
+            \hspace*{1.5em}\scriptsize\textcolor{textgrey}{Eliott Flechtner (M2 QMI)}
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=0.48\paperwidth, ht=2.5ex, dp=1.1ex, center]{}%
+            \scriptsize\textcolor{textgrey}{Purification Scheduling for All-Photonic Repeaters}
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=0.20\paperwidth, ht=2.5ex, dp=1.1ex, right]{}%
+            \scriptsize\textcolor{textgrey}{\insertframenumber{} / \inserttotalframenumber}\hspace*{1.5em}
+        \end{beamercolorbox}%
+    }%
+    \vskip0pt%
+}
+
+% --- Macro for Standard Graphic Placeholders ---
+\newcommand{\graphicplaceholder}[3]{%
+    \begin{tikzpicture}
+        \node[draw=linegrey, dashed, fill=softgrey, rounded corners=2pt, minimum width=#1, minimum height=#2, align=center, inner sep=6pt] {
+            \textcolor{textgrey}{\small\textbf{#3}}\\[2pt]
+            \textcolor{textgrey}{\scriptsize[Replace with asset / PDF figure]}
+        };
+    \end{tikzpicture}
+}
+
+% ==============================================================================
+% PRESENTATION METADATA
+% ==============================================================================
+\title{Non-Adaptive Scheduling of Entanglement Purification\\for All-Photonic Quantum Repeaters}
+\subtitle{Master's Thesis Defense --- M2 QMI}
+\author{Eliott Flechtner}
+\institute{EPITA \& Institut Polytechnique de Paris\\Host Laboratory: AQUA, Keio University SFC Campus, Japan}
+\date{September 25, 2026}
+
+\begin{document}
+
+% ==============================================================================
+% SLIDE 1: TITLE SLIDE
+% ==============================================================================
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+    % Institutional Header Logos Placeholder
+    \vspace*{-0.2cm}
+    \begin{columns}[c]
+        \column{0.30\textwidth}
+            \centering \graphicplaceholder{3.2cm}{0.9cm}{Keio University}
+        \column{0.40\textwidth}
+            \centering \graphicplaceholder{4.2cm}{0.9cm}{Télécom Paris / IP Paris}
+        \column{0.30\textwidth}
+            \centering \graphicplaceholder{3.2cm}{0.9cm}{EPITA}
+    \end{columns}
+
+    \vspace{0.6cm}
+    \centering
+    {\large\bfseries\textcolor{keioblue}{Non-Adaptive Scheduling of Entanglement Purification\\for All-Photonic Quantum Repeaters}}\\[0.25cm]
+    {\footnotesize\textcolor{darkslate}{Research Internship Defense --- Master 2 Quantum, Mathematics and Informatics (QMI)}}\\[0.15cm]
+    {\normalsize\textbf{Eliott Flechtner}}\\[0.1cm]
+    {\scriptsize EPITA \& Institut Polytechnique de Paris \quad$\vert$\quad AQUA Lab, Keio University, Japan}
+
+    \vspace{0.4cm}
+    \begin{columns}[t]
+        \column{0.50\textwidth}
+            \raggedright
+            \tiny\textbf{\textcolor{textgrey}{SUPERVISORY COMMITTEE}}\\[2pt]
+            \scriptsize
+            Prof. Rodney Van Meter \textit{(Keio University)}\\
+            Proj. Assoc. Prof. Michal Hajdušek \textit{(Keio University)}\\
+            Proj. Assist. Prof. Naphan Benchasattabuse \textit{(Keio University)}
+        \column{0.45\textwidth}
+            \raggedright
+            \tiny\textbf{\textcolor{textgrey}{EXAMINATION COMMITTEE}}\\[2pt]
+            \scriptsize
+            Prof. Romain Alléaume \textit{(Télécom Paris, IP Paris)}\\
+            Prof. Daniel E. Browne \textit{(University College London)}
+    \end{columns}
+\end{frame}
+}
+
+% ==============================================================================
+% SLIDE 2: CONTEXT & MOTIVATION
+% ==============================================================================
+\begin{frame}{Why Quantum Repeaters}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+            \begin{itemize}
+                \item Fiber loss grows exponentially with distance
+                \item Direct transmission cannot scale
+                \item Repeaters break the channel into shorter, purified hops
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item 1G/2G: memory-based, limited by dephasing \\\& two-way signaling
+                \item 3G, all-photonic: flying graph states, loss tolerance via tree encoding
+            \end{itemize}
+        \column{0.42\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.5cm}{Fiber loss vs.\ all-photonic repeater concept}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 3: REPEATER ARCHITECTURE
+% ==============================================================================
+\begin{frame}{Half-RGS Repeaters}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+            \begin{itemize}
+                \item HRGS: half of a repeater graph state, held at one station
+                \item End nodes act as their own entanglement source
+                \item Memory cost grows additively with hop count, not multiplicatively
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item Outer photons meet at analyzer stations
+                \item Linear-optical BSM success capped at 50\% $\to$ redundant arms
+            \end{itemize}
+        \column{0.42\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.5cm}{HRGS combination and $N$-hop chain}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 4: THE SCHEDULING GAP
+% ==============================================================================
+\begin{frame}{The Scheduling Gap}
+    \begin{columns}[T]
+        \column{0.58\textwidth}
+            \begin{itemize}
+                \item Purification can be inserted at generation, link, intermediate span, or end-to-end
+                \item Circuit, copy count and order can vary between stages
+            \end{itemize}
+            \vspace{0.3cm}
+            \begin{itemize}
+                \item Prior work (Integrating paper) shows this flexibility with one hand-picked schedule
+                \item Which allocation is actually best under a fixed budget was left open
+            \end{itemize}
+        \column{0.38\textwidth}
+            \centering
+            \graphicplaceholder{5.0cm}{4.5cm}{Purification insertion points across spans}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 5: ERROR REPRESENTATION & CIRCUITS
+% ==============================================================================
+\begin{frame}{Noise Model and Purification Circuits}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+            \begin{itemize}
+                \item Bell-diagonal states, error vector $e=(w,x,y,z)$, fidelity $F=w$
+                \item Inner-qubit errors bias $x,z$ but leave $y\approx0$
+            \end{itemize}
+        \column{0.48\textwidth}
+            \begin{itemize}
+                \item Three 2-to-1 circuits: $C_{ZX}$, $C_{XZ}$, $C_{YY}$
+                \item $C_{YY}$ used first to remove the single-sided bias
+            \end{itemize}
+            \vspace{0.2cm}
+            \centering
+            \graphicplaceholder{5.0cm}{1.5cm}{Circuit layouts}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 6: PARTIALLY-BUILT BELL STATE S
+% ==============================================================================
+\begin{frame}{Representing a Partial Resource}
+    Every intermediate resource is a state:
+    $$S = \big(e,\; s,\; t,\; t_{\text{gen}},\; \kappa,\; r,\; h\big)$$
+
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+            \begin{itemize}
+                \item $e$: error vector, $s$: Pauli frame bit
+                \item $t-t_{\text{gen}}$: idle time $\to$ memory dephasing
+            \end{itemize}
+        \column{0.48\textwidth}
+            \begin{itemize}
+                \item $\kappa$: span, $r$: purification rounds, $h$: heralding status
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{alertblock}{Span-matching rule}
+                Two states purify together only if $\kappa(S_1)=\kappa(S_2)$ --- construction history doesn't matter.
+            \end{alertblock}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 7: SCHEDULES AS DAGS
+% ==============================================================================
+\begin{frame}{A Schedule Is a DAG}
+    \begin{columns}[T]
+        \column{0.45\textwidth}
+            $\Sigma = (T, \phi)$, $\phi: T \to \mathcal{K}$
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item Gen, Join, Swap, Purify, Idle, Herald, PauliCorrect
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item Optimistic: heralding deferred to a single node at the root
+            \end{itemize}
+        \column{0.52\textwidth}
+            \centering
+            \graphicplaceholder{6.5cm}{4.6cm}{$N=2$ worked example DAG}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 8: CONCURRENCY & EVALUATION PASS
+% ==============================================================================
+\begin{frame}{Evaluating a Schedule}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+            \begin{itemize}
+                \item Single bottom-up pass, $O(|T|)$: fidelity, cost, latency
+                \item Rate accounts for full-schedule restart on failure:
+                $$R(\Sigma) = \frac{P_{\text{success}}}{T_{\text{attempt}}}$$
+            \end{itemize}
+            \vspace{0.2cm}
+            $$\Sigma^* = \arg\max_{\Sigma \text{ feasible}} R(\Sigma) \;\; \text{s.t.}\;\; F(\Sigma) \ge F_{\min}$$
+        \column{0.48\textwidth}
+            \begin{itemize}
+                \item Concurrency $M(\Sigma)$: min. open branches, via Sethi--Ullman recurrence
+                \item Exact register bound, no timing info needed
+            \end{itemize}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 9: COMBINATORIAL SEARCH FRAMEWORK
+% ==============================================================================
+\begin{frame}{Searching the Schedule Space}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+            \begin{itemize}
+                \item Combinatorial explosion: circuit choice, split points, copy counts
+                \item Exhaustive search intractable beyond $N=3$
+            \end{itemize}
+            \vspace{0.3cm}
+            \textbf{Three tiers:}
+            \begin{enumerate}
+                \item Fixed baselines (raw, uniform link-level, paper schedule)
+                \item Exact span-partition dynamic program
+                \item Bounded beam search with same-span pumping
+            \end{enumerate}
+        \column{0.42\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.5cm}{Baselines $\to$ exact DP $\to$ beam search}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 10: TIER 2: SPAN DYNAMIC PROGRAMMING
+% ==============================================================================
+\begin{frame}{Exact Search: Span-Partition DP}
+    \begin{columns}[T]
+        \column{0.52\textwidth}
+            \begin{itemize}
+                \item Memoize best sub-schedules per span, reuse to build wider spans:
+                $$\text{Span}(a, c) = \text{Span}(a, b) \bowtie \text{Span}(b, c)$$
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item Keep a Pareto set over (cost, fidelity, success prob.)
+                \item Even a locally worse candidate can win later once swapped
+            \end{itemize}
+        \column{0.45\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.2cm}{Span memoization \& Pareto pruning}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 11: TIER 3: SAME-SPAN PUMPING & BEAM SEARCH
+% ==============================================================================
+\begin{frame}{Pumping and Beam Search}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+            \begin{itemize}
+                \item Same-span pumping: purify against a fresh copy of the same span, not just a different one
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item Beam width 25 keeps frontiers tractable (uncapped: 1000+ candidates)
+                \item Half the slots for top fidelity, half for best rate among feasible candidates
+            \end{itemize}
+        \column{0.42\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.5cm}{Beam frontier retention strategy}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 12: PHYSICS VALIDATION
+% ==============================================================================
+\begin{frame}{Validating the Evaluator}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+            \begin{itemize}
+                \item Reproduces the Integrating paper's Fig.\,5 fidelity curves
+                \item Raw chain, heralded pumping, optimistic pumping
+                \item Match to four significant figures
+            \end{itemize}
+        \column{0.48\textwidth}
+            \centering
+            \small
+            \begin{tabular}{lccc}
+                \toprule
+                \textbf{Schedule} & \textbf{Ref.} & \textbf{Ours} \\
+                \midrule
+                Raw & $0.823$ & $\mathbf{0.8234}$ \\
+                Heralded & $0.917$ & $\mathbf{0.9168}$ \\
+                Optimistic & $0.929$ & $\mathbf{0.9295}$ \\
+                \bottomrule
+            \end{tabular}
+            \vspace{0.4cm}
+            \graphicplaceholder{5.2cm}{2.5cm}{Fidelity reproduction curve}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 13: HEADLINE RESULTS
+% ==============================================================================
+\begin{frame}{Beating the Paper's Schedule}
+    \textbf{Reference config:} $N = 10$, $e_d = 0.01$, $F_{\min} = 0.90$, $E_{\max} = 100$
+
+    \vspace{0.2cm}
+    \centering
+    \small
+    \begin{tabularx}{0.95\textwidth}{lccccX}
+        \toprule
+        \textbf{Schedule} & \textbf{$C$} & \textbf{$F$} & \textbf{Rate} & \textbf{Rel.} & \\
+        \midrule
+        Paper schedule & 100 & 0.93 & 4,055.92 & 1.00$\times$ & hand-picked \\
+        Matched cost & 100 & 0.92 & 4,158.14 & \textbf{+2.5\%} & same budget \\
+        Budget-relaxed & \textbf{60} & 0.91 & \textbf{6,195.95} & \textbf{+52.8\%} & 60\% of cost \\
+        \bottomrule
+    \end{tabularx}
+
+    \vspace{0.4cm}
+    \begin{itemize}
+        \item The paper schedule over-purifies everywhere uniformly
+        \item Search spends the budget where it's actually needed
+    \end{itemize}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 14: FEASIBILITY ADVANTAGE
+% ==============================================================================
+\begin{frame}{The Real Finding: Feasibility, Not Just Speed}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+            \begin{itemize}
+                \item Turn on inner-qubit error ($p_{\text{in}}=3\times10^{-3}$)
+                \item Paper schedule drops below $F_{\min}$: $F=0.67$ (18 arms), $F=0.87$ (6 arms)
+                \item Search finds a feasible schedule at the \textbf{same cost}
+            \end{itemize}
+            \vspace{0.3cm}
+            \begin{itemize}
+                \item Same pattern on 100 randomized heterogeneous networks: mean +20\% rate, never worse
+                \item One weak hop with 12$\times$ noise: uniform purification fails, search concentrates effort there
+            \end{itemize}
+        \column{0.48\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.6cm}{Fixed schedule vs.\ feasible searched schedule}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 15: CHAIN-LENGTH SCALING & TIMING
+% ==============================================================================
+\begin{frame}{Scaling with Chain Length and Timing}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+            \begin{itemize}
+                \item Minimum budget to hit $F\ge0.9$, for $N=10$ to $28$
+                \item Fit: $E_{\max}^{\min} \approx 1.19\,N^{1.67}$ --- superlinear
+                \item Paper's linear $10N$ rule breaks around $N=28$
+            \end{itemize}
+            \vspace{0.3cm}
+            \begin{itemize}
+                \item Heralded pumping: waiting copies decohere, $F$ drops $0.92\to0.25$
+                \item Optimistic schedules avoid the wait, stay flat
+            \end{itemize}
+        \column{0.48\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.6cm}{Budget scaling vs.\ dephasing decay}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 16: DISCUSSION: OPERATING REGIMES
+% ==============================================================================
+\begin{frame}{When Does Scheduling Actually Matter}
+    \begin{columns}[T]
+        \column{0.52\textwidth}
+            \begin{itemize}
+                \item Low noise ($e_d \le 0.005$): easy, everything clears the floor
+                \item High noise ($e_d \ge 0.016$): nothing clears the floor
+                \item In between: \textbf{scheduling is decisive}
+            \end{itemize}
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item Pareto quality plateaus past $C\approx60$
+            \end{itemize}
+        \column{0.45\textwidth}
+            \begin{block}{Scope}
+                Beam search is heuristic --- results are existence proofs within the searched families, not global optima.
+            \end{block}
+            \vspace{0.2cm}
+            \centering
+            \graphicplaceholder{5.0cm}{2.0cm}{Pareto trade-off frontiers}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 17: CONCLUSION & OUTLOOK
+% ==============================================================================
+\begin{frame}{Conclusion}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+            \begin{itemize}
+                \item DAG-based schedule model + validated evaluator
+                \item Three-tier search: baselines, exact DP, beam search
+                \item Main result: scheduling buys \textbf{feasibility}, not just a rate bump
+                \item Budget scales roughly as $N^{1.67}$
+            \end{itemize}
+            \vspace{0.3cm}
+            \begin{itemize}
+                \item Next: adaptive (MDP-based) scheduling, mesh topologies
+            \end{itemize}
+        \column{0.42\textwidth}
+            \begin{block}{Code}
+                \scriptsize\texttt{github.com/EliottFlechtner/\\entanglement-purification-scheduler}
+            \end{block}
+            \vspace{0.4cm}
+            \centering
+            \large\textbf{Thank you.}\\[0.2cm]
+            \small\textit{Questions welcome.}
+    \end{columns}
+\end{frame}
+
+% ==============================================================================
+% APPENDIX / BACKUP SLIDES (Does not increment total slide count)
+% ==============================================================================
+\appendix
+
+\begin{frame}{Backup: Sethi--Ullman Concurrency Algorithm}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+            \begin{itemize}
+                \item Bottom-up register assignment
+                \item Evaluate the heavier branch first, hold result in one register
+                \item Time $O(|T|)$, space $O(h)$
+            \end{itemize}
+        \column{0.42\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.5cm}{RegisterRequirement(v) pseudocode}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Backup: DP vs.\ Beam Search Runtime}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+            \begin{itemize}
+                \item Exact DP explodes beyond $N=10$
+                \item $N=18$: DP times out (300s); beam search finds $R=1{,}214$ in 153.5s
+                \item Beam search scales predictably up to $N=28$
+            \end{itemize}
+        \column{0.48\textwidth}
+            \centering
+            \graphicplaceholder{5.5cm}{4.5cm}{Runtime and score benchmarks}
+    \end{columns}
+\end{frame}
+
+\end{document}
